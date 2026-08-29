@@ -1,0 +1,29 @@
+name: lean
+
+on:
+  push:
+    branches: [main]
+    paths: [formalization/**]
+  pull_request:
+    paths: [formalization/**]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: formalization
+    steps:
+      - uses: actions/checkout@v7
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: formalization
+          build: false
+          test: false
+          lint: false
+      # precompiled modules dlopen the toolchain's shared libraries,
+      # which the Linux loader only finds through LD_LIBRARY_PATH
+      - run: echo "LD_LIBRARY_PATH=$(lean --print-libdir)" >> "$GITHUB_ENV"
+      - run: lake build SquareAchievement checker
+      - run: lake exe checker 6
+      - run: lake exe checker 5 five
