@@ -171,10 +171,13 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       a reply far from the corner region can join a square through two of the
       strategy's stones only from the region's own rows and columns, so far
       replies are looked up by geometric class rather than by exact position.
-      The 5 × 5 board is the odd one out: it is too cramped for pure forcing,
-      and exhaustive analysis shows that no all-forcing table wins there. Its
-      table comes instead from a full solution of the 5 × 5 game and includes
-      quiet moves that fork on the opponent's reply.
+      And a pair of far replies can combine against a single cell of the corner
+      region; such pairs get entries of their own, keyed by that cell and built
+      to never hand it over. The 5 × 5 board is the odd one out: it is too
+      cramped for pure forcing, and exhaustive analysis shows that no
+      all-forcing table wins there. Its table comes instead from a full solution
+      of the 5 × 5 game and includes quiet moves that fork on the opponent's
+      reply.
     </p>
 
     <h2>Why believe a computer search</h2>
@@ -212,8 +215,9 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       was generated and checked on a board of size 15; a larger board can steer
       it into positions its plans were never checked against. Figure 3 shows the
       smallest example we know from an earlier version of the table. Everything
-      through 14 × 14 is settled unconditionally, and the general statement is
-      work we have not finished.
+      through 15 × 15 is settled unconditionally, a faster but unproven replica
+      of the checker verifies the current table through 17 × 17, and the general
+      statement is work we have not finished.
     </p>
     <figure class="diagram">
       <svg
