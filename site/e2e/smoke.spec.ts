@@ -24,7 +24,7 @@ test("undo removes the last exchange", async ({ page }) => {
 
 test("threat highlighting paints threat cells", async ({ page }) => {
   await page.goto("./");
-  await page.locator("sag-board .sag-th").check();
+  await page.locator("sag-board .sag-th").click();
   await page.locator('sag-board rect[data-i="1"]').click();
   await page.locator('sag-board rect[data-i="3"]').click();
   await expect

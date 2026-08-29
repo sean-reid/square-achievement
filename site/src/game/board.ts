@@ -45,7 +45,7 @@ export class SagBoard extends HTMLElement {
       <p class="sag-status" role="status"></p>
       <p class="sag-quiet">
         <button class="sag-undo">undo</button> ·
-        <label class="sag-toggle"><input type="checkbox" class="sag-th"> threats</label> ·
+        <button class="sag-th" aria-pressed="false">threats</button> ·
         <button class="sag-share">share</button> ·
         <button class="sag-demo">demo</button>
       </p>`;
@@ -77,10 +77,14 @@ export class SagBoard extends HTMLElement {
         this.undoPair();
       },
     );
-    this.querySelector<HTMLInputElement>(".sag-th")!.addEventListener(
-      "change",
+    this.querySelector<HTMLButtonElement>(".sag-th")!.addEventListener(
+      "click",
       (e) => {
-        this.showThreats = (e.target as HTMLInputElement).checked;
+        this.showThreats = !this.showThreats;
+        (e.target as HTMLButtonElement).setAttribute(
+          "aria-pressed",
+          String(this.showThreats),
+        );
         this.paintThreats();
       },
     );

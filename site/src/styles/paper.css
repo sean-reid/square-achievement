@@ -227,13 +227,13 @@ figure.game figcaption {
   padding: 0 0.15rem;
 }
 
-.sag-quiet button:hover,
-.sag-quiet label:hover {
+.sag-quiet button:hover {
   color: var(--accent);
 }
 
-.sag-quiet label {
-  cursor: pointer;
+.sag-quiet button[aria-pressed="true"] {
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent);
 }
 
 footer {
