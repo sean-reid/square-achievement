@@ -256,7 +256,14 @@ default class. The classes reflect the geometry of
 Lemma~\ref{lem:span}: every corner of a square through two stones of
 the corner region lies in one of the region's rows or columns, so only
 far replies aligned with the region can complete a square the strategy
-is building.
+is building. Third, certain pairs of far replies can complete a square
+through a single cell of the corner region; each branch carries
+\emph{farm entries} for such pairs, keyed by that cell, whose plans
+never force the opponent onto it. When the first reply is not an
+exact key of the table, the pair's farm entry takes precedence over
+an exact entry for the second reply: exact entries answer the pair
+geometry of the board they were generated on, which one far stone can
+shift.
 
 The board of size $5$ is treated separately, and necessarily so: its
 table is not purely forcing. Exhaustive analysis shows that for
@@ -271,8 +278,8 @@ The general table holds $237$ branch keys (the $224$ possible first
 replies on the board it was generated on, $\Board_{15}$ of
 Section~\ref{sec:uniform}, twelve alignment classes, and a default)
 with
-$8{,}135$ plan entries in all; the $5 \times 5$ table holds $24$
-branches. Both are included with the supplementary material in source
+$8{,}135$ plan entries and $248$ farm entries in all; the
+$5 \times 5$ table holds $24$ branches. Both are included with the supplementary material in source
 and machine-readable form.
 
 \section{Verification}\label{sec:verify}
@@ -414,16 +421,24 @@ between the game on $\Board_n$ and the game on a fixed
 $\Board_{N_0}$, and the evidence locates the difficulty precisely. A
 table generated on $\Board_g$ carries exact entries for every reply
 on $\Board_g$, so its class entries are consulted only for $n > g$:
-no verified size exercises the class fallback, and both tables we
-generated failed at exactly $n = g + 1$, the first size to reach it
-(the $\Board_{12}$ candidate at $13$, the published $\Board_{15}$
-table at $16$). Figure~\ref{fig:farm} shows the mechanism on
-$\Board_{16}$. Instrumented runs confirm that on every verified size
-the strategy's moves and the squares behind its reflexes stay inside
-the corner region while far replies resolve through exact entries. A
-larger generation board therefore cannot settle the conjecture: the
-class entries need an invariance argument that generation alone does
-not provide.
+no verified size exercises the class fallback, and two earlier
+candidates without farm entries failed at exactly $n = g + 1$, the
+first size to reach it (a $\Board_{12}$ candidate at $13$, a
+$\Board_{15}$ candidate at $16$). Figure~\ref{fig:farm} shows the
+mechanism on $\Board_{16}$. Instrumented runs confirm that on every
+verified size the strategy's moves and the squares behind its
+reflexes stay inside the corner region while far replies resolve
+through exact entries, so a larger generation board alone cannot
+settle the conjecture. The farm entries answer the mechanism
+directly: the pair of far replies determines the one region cell it
+can farm through, the entry for that cell never hands the cell over,
+and the precedence of farm entries over exact ones covers pairs whose
+farm sits off the generated geometry. With them the published table
+verifies through $\Board_{17}$, two sizes past its generation board.
+The conjecture remains open: what is missing is the simulation
+argument that turns bounded far-reply behavior into a statement for
+every $n$ at once, together with the checked table properties it
+rests on.
 
 \begin{figure}[ht]
 \centering
