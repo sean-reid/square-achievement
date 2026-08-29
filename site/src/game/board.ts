@@ -130,9 +130,15 @@ export class SagBoard extends HTMLElement {
     this.svg = document.createElementNS(NS, "svg");
     this.svg.setAttribute("viewBox", `-1 -1 ${size + 2} ${size + 2}`);
     this.svg.setAttribute("class", "sag-svg");
-    const stage = this.querySelector(".sag-stage")!;
+    const stage = this.querySelector<HTMLElement>(".sag-stage")!;
     stage.innerHTML = "";
     stage.appendChild(this.svg);
+    // touch targets stay usable at any n: grow past the column and
+    // let the stage scroll rather than shrink the cells
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const minCell = coarse ? 44 : 26;
+    const avail = stage.clientWidth || 416;
+    this.svg.style.width = avail / n < minCell ? `${n * minCell}px` : "";
     for (const name of ["threats", "grid", "stones", "marks", "win", "cells"]) {
       const g = document.createElementNS(NS, "g");
       g.setAttribute("class", `sag-${name}`);

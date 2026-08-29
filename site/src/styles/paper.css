@@ -151,6 +151,11 @@ figure.game figcaption {
   cursor: pointer;
 }
 
+.sag-stage {
+  overflow: auto;
+  max-height: 75vh;
+}
+
 .sag-svg {
   display: block;
   width: min(100%, 26rem);
