@@ -34,16 +34,33 @@ function verifyAll(pos: Position): boolean {
 }
 
 describe("farm branches at n = 16", () => {
-  for (const o2 of [
-    [12, 3],
-    [12, 15],
-    [15, 15],
-  ] as [number, number][]) {
-    it(`wins the branch o1=(0,15) o2=(${o2})`, () => {
+  for (const [o1, o2] of [
+    [
+      [0, 15],
+      [12, 3],
+    ],
+    [
+      [0, 15],
+      [12, 15],
+    ],
+    [
+      [0, 15],
+      [15, 15],
+    ],
+    [
+      [14, 15],
+      [14, 3],
+    ],
+    [
+      [15, 15],
+      [14, 3],
+    ],
+  ] as [[number, number], [number, number]][]) {
+    it(`wins the branch o1=(${o1}) o2=(${o2})`, () => {
       const pos = new Position(16);
       expect(botMove(pos)).toEqual([2, 2]);
       pos.play([2, 2]);
-      pos.play([0, 15]);
+      pos.play(o1);
       expect(botMove(pos)).toEqual([3, 2]);
       pos.play([3, 2]);
       pos.play(o2);
