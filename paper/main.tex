@@ -365,14 +365,19 @@ stones of the strategy's region, and a far reply interacts with play
 only through its alignment class. What remains is the bookkeeping that
 turns this confinement into a simulation between the game on
 $\Board_n$ and the game on a fixed $\Board_{N_0}$; this is under way
-in the formal development. One subtlety deserves record: the
-opponent's forced blocks accumulate, and an aligned far stone can seed
-squares whose side grows with the board, so class representatives must
-be generated on boards large enough to exhibit the longest such
-exchanges. A table generated on too small a board verifies there and
-fails on larger boards; the table published here was generated on
-$\Board_{15}$ after an earlier candidate, generated on $\Board_{12}$,
-failed on $\Board_{13}$ in exactly this way.
+in the formal development. One subtlety deserves record. A table
+generated on $\Board_g$ carries exact entries for every reply on
+$\Board_g$, so its class entries are consulted only for $n > g$: the
+verified sizes exercise the class fallback not at all, and both tables
+we generated failed at exactly $n = g + 1$, the first size to reach
+it (the $\Board_{12}$ candidate at $13$, the published $\Board_{15}$
+table at $16$). Instrumented runs confirm that on every verified size
+the strategy's moves and the squares behind its reflexes stay inside
+the corner region while far replies resolve through exact entries.
+The missing ingredient is thus not a larger generation board but a
+class scheme whose entries provably subsume the exact ones they
+replace; the simulation argument will have to supply the invariance
+that generation alone cannot.
 
 \section{Reproducibility}\label{sec:repro}
 
