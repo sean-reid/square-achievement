@@ -12,7 +12,10 @@ import { Position, threats } from "./rules";
 import type { Decision } from "./table";
 import smallJson from "./small_tables.json";
 
-const tables = smallJson as Record<string, Record<string, [number, number]>>;
+const tables = smallJson as unknown as Record<
+  string,
+  Record<string, [number, number]>
+>;
 
 function mask(stones: Set<number>): number {
   let m = 0;
