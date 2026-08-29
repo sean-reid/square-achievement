@@ -1,0 +1,57 @@
+import Mathlib.Data.Finset.Basic
+import Mathlib.Data.Finset.Prod
+
+/-!
+# Cells, boards, and axis-aligned squares
+
+Cells live in the infinite quarter-plane `ℕ × ℕ`; the `n × n` board is a
+finset of it. Working in the quarter-plane makes cross-board statements
+(a square on a small board is a square on every larger board) direct.
+
+A winning square is the four-corner set of an axis-aligned square with
+side length at least 1, so the smallest winner is a 2x2 block of cells.
+-/
+
+abbrev Cell := ℕ × ℕ
+
+/-- The `n × n` board in the quarter-plane. -/
+def board (n : ℕ) : Finset Cell := Finset.range n ×ˢ Finset.range n
+
+theorem mem_board {n : ℕ} {x : Cell} : x ∈ board n ↔ x.1 < n ∧ x.2 < n := by
+  simp [board]
+
+theorem board_mono {m n : ℕ} (h : m ≤ n) : board m ⊆ board n := by
+  intro x hx
+  rw [mem_board] at hx ⊢
+  exact ⟨hx.1.trans_le h, hx.2.trans_le h⟩
+
+/-- The four corners of the axis-aligned square anchored at `(r, c)`
+with side length `s`. -/
+def corners (r c s : ℕ) : Finset Cell :=
+  {(r, c), (r, c + s), (r + s, c), (r + s, c + s)}
+
+theorem mem_corners {r c s : ℕ} {x : Cell} :
+    x ∈ corners r c s ↔
+      x = (r, c) ∨ x = (r, c + s) ∨ x = (r + s, c) ∨ x = (r + s, c + s) := by
+  simp [corners]
+
+/-- A square fits the `n × n` board as soon as its far corner does. -/
+theorem corners_subset_board {r c s n : ℕ} (hr : r + s < n) (hc : c + s < n) :
+    corners r c s ⊆ board n := by
+  intro x hx
+  rw [mem_corners] at hx
+  rw [mem_board]
+  rcases hx with h | h | h | h <;> subst h <;> constructor <;> omega
+
+/-- `stones` contains all four corners of some winning square. -/
+def HasSquare (stones : Finset Cell) : Prop :=
+  ∃ r c s, 0 < s ∧ corners r c s ⊆ stones
+
+theorem HasSquare.mono {A B : Finset Cell} (h : HasSquare A) (hAB : A ⊆ B) :
+    HasSquare B := by
+  obtain ⟨r, c, s, hs, hsub⟩ := h
+  exact ⟨r, c, s, hs, hsub.trans hAB⟩
+
+theorem not_hasSquare_empty : ¬ HasSquare (∅ : Finset Cell) := by
+  rintro ⟨r, c, s, -, hsub⟩
+  exact absurd (hsub (by simp [mem_corners])) (Finset.notMem_empty (r, c))

@@ -9,3 +9,4 @@ paper/main.pdf
 __pycache__/
 .pytest_cache/
 pipeline/.venv/
+formalization/.lake/
