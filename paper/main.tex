@@ -34,16 +34,17 @@ ends: draws for $n \le 4$ and a first-player win for $n = 5$ by
 computer search, and a first-player win for $n \ge 15$ by a theorem of
 Bacher and Eliahou together with strategy stealing. We close the
 remaining range: the first player wins if and only if $n \ge 5$. The
-proof for $5 \le n \le 14$ is an explicit strategy, two simple
-reflexes over a fixed lookup table whose plans are confined to a
-$6 \times 6$ corner region, verified by exhaustive search. All results
-are formalized in Lean~4: the game, the strategy tables, and
-executable checkers whose soundness is machine-checked, so each
-exhaustive search yields a formal theorem. We conjecture that the same
-fixed table wins for every $n \ge 6$, which would replace the
-non-constructive argument for large boards by a single explicit
-strategy; the supporting geometry is proved here and the conjecture is
-verified for $6 \le n \le 14$.
+proof for $5 \le n \le 14$ is an explicit strategy verified by
+exhaustive search: two reflexes over fixed lookup tables, one table
+for $n = 5$ and one, with plans confined to a $6 \times 6$ corner
+region, for all larger boards. The game, the tables, and the checkers
+running the searches are formalized in Lean~4 with machine-checked
+soundness, so each successful search yields a theorem about the game
+rather than a claim about a program. We conjecture that this
+table wins for every $n \ge 6$, which would replace the
+non-constructive argument by a single explicit strategy; the
+confinement geometry behind the conjecture is proved here, and the
+conjecture is verified for $6 \le n \le 14$.
 \end{abstract}
 
 \maketitle
@@ -51,7 +52,7 @@ verified for $6 \le n \le 14$.
 \section{Introduction}\label{sec:intro}
 
 Two players alternately claim empty cells of an $n \times n$ grid, the
-first player moving first. A player wins on holding all four corners
+first player moving first. A player wins upon holding all four corners
 of a square with horizontal and vertical sides, of any size: the cells
 $(r,c)$, $(r,c+s)$, $(r+s,c)$, $(r+s,c+s)$ for some $s \ge 1$. If the
 board fills with no player holding such a square, the game is a draw.
@@ -83,30 +84,30 @@ player has a winning strategy if and only if $n \ge 5$.
 The new content of Theorem~\ref{thm:main} is the range
 $5 \le n \le 14$, which we settle with an explicit strategy: two
 reflexes (complete a square when possible, otherwise block an imminent
-completion) over a fixed lookup table of forcing plans. The plans are
-confined to the $6 \times 6$ corner region of the board, and replies
-far from that region are looked up through finitely many geometric
-classes, so a single table serves every board size at once. For each
-$n$ in range, an exhaustive search over all reply sequences certifies
-that the strategy wins.
+completion) over fixed lookup tables of forcing plans. The
+$5 \times 5$ board has its own table, extracted from a full solution
+of that game. For $n \ge 6$ a single table serves every size: its
+plans are confined to the $6 \times 6$ corner region of the board,
+and replies far from that region are looked up through finitely many
+geometric classes. For each $n$ in this range, an exhaustive search
+over all reply sequences certifies that the strategy wins.
 
 Exhaustive searches are only as trustworthy as the programs running
-them, and this game has already supplied a cautionary example: the
-first version of the search in \cite{jenrich} contained an error, and
-its corrected form initially returned the opposite verdict for $n = 5$
-before further revision. We therefore formalize everything in Lean~4
-\cite{lean4}, building on mathlib \cite{mathlib}: the game itself, a
-checker that replays the strategy against every reply sequence, a dual
-checker refuting first-player wins on small boards, and soundness
-theorems for both. Each search then discharges a statement about the
+them, and this game supplies a cautionary example: the first version
+of the search in \cite{jenrich} contained an error and was corrected
+in a later revision. We therefore formalize the computational part of
+this paper in Lean~4 \cite{lean4}, building on mathlib
+\cite{mathlib}: the game itself, a checker that replays the strategy
+against every reply sequence, a dual checker refuting first-player
+wins on small boards, and soundness theorems for both. Each search then discharges a statement about the
 abstract game rather than about a program. The formal development
 accompanies this paper as supplementary material.
 
 The strategy-stealing argument for $n \ge 15$ proves existence without
 exhibiting a strategy. Our table is a candidate replacement: we
 conjecture it wins for every $n \ge 6$
-(Conjecture~\ref{conj:uniform}), prove the geometric lemma that
-confines its play to a bounded region, and verify the conjecture for
+(Conjecture~\ref{conj:uniform}), prove the geometric lemma behind its
+treatment of far replies, and verify the conjecture for
 $6 \le n \le 14$.
 
 \section{Definitions and conventions}\label{sec:defs}
@@ -172,7 +173,7 @@ Lemma~\ref{lem:stealing}, these games are drawn under optimal play.
 For $n \le 2$ no square fits the board. For $n = 3, 4$ the claim is a
 statement about a finite game tree, verified by an exhaustive search
 that is part of the formal development (Section~\ref{sec:lean}): the
-searcher shows that the player to move cannot force a win by
+search shows that the player to move cannot force a win by
 exhibiting, for every first-player move, a reply after which the first
 player still cannot force one. Two standard reductions keep the tree
 small: a player able to complete a square wins immediately, and a
@@ -200,14 +201,16 @@ reflex~(2). The table therefore records only free choices.
 \subsection{The table}
 When no reflex applies, the strategy consults a lookup table. The
 opening move is $(2,2)$. The table maps the opponent's first reply
-$o_1$ to a second move, and the pair $(o_1, o_2)$ of the first two
+$o_1$ to the strategy's second move, and the pair $(o_1, o_2)$ of the first two
 replies to a \emph{plan}: an ordered list of cells, of which the
 strategy plays the first not already held. Plans are forcing: in the
-verified lines each plan move completes three corners of some square,
-so every reply is forced, until some move creates two threats at once
-and reflex~(1) converts.
+verified lines each plan move creates a threat, three corners of a
+square whose fourth cell is empty, so every reply is a forced block,
+until a move creates two threats at once; whichever the opponent
+blocks, reflex~(1) completes the other square.
 
-Two features let one table serve all boards. First, every cell a plan
+Two features let one table serve every board of size at least six.
+First, every cell a plan
 can play lies in the corner region $\{0,\dots,5\}^2$, so each square
 the strategy builds exists on every board with $n \ge 6$; this
 confinement is a checked property of the table. Second, replies
@@ -215,20 +218,24 @@ outside the region are looked up through \emph{alignment classes}: a
 far reply in row $r < 6$ falls in class $(\mathrm{row},\, r)$, one in
 column $c < 6$ in class $(\mathrm{col},\, c)$, and the rest in a
 default class. The classes reflect the geometry of
-Lemma~\ref{lem:span}: a far stone joins a square through two stones of
-the corner region only when it shares a row or column with the region.
+Lemma~\ref{lem:span}: every corner of a square through two stones of
+the corner region lies in one of the region's rows or columns, so only
+far replies aligned with the region can complete a square the strategy
+is building.
 
 The board of size $5$ is treated separately, and necessarily so: its
-table is not purely forcing. Exhaustive analysis shows that from
-twenty of the possible $(o_1, o_2)$ openings no all-forcing
+table is not purely forcing. Exhaustive analysis shows that for
+twenty of the $(o_1, o_2)$ openings that arise, no all-forcing
 continuation wins on $\Board_5$. The $5 \times 5$ table therefore
 contains \emph{quiet forks}, a non-threatening move together with a
 sub-table indexed by the reply to it, extracted from a full solution
 of the $5 \times 5$ game ($1.03 \times 10^8$ positions searched, draws
 scored against the first player).
 
-The general table holds $237$ branch keys (the first replies of the
-generation board, thirteen alignment classes, and a default) with
+The general table holds $237$ branch keys (the $224$ possible first
+replies on the board it was generated on, $\Board_{15}$ of
+Section~\ref{sec:uniform}, twelve alignment classes, and a default)
+with
 $8{,}135$ plan entries in all; the $5 \times 5$ table holds $24$
 branches. Both are included with the supplementary material in source
 and machine-readable form.
@@ -296,7 +303,7 @@ predicate as an inductive family: the first player \emph{can win} from
 a position if some legal move completes one of their squares, or some
 legal move admits at least one reply and every reply both fails to
 complete an opponent square and leads to a position from which the
-first player can win. A derivation of the predicate is literally a
+first player can win. A derivation of the predicate is precisely a
 strategy tree, one first-player move per node with all replies
 covered, and draws are failures by construction.
 
@@ -315,7 +322,7 @@ and \texttt{refute}, the dual search of Section~\ref{sec:small}, with
   \;\longrightarrow\; \text{the first player cannot win on } \Board_n.
 \]
 
-One design decision kept both proofs short. The checker validates
+One design decision keeps both proofs short. The checker validates
 every move it plays: legality is enforced by guards, completions are
 detected by an executable scan proved equivalent to the abstract
 predicate, and replies are enumerated exhaustively. Soundness
@@ -345,39 +352,42 @@ The conjecture holds for $6 \le n \le 14$ by
 Section~\ref{sec:verify}. The intended proof for general $n$ is a
 saturation argument: the strategy's own stones stay in the corner
 region, and the geometry bounds the reach of the opponent's play. The
-elementary confinement lemma is already formalized.
+containment in the following lemma is already formalized.
 
 \begin{lemma}\label{lem:span}
 Let $x \ne y$ be distinct corners of a square $\Sq(r,c,s)$ with
-$x, y \in \Board_B$. Then $r + s < 2B$ and $c + s < 2B$; in particular
-$\Sq(r,c,s) \subseteq \Board_{2B}$.
+$x, y \in \Board_B$. Then $r + s < 2B$ and $c + s < 2B$, so
+$\Sq(r,c,s) \subseteq \Board_{2B}$; moreover every corner of
+$\Sq(r,c,s)$ has its row or its column indexed below $B$.
 \end{lemma}
 
 \begin{proof}
 Two distinct corners either share a coordinate and differ by $s$ in
 the other, or differ by $s$ in both; either way $s < B$. Each anchor
 coordinate is bounded by the corresponding coordinate of a corner, so
-$r, c < B$ and the claim follows.
+$r, c < B$, and the containment follows. For the last claim: if $x$
+and $y$ share a row, the two remaining corners inherit their columns,
+both below $B$; a shared column is symmetric; and if $x$ and $y$ are
+diagonally opposite, all four corners lie in $\Board_B$.
 \end{proof}
 
-Consequently only boundedly many squares can ever pass through two
-stones of the strategy's region, and a far reply interacts with play
-only through its alignment class. What remains is the bookkeeping that
-turns this confinement into a simulation between the game on
-$\Board_n$ and the game on a fixed $\Board_{N_0}$; this is under way
-in the formal development. One subtlety deserves record. A table
-generated on $\Board_g$ carries exact entries for every reply on
-$\Board_g$, so its class entries are consulted only for $n > g$: the
-verified sizes exercise the class fallback not at all, and both tables
-we generated failed at exactly $n = g + 1$, the first size to reach
-it (the $\Board_{12}$ candidate at $13$, the published $\Board_{15}$
+Consequently only boundedly many squares pass through two stones of
+the corner region, all contained in $\Board_{12}$, and a far reply
+can complete one only from the region's rows and columns, which is
+what the alignment classes record. What remains open is a simulation
+between the game on $\Board_n$ and the game on a fixed
+$\Board_{N_0}$, and the evidence locates the difficulty precisely. A
+table generated on $\Board_g$ carries exact entries for every reply
+on $\Board_g$, so its class entries are consulted only for $n > g$:
+no verified size exercises the class fallback, and both tables we
+generated failed at exactly $n = g + 1$, the first size to reach it
+(the $\Board_{12}$ candidate at $13$, the published $\Board_{15}$
 table at $16$). Instrumented runs confirm that on every verified size
 the strategy's moves and the squares behind its reflexes stay inside
-the corner region while far replies resolve through exact entries.
-The missing ingredient is thus not a larger generation board but a
-class scheme whose entries provably subsume the exact ones they
-replace; the simulation argument will have to supply the invariance
-that generation alone cannot.
+the corner region while far replies resolve through exact entries. A
+larger generation board therefore cannot settle the conjecture: the
+class entries need an invariance argument that generation alone does
+not provide.
 
 \section{Reproducibility}\label{sec:repro}
 
