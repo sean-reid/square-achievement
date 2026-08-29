@@ -95,57 +95,145 @@ figure.game figcaption {
 
 .sag-controls {
   display: flex;
-  gap: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.7rem;
   justify-content: center;
   align-items: baseline;
-  margin-bottom: 0.9rem;
-  font-size: 0.9em;
+  margin-bottom: 1rem;
+  font-size: 0.82em;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
 }
 
-.sag-n {
-  width: 3.4rem;
-  font: inherit;
-  background: var(--paper);
-  color: var(--ink);
-  border: 1px solid var(--rule);
+.sag-size {
+  min-width: 4.2rem;
+  text-align: center;
+  font-variant: normal;
 }
 
-.sag-reset {
+.sag-dec,
+.sag-inc {
+  min-width: 1.7rem;
+}
+
+.sag-controls button {
   font: inherit;
-  font-size: 0.9em;
-  background: var(--box);
+  background: none;
   color: var(--ink);
   border: 1px solid var(--rule);
-  padding: 0.15rem 0.7rem;
+  border-radius: 2px;
+  padding: 0.1rem 0.6rem;
+  cursor: pointer;
+  transition: border-color 160ms ease;
+}
+
+.sag-controls button:hover {
+  border-color: var(--accent);
+}
+
+.sag-toggle {
   cursor: pointer;
 }
 
-.sag-grid {
-  display: grid;
-  gap: 2px;
-  justify-content: center;
-}
-
-.sag-cell {
-  font: inherit;
-  font-weight: 600;
-  background: var(--box);
-  color: var(--ink);
-  border: 1px solid var(--rule);
-  cursor: pointer;
-  min-width: 0;
-  padding: 0;
+.sag-svg {
+  display: block;
+  width: min(100%, 26rem);
+  margin: 0 auto;
   touch-action: manipulation;
 }
 
-.sag-cell:disabled {
-  cursor: default;
+.sag-grid line {
+  stroke: var(--rule);
+  stroke-width: 0.16;
+}
+
+.sag-cell {
+  fill: transparent;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .sag-cell:hover {
+    fill: var(--accent);
+    fill-opacity: 0.08;
+  }
+}
+
+.sag-x line {
+  stroke: var(--ink);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+}
+
+.sag-o circle {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.9;
+}
+
+.sag-stone {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sag-appear 180ms ease-out;
+}
+
+@keyframes sag-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+.sag-threat {
+  fill: var(--accent);
+  fill-opacity: 0.13;
+}
+
+.sag-dim {
+  opacity: 0.25;
+  transition: opacity 600ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sag-stone {
+    animation: none;
+  }
+  .sag-dim {
+    transition: none;
+  }
 }
 
 .sag-status {
   font-style: italic;
-  font-size: 0.9em;
+  font-size: 0.88em;
+  text-align: center;
   min-height: 1.4em;
+}
+
+.sag-quiet {
+  text-align: center;
+  font-size: 0.78em;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  color: var(--rule);
+}
+
+.sag-quiet button {
+  font: inherit;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0 0.15rem;
+}
+
+.sag-quiet button:hover {
+  color: var(--accent);
+}
+
+.sag-quiet button[aria-pressed="true"] {
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent);
 }
 
 footer {
