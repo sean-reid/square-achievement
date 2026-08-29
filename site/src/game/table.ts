@@ -143,11 +143,15 @@ export function strategyDecision(
   if (o2 === null) return { move: null, source: "exhausted" };
   const entries = lookup(table.box, table.scripts, o1);
   if (entries === undefined) return { move: null, source: "exhausted" };
-  let entry: Entry | undefined = entries[cellKey(o2)];
-  if (entry === undefined) {
-    const farm = farmKey(table.box, o1, o2);
-    if (farm !== null) entry = entries[farm];
-  }
+  // an exact o2 entry is only pair-safe when o1 is exact too: an
+  // abstract o1 shifts the pair's farm cell away from the one the
+  // exact entry was generated against
+  const o1Exact = table.scripts[cellKey(o1)] !== undefined;
+  const farm = farmKey(table.box, o1, o2);
+  let entry: Entry | undefined =
+    !o1Exact && farm !== null ? entries[farm] : undefined;
+  if (entry === undefined) entry = entries[cellKey(o2)];
+  if (entry === undefined && farm !== null) entry = entries[farm];
   if (entry === undefined) entry = lookup(table.box, entries, o2);
   if (entry === undefined) return { move: null, source: "exhausted" };
   const move = resolveEntry(table, pos, entry);
