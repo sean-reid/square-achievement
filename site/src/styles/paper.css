@@ -87,6 +87,22 @@ figure.game {
   text-align: center;
 }
 
+figure.diagram {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+figure.diagram svg {
+  width: min(100%, 19rem);
+  height: auto;
+}
+
+figure.diagram figcaption {
+  font-size: 0.85em;
+  margin-top: 0.8rem;
+  color: var(--rule);
+}
+
 figure.game figcaption {
   font-size: 0.85em;
   margin-top: 0.8rem;
@@ -159,16 +175,14 @@ figure.game figcaption {
   }
 }
 
-.sag-x line {
-  stroke: var(--ink);
-  stroke-width: 0.9;
-  stroke-linecap: round;
+.sag-x circle {
+  fill: var(--ink);
 }
 
 .sag-o circle {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 0.9;
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 0.55;
 }
 
 .sag-stone {

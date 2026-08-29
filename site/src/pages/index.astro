@@ -35,15 +35,15 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
     <figure class="game">
       <sag-board n="5"></sag-board>
       <figcaption>
-        Figure 1. Play the game: you are O, the bot opens as P1 and replays the
-        strategy below move for move. Change n to explore; below 5 × 5 neither
-        side can force a win.
+        Figure 1. Play the game: you play white, and the bot plays black, moving
+        first and replaying the strategy below move for move. Change n to
+        explore; below 5 × 5 neither side can force a win.
       </figcaption>
     </figure>
 
     <h2>The game</h2>
     <p>
-      Played on the cells of an <span set:html={k("n \\times n")} /> grid, P1 (X)
+      Played on the cells of an <span set:html={k("n \\times n")} /> grid, P1 (black)
       moving first. A winning set is any
       <span
         set:html={k("\\{(r,c),\\,(r,c{+}s),\\,(r{+}s,c),\\,(r{+}s,c{+}s)\\}")}
@@ -54,6 +54,68 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       on the boards below 5 × 5 blocking is enough: neither player can force a
       win.
     </p>
+
+    <figure class="diagram">
+      <svg
+        viewBox="-4 -4 152 152"
+        role="img"
+        aria-label="A 6 by 6 grid showing the corners of a 2 by 2 block and of a square of side 3"
+      >
+        <defs>
+          <pattern
+            id="grid6"
+            width="24"
+            height="24"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d="M24 0H0V24"
+              fill="none"
+              stroke="var(--rule)"
+              stroke-width="0.8"
+              opacity="0.5"></path>
+          </pattern>
+        </defs>
+        <rect width="144" height="144" fill="url(#grid6)"></rect>
+        <rect
+          width="144"
+          height="144"
+          fill="none"
+          stroke="var(--rule)"
+          stroke-width="0.8"
+          opacity="0.5"></rect>
+        <rect
+          x="12"
+          y="108"
+          width="24"
+          height="24"
+          fill="none"
+          stroke="var(--accent)"
+          stroke-width="1.5"
+          stroke-dasharray="4 3"></rect>
+        <rect
+          x="60"
+          y="12"
+          width="72"
+          height="72"
+          fill="none"
+          stroke="var(--accent)"
+          stroke-width="1.5"
+          stroke-dasharray="4 3"></rect>
+        <circle cx="12" cy="108" r="4" fill="var(--ink)"></circle>
+        <circle cx="36" cy="108" r="4" fill="var(--ink)"></circle>
+        <circle cx="12" cy="132" r="4" fill="var(--ink)"></circle>
+        <circle cx="36" cy="132" r="4" fill="var(--ink)"></circle>
+        <circle cx="60" cy="12" r="4" fill="var(--ink)"></circle>
+        <circle cx="132" cy="12" r="4" fill="var(--ink)"></circle>
+        <circle cx="60" cy="84" r="4" fill="var(--ink)"></circle>
+        <circle cx="132" cy="84" r="4" fill="var(--ink)"></circle>
+      </svg>
+      <figcaption>
+        Figure 2. Winning shapes: the corners of a 2 × 2 block and of a square
+        of side 3. Only the corners must be held.
+      </figcaption>
+    </figure>
 
     <div class="theorem">
       <span class="label">Theorem 1.</span> The first player has a winning strategy
@@ -139,6 +201,115 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       on a larger one. We have not ruled that out for every board at once yet;
       the sizes through 14 × 14 are settled unconditionally.
     </p>
+    <figure class="diagram">
+      <svg
+        viewBox="-8 -24 356 352"
+        role="img"
+        aria-label="A 16 by 16 board with a farm square through the corner region and three far opponent stones"
+      >
+        <defs>
+          <pattern
+            id="grid16"
+            width="20"
+            height="20"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d="M20 0H0V20"
+              fill="none"
+              stroke="var(--rule)"
+              stroke-width="0.7"
+              opacity="0.45"></path>
+          </pattern>
+        </defs>
+        <rect width="320" height="320" fill="url(#grid16)"></rect>
+        <rect
+          width="320"
+          height="320"
+          fill="none"
+          stroke="var(--rule)"
+          stroke-width="0.7"
+          opacity="0.45"></rect>
+        <rect width="120" height="120" fill="var(--accent)" fill-opacity="0.09"
+        ></rect>
+        <rect
+          x="70"
+          y="10"
+          width="240"
+          height="240"
+          fill="none"
+          stroke="var(--accent)"
+          stroke-width="1.5"
+          stroke-dasharray="5 4"></rect>
+        <circle
+          cx="70"
+          cy="10"
+          r="6"
+          fill="var(--paper)"
+          stroke="var(--ink)"
+          stroke-width="1.5"></circle>
+        <circle
+          cx="310"
+          cy="10"
+          r="6"
+          fill="var(--paper)"
+          stroke="var(--ink)"
+          stroke-width="1.5"></circle>
+        <circle
+          cx="70"
+          cy="250"
+          r="6"
+          fill="var(--paper)"
+          stroke="var(--ink)"
+          stroke-width="1.5"></circle>
+        <circle
+          cx="310"
+          cy="250"
+          r="8"
+          fill="none"
+          stroke="var(--ink)"
+          stroke-width="1.5"
+          stroke-dasharray="4 3"></circle>
+        <text
+          x="70"
+          y="-8"
+          text-anchor="middle"
+          font-size="14"
+          fill="var(--ink)"
+          font-style="italic">t</text
+        >
+        <text
+          x="310"
+          y="-8"
+          text-anchor="middle"
+          font-size="14"
+          fill="var(--ink)"
+          font-style="italic">o1</text
+        >
+        <text
+          x="52"
+          y="255"
+          text-anchor="end"
+          font-size="14"
+          fill="var(--ink)"
+          font-style="italic">o2</text
+        >
+        <text
+          x="328"
+          y="255"
+          text-anchor="start"
+          font-size="14"
+          fill="var(--ink)"
+          font-style="italic">z</text
+        >
+      </svg>
+      <figcaption>
+        Figure 3. A farm on the 16 × 16 board. The opponent's far replies o1 and
+        o2 align with the corner region (shaded); once a forced block lands on
+        t, the dashed square threatens at the dashed cell z. The square does not
+        fit any smaller board.
+      </figcaption>
+    </figure>
 
     <h2>Formalization and downloads</h2>
     <p>
