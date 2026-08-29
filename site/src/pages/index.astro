@@ -127,17 +127,22 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
     <h2>History</h2>
     <p>
       Harary called games like this achievement games: both players build toward
-      the same target, and the first to finish wins. Erickson asked what happens
-      for the axis-aligned square on an
-      <span set:html={k("n \\times n")} /> grid, and the question is recorded on the
-      Open Problem Garden. Two ends of the answer were known. Jenrich reported computer
-      searches giving draws on 3 × 3 and 4 × 4 and a first-player win on 5 × 5. At
-      the other end, Bacher and Eliahou proved that every two-coloring of a 15 × 15
-      grid contains a monochromatic square, so no game on a board of size 15 or more
-      can end in a draw; a standard strategy-stealing argument then gives the first
-      player a win, though it produces no strategy. In between, from 6 × 6 through
-      14 × 14, the outcome was open. We close that range, and the proof is a strategy
-      you can watch: the bot in Figure 1 is playing it.
+      the same target, and the first to finish wins
+      <a class="cite" href="#ref-1">[1]</a>. Erickson asked what happens for the
+      axis-aligned square on an
+      <span set:html={k("n \\times n")} /> grid
+      <a class="cite" href="#ref-2">[2]</a>, and the question is recorded on the
+      Open Problem Garden <a class="cite" href="#ref-3">[3]</a>. Two ends of the
+      answer were known. Jenrich reported computer searches giving draws on 3 ×
+      3 and 4 × 4 and a first-player win on 5 × 5
+      <a class="cite" href="#ref-4">[4]</a>. At the other end, Bacher and
+      Eliahou proved that every two-coloring of a 15 × 15 grid contains a
+      monochromatic square
+      <a class="cite" href="#ref-5">[5]</a>, so no game on a board of size 15 or
+      more can end in a draw; a standard strategy-stealing argument then gives
+      the first player a win, though it produces no strategy. In between, from 6
+      × 6 through 14 × 14, the outcome was open. We close that range, and the
+      proof is a strategy you can watch: the bot in Figure 1 is playing it.
     </p>
 
     <h2>The strategy</h2>
@@ -178,7 +183,7 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       against every sequence of replies, which at 9 × 9 means more than three
       million positions. Searches of this kind have gone wrong before, in this
       very game. The first published search for 5 × 5 contained an error and had
-      to be corrected.
+      to be corrected <a class="cite" href="#ref-4">[4]</a>.
     </p>
     <p>
       We therefore wrote the search three times with nothing shared between
@@ -322,7 +327,9 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
 
     <h2>Formalization and downloads</h2>
     <p>
-      The proof is formalized in Lean 4: the game semantics, an executable
+      The proof is formalized in Lean 4
+      <a class="cite" href="#ref-6">[6]</a>, building on mathlib
+      <a class="cite" href="#ref-7">[7]</a>: the game semantics, an executable
       verifier with a machine-checked soundness theorem, and the strategy tables
       as certificates; the assembly for arbitrary board size is in progress.
       Both artifacts are built from this repository on every deploy:
@@ -331,6 +338,40 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
         >the Lean development (tar.gz)</a
       >.
     </p>
+
+    <h2>References</h2>
+    <ol class="refs">
+      <li id="ref-1">
+        F. Harary, Achievement and avoidance games for graphs, Annals of
+        Discrete Mathematics 13 (1982), 111–119.
+      </li>
+      <li id="ref-2">
+        M. Erickson, Pearls of Discrete Mathematics, CRC Press, 2010.
+      </li>
+      <li id="ref-3">
+        M. Erickson, Square achievement game on an n × n grid, Open Problem
+        Garden.
+        <a href="http://www.openproblemgarden.org/op/a_game_on_an_n_x_n_grid"
+          >openproblemgarden.org</a
+        >
+      </li>
+      <li id="ref-4">
+        T. Jenrich, Guaranteed successful strategies for a square achievement
+        game on an n × n grid, 2012.
+        <a href="https://arxiv.org/abs/1109.2341">arXiv:1109.2341</a>
+      </li>
+      <li id="ref-5">
+        R. Bacher and S. Eliahou, Extremal binary matrices without constant
+        2-squares, Journal of Combinatorics 1 (2010), no. 1, 77–100.
+      </li>
+      <li id="ref-6">
+        L. de Moura and S. Ullrich, The Lean 4 theorem prover and programming
+        language, Automated Deduction – CADE 28, Springer, 2021.
+      </li>
+      <li id="ref-7">
+        The mathlib Community, The Lean mathematical library, CPP 2020.
+      </li>
+    </ol>
 
     <footer>
       Code MIT · text CC BY 4.0 · built from the square-achievement repository.
