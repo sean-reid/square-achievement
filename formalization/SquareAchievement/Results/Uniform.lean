@@ -29,6 +29,13 @@ theorem forcing_six : forcingComplete genTable 6 = true := by native_decide
 
 theorem forcing_seven : forcingComplete genTable 7 = true := by native_decide
 
+/-- The forcing property at the generation board. The compiled run
+returns true in about two hours, so like the per-size checks this
+stays `sorry` until the final build discharges it by
+`native_decide`. -/
+theorem forcing_fifteen : forcingComplete genTable 15 = true := by
+  sorry
+
 /-- One checked run at the generation board wins every board from the
 generation board up. -/
 theorem check_sound_uniform {t : Table} {n : ℕ} (hn : 15 ≤ n)
