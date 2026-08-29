@@ -1,6 +1,7 @@
 /** The interactive board: an SVG figure in the paper's own idiom.
  *
- * The visitor plays O against the table strategy's X. Hairline rules,
+ * The visitor plays white against the table strategy's black stones.
+ * Hairline rules,
  * drawn stones, threat washes, a winning square that draws itself in,
  * a move list with the strategy's stated reasons, undo, a shareable
  * link, and a self-playing demonstration. Motion is subtle and
@@ -173,23 +174,11 @@ export class SagBoard extends HTMLElement {
     const g = document.createElementNS(NS, "g");
     g.setAttribute("class", first ? "sag-stone sag-x" : "sag-stone sag-o");
     g.setAttribute("data-stone", String(i));
-    if (first) {
-      const d = U * 0.26;
-      for (const s of [1, -1]) {
-        const line = document.createElementNS(NS, "line");
-        line.setAttribute("x1", String(cx - d));
-        line.setAttribute("y1", String(cy - d * s));
-        line.setAttribute("x2", String(cx + d));
-        line.setAttribute("y2", String(cy + d * s));
-        g.appendChild(line);
-      }
-    } else {
-      const circle = document.createElementNS(NS, "circle");
-      circle.setAttribute("cx", String(cx));
-      circle.setAttribute("cy", String(cy));
-      circle.setAttribute("r", String(U * 0.3));
-      g.appendChild(circle);
-    }
+    const circle = document.createElementNS(NS, "circle");
+    circle.setAttribute("cx", String(cx));
+    circle.setAttribute("cy", String(cy));
+    circle.setAttribute("r", String(U * 0.32));
+    g.appendChild(circle);
     return g;
   }
 
