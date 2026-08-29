@@ -4,6 +4,7 @@
 \usepackage[margin=1.2in]{geometry}
 \usepackage{microtype}
 \usepackage{booktabs}
+\usepackage{tikz}
 \usepackage{xcolor}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
 
@@ -126,7 +127,23 @@ $\Sq(r,c,s) \subseteq A$ for some $r, c \ge 0$ and $s \ge 1$.
 
 The case $s = 1$ is allowed: the smallest winning configuration is a
 $2 \times 2$ block of cells. This is the convention of
-\cite{jenrich, bacher-eliahou}.
+\cite{jenrich, bacher-eliahou}. Figure~\ref{fig:rules} shows examples
+of side $1$ and side $3$; tilted squares do not count.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=0.5]
+  \draw[gray!60] (0,0) grid (6,-6);
+  \foreach \r/\c in {4/0, 4/1, 5/0, 5/1, 0/2, 0/5, 3/2, 3/5}
+    \fill[black] (\c+0.5,-\r-0.5) circle (0.26);
+  \draw[thick,dashed] (0.5,-4.5) rectangle (1.5,-5.5);
+  \draw[thick,dashed] (2.5,-0.5) rectangle (5.5,-3.5);
+\end{tikzpicture}
+\caption{Winning shapes on $\Board_6$: the corners of a $2 \times 2$
+block (side $1$) and of a square of side $3$. Only the four corners
+must be held; the interior is irrelevant.}
+\label{fig:rules}
+\end{figure}
 
 A \emph{position} is a pair of disjoint subsets of $\Board_n$, the
 stones of the first and the second player. Play alternates, the first
@@ -208,6 +225,24 @@ verified lines each plan move creates a threat, three corners of a
 square whose fourth cell is empty, so every reply is a forced block,
 until a move creates two threats at once; whichever the opponent
 blocks, reflex~(1) completes the other square.
+Figure~\ref{fig:forcing} shows the first such exchange of a verified
+line.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=0.55]
+  \draw[gray!60] (0,0) grid (6,-6);
+  \foreach \r/\c in {2/2, 3/2, 2/1}
+    \fill[black] (\c+0.5,-\r-0.5) circle (0.26);
+  \draw[thick,dashed] (1.5,-2.5) rectangle (2.5,-3.5);
+  \draw[thick,dashed] (1.5,-3.5) circle (0.28);
+\end{tikzpicture}
+\caption{After the opening $(2,2)$, a far first reply, the second move
+$(3,2)$, and the plan move $(2,1)$, the strategy (black) holds three corners
+of the dashed block; the opponent must take the dashed cell $(3,1)$ or
+lose on the next move.}
+\label{fig:forcing}
+\end{figure}
 
 Two features let one table serve every board of size at least six.
 First, every cell a plan
@@ -382,12 +417,36 @@ on $\Board_g$, so its class entries are consulted only for $n > g$:
 no verified size exercises the class fallback, and both tables we
 generated failed at exactly $n = g + 1$, the first size to reach it
 (the $\Board_{12}$ candidate at $13$, the published $\Board_{15}$
-table at $16$). Instrumented runs confirm that on every verified size
+table at $16$). Figure~\ref{fig:farm} shows the mechanism on
+$\Board_{16}$. Instrumented runs confirm that on every verified size
 the strategy's moves and the squares behind its reflexes stay inside
 the corner region while far replies resolve through exact entries. A
 larger generation board therefore cannot settle the conjecture: the
 class entries need an invariance argument that generation alone does
 not provide.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=0.34]
+  \fill[gray!15] (0,0) rectangle (6,-6);
+  \draw[gray!60] (0,0) grid (16,-16);
+  \draw[thick,dashed] (3.5,-0.5) rectangle (15.5,-12.5);
+  \foreach \r/\c in {0/3, 0/15, 12/3}
+    \draw[thick] (\c+0.5,-\r-0.5) circle (0.26);
+  \draw[thick,dashed] (15.5,-12.5) circle (0.34);
+  \node[above=1pt] at (3.5,-0.2) {$t$};
+  \node[above=1pt] at (15.5,-0.2) {$o_1$};
+  \node[left=2pt] at (3.1,-12.5) {$o_2$};
+  \node[right=2pt] at (16.0,-12.5) {$z$};
+\end{tikzpicture}
+\caption{A farm on $\Board_{16}$, from the refutation of the
+$\Board_{15}$ table. The opponent's (white) free replies $(0,15)$ and
+$(12,3)$ align with the corner region (shaded); when a forced block
+lands on $(0,3)$, the dashed square threatens at the dashed cell
+$(12,15)$. Two of its corners lie outside $\Board_{15}$, so no search
+on the generation board encounters this square.}
+\label{fig:farm}
+\end{figure}
 
 \section{Reproducibility}\label{sec:repro}
 
