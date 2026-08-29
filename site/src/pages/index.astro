@@ -174,32 +174,41 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
 
     <h2>Why believe a computer search</h2>
     <p>
-      For each board size, an exhaustive search plays the strategy against every
-      reply sequence; at 9 × 9 that is over three million positions. This game
-      has its own cautionary tale: the first published search for 5 × 5
-      contained an error and was later corrected. The search here is implemented
-      three times independently, in Python, in Lean, and in the TypeScript bot
-      on this page, and all three agree on every size tested. Only one of the
-      three carries mathematical weight: the Lean checker comes with a
-      machine-checked soundness theorem: if the checker returns true, a winning
-      strategy tree exists for the abstract game. The strategy tables enter the
-      development as plain data, so nothing about how they were found needs to
-      be trusted.
+      For each board size the proof is an exhaustive search: the strategy plays
+      against every sequence of replies, which at 9 × 9 means more than three
+      million positions. Searches of this kind have gone wrong before, in this
+      very game. The first published search for 5 × 5 contained an error and had
+      to be corrected.
+    </p>
+    <p>
+      We therefore wrote the search three times with nothing shared between
+      them: once in Python, used while discovering the tables; once in Lean; and
+      once in TypeScript, driving the bot on this page. The three agree on every
+      board size we have tried, which is reassuring but is not the proof. The
+      proof rests on the Lean version alone. It comes with a soundness theorem,
+      itself machine-checked, which says that whenever the checker answers true,
+      a winning strategy tree exists for the game as defined mathematically.
+      Nothing about how the tables were found has to be taken on faith; they sit
+      in the development as plain data, and a wrong table would fail the check
+      rather than slip through it.
     </p>
 
     <h2>Toward every board at once</h2>
     <p>
-      For boards of size 15 and up the win is indirect: no draw is possible, and
-      the second player cannot have a winning strategy, so the first player
-      does. That argument names no move. We conjecture that the table strategy
-      wins on every board of size 6 and up, which would replace the indirection
-      with one explicit strategy for all of them. A patient opponent, though,
-      can drop stones far from the corner region, aligned so that the squares
-      through them exist only on much larger boards, and harvest forced
-      exchanges from them. The reflexes answer each threat, but every answer
-      costs a tempo, and a table tuned on one finite board can be led off script
-      on a larger one. We have not ruled that out for every board at once yet;
-      the sizes through 14 × 14 are settled unconditionally.
+      For boards of size 15 and up we know the first player wins, but not how:
+      no game there can end in a draw, and the second player cannot be the one
+      with a winning strategy, so the first player is. Nothing in that argument
+      says which move to make. We expect the table strategy above to win on
+      every board of size 6 and up, and proving it would give one explicit
+      strategy for all of them. What makes this hard is the room a large board
+      gives the opponent. Stones placed far from the corner region belong to
+      squares that exist only out there, and whenever one of those squares
+      reaches three corners, the strategy has to spend a move on it. The table
+      was generated and checked on a board of size 15; a larger board can steer
+      it into positions its plans were never checked against. Figure 3 shows the
+      smallest example we know from an earlier version of the table. Everything
+      through 14 × 14 is settled unconditionally, and the general statement is
+      work we have not finished.
     </p>
     <figure class="diagram">
       <svg
