@@ -1,0 +1,14 @@
+[project]
+name = "square-achievement-pipeline"
+version = "0.0.0"
+description = "Strategy generation and cross-checking for the square achievement game"
+requires-python = ">=3.11"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.ruff]
+line-length = 96
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]

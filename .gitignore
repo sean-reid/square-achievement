@@ -6,3 +6,6 @@ paper/*.fls
 paper/*.fdb_latexmk
 paper/*.synctex.gz
 paper/main.pdf
+__pycache__/
+.pytest_cache/
+pipeline/.venv/
