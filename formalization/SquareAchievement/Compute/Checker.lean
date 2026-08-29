@@ -89,7 +89,8 @@ def strategyMove (t : Table) (squares : List (List Cell)) (hist : List Cell) :
     else do
       let o2 ← hist[hist.idxOf x2 + 1]?
       let table ← lookup t.box t.scripts o1
-      let entry ← lookup t.box table o2
+      let entry ← lookupO2 t.box table
+        (t.scripts.lookup (.cell o1)).isSome o1 o2
       resolveEntry t.box p1 hist (hist.length + 1) entry
 
 def onBoard (n : ℕ) (c : Cell) : Bool := c.1 < n && c.2 < n
