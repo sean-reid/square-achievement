@@ -38,6 +38,40 @@ function classKey(box: number, cell: [number, number]): string | null {
   return null;
 }
 
+/** The hot cell a far reply pair can farm through, mirroring the
+ * pipeline's farm_relation: one member is aligned with the corner
+ * region, and the pair pins the square's box corner exactly. */
+function farmKey(
+  box: number,
+  o1: [number, number],
+  o2: [number, number],
+): string | null {
+  const far = 2 * box;
+  if (Math.max(o1[0], o1[1]) < far || Math.max(o2[0], o2[1]) < far) {
+    return null;
+  }
+  for (const [p, q] of [
+    [o1, o2],
+    [o2, o1],
+  ] as const) {
+    if (p[0] < box && q[1] === p[1]) {
+      const s = q[0] - p[0];
+      const b = p[1] - s;
+      if (s >= 1 && b >= 0 && b < box) return `farm:${p[0]},${b}`;
+    }
+    if (p[1] < box && q[0] === p[0]) {
+      const s = q[1] - p[1];
+      const a = p[0] - s;
+      if (s >= 1 && a >= 0 && a < box) return `farm:${a},${p[1]}`;
+    }
+    if (p[0] < box && q[1] < box) {
+      const s = p[1] - q[1];
+      if (s >= 1 && s === q[0] - p[0]) return `farm:${p[0]},${q[1]}`;
+    }
+  }
+  return null;
+}
+
 function lookup<T>(
   box: number,
   rec: Record<string, T>,
@@ -109,7 +143,12 @@ export function strategyDecision(
   if (o2 === null) return { move: null, source: "exhausted" };
   const entries = lookup(table.box, table.scripts, o1);
   if (entries === undefined) return { move: null, source: "exhausted" };
-  const entry = lookup(table.box, entries, o2);
+  let entry = entries[cellKey(o2)];
+  if (entry === undefined) {
+    const farm = farmKey(table.box, o1, o2);
+    if (farm !== null) entry = entries[farm];
+  }
+  if (entry === undefined) entry = lookup(table.box, entries, o2);
   if (entry === undefined) return { move: null, source: "exhausted" };
   const move = resolveEntry(table, pos, entry);
   return move ? { move, source: "plan" } : { move: null, source: "exhausted" };
