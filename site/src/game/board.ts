@@ -197,7 +197,7 @@ export class SagBoard extends HTMLElement {
       this.dimOthers(win);
       this.status(
         first
-          ? "X completes a square: the strategy wins."
+          ? "the strategy completes a square and wins."
           : "you completed a square: you win!",
       );
     } else if (this.pos.full()) {
