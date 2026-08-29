@@ -29,7 +29,7 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       precisely when <span set:html={k("n \\ge 5")} />, and that all smaller
       boards are drawn under optimal play. The strategy is explicit, and the
       searches that verify it are formalized in Lean 4, so each verified board
-      size is a theorem rather than a program run.
+      size comes with a machine-checked proof.
     </p>
 
     <figure class="game">
@@ -49,9 +49,10 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
         set:html={k("\\{(r,c),\\,(r,c{+}s),\\,(r{+}s,c),\\,(r{+}s,c{+}s)\\}")}
       /> with <span set:html={k("s \\ge 1")} />: the four corners of an
       axis-aligned square, from 2 × 2 blocks up. A full board with no completed
-      square is a draw. Tilted squares do not count. Both players chase the same
-      goal, so a player who can no longer win can still spoil; that is why small
-      boards end drawn rather than lost.
+      square is a draw. Tilted squares do not count. Both players are after the
+      same squares, so even a player who cannot win anymore can still block, and
+      on the boards below 5 × 5 blocking is enough: neither player can force a
+      win.
     </p>
 
     <div class="theorem">
@@ -63,29 +64,29 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
 
     <h2>History</h2>
     <p>
-      Games of this shape are achievement games, introduced by Harary: both
-      players build toward the same target, first to finish wins. Erickson asked
-      what happens for the axis-aligned square on an
+      Harary called games like this achievement games: both players build toward
+      the same target, and the first to finish wins. Erickson asked what happens
+      for the axis-aligned square on an
       <span set:html={k("n \\times n")} /> grid, and the question is recorded on the
       Open Problem Garden. Two ends of the answer were known. Jenrich reported computer
       searches giving draws on 3 × 3 and 4 × 4 and a first-player win on 5 × 5. At
       the other end, Bacher and Eliahou proved that every two-coloring of a 15 × 15
       grid contains a monochromatic square, so no game on a board of size 15 or more
-      can end in a draw; a classical strategy-stealing argument then hands the win
-      to the first player, without exhibiting a single move of a strategy. In between,
-      from 6 × 6 through 14 × 14, the outcome was open. That is the range we close,
-      and the proof is a strategy you can watch: the bot in Figure 1 is playing it.
+      can end in a draw; a standard strategy-stealing argument then gives the first
+      player a win, though it produces no strategy. In between, from 6 × 6 through
+      14 × 14, the outcome was open. We close that range, and the proof is a strategy
+      you can watch: the bot in Figure 1 is playing it.
     </p>
 
     <h2>The strategy</h2>
     <p>
-      Everything rests on two reflexes, checked before anything else on every
-      turn: complete one of your own squares if you can; otherwise, if the
-      opponent is one cell from completing theirs, block it. What remains is
-      choosing the quiet moves, and those come from a fixed lookup table. The
-      strategy opens at (2,2), answers the opponent's first reply with a tabled
-      second move, and the first two replies together select a plan: a short
-      list of cells played in order.
+      On every turn the strategy checks two reflexes before anything else:
+      complete one of your own squares if you can; otherwise, if the opponent is
+      one cell from completing theirs, block it. What remains is choosing the
+      quiet moves, and those come from a fixed lookup table. The strategy opens
+      at (2,2), answers the opponent's first reply with a tabled second move,
+      and the first two replies together select a plan: a short list of cells
+      played in order.
     </p>
     <p>
       Plans are forcing. Each plan move puts three corners of some square in
@@ -113,16 +114,15 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
     <p>
       For each board size, an exhaustive search plays the strategy against every
       reply sequence; at 9 × 9 that is over three million positions. This game
-      already shows why such searches deserve suspicion: the first published
-      search for 5 × 5 contained an error and was later corrected. The search
-      here is implemented three times independently, in Python, in Lean, and in
-      the TypeScript bot on this page, and all three agree on every size tested.
-      Only one of the three carries mathematical weight: the Lean checker comes
-      with a machine-checked soundness theorem, stating that if the checker
-      returns true then a winning strategy tree exists for the abstract game. A
-      program's output is just a bit; the soundness theorem is what turns that
-      bit into mathematics. The strategy tables enter the development as plain
-      data, so nothing about how they were found needs to be trusted.
+      has its own cautionary tale: the first published search for 5 × 5
+      contained an error and was later corrected. The search here is implemented
+      three times independently, in Python, in Lean, and in the TypeScript bot
+      on this page, and all three agree on every size tested. Only one of the
+      three carries mathematical weight: the Lean checker comes with a
+      machine-checked soundness theorem: if the checker returns true, a winning
+      strategy tree exists for the abstract game. The strategy tables enter the
+      development as plain data, so nothing about how they were found needs to
+      be trusted.
     </p>
 
     <h2>Toward every board at once</h2>
@@ -131,13 +131,13 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       the second player cannot have a winning strategy, so the first player
       does. That argument names no move. We conjecture that the table strategy
       wins on every board of size 6 and up, which would replace the indirection
-      with one explicit strategy for all of them. The obstacle is concrete. A
-      patient opponent can plant stones far from the corner region, whose
-      squares exist only on very large boards, and harvest forced exchanges from
-      them. The reflexes answer each such threat, but every answer costs a
-      tempo, and a table tuned on one finite board can be led off script on a
-      larger one. We have not yet ruled that out for every board at once; the
-      sizes through 14 × 14 are settled unconditionally.
+      with one explicit strategy for all of them. A patient opponent, though,
+      can drop stones far from the corner region, aligned so that the squares
+      through them exist only on much larger boards, and harvest forced
+      exchanges from them. The reflexes answer each threat, but every answer
+      costs a tempo, and a table tuned on one finite board can be led off script
+      on a larger one. We have not ruled that out for every board at once yet;
+      the sizes through 14 × 14 are settled unconditionally.
     </p>
 
     <h2>Formalization and downloads</h2>
