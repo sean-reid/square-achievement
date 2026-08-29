@@ -10,6 +10,6 @@ export default defineConfig({
   use: { baseURL: "http://localhost:4321/square-achievement/" },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile", use: { ...devices["iPhone 13"] } },
+    { name: "mobile", use: { ...devices["Pixel 7"] } },
   ],
 });

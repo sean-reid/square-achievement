@@ -22,7 +22,7 @@ export class SagBoard extends HTMLElement {
     this.over = false;
     this.status = VERIFIED
       ? "You are O. The bot plays the machine-verified strategy."
-      : "You are O. Preview bot; the verified strategy table lands soon.";
+      : "You are O. The bot replays the strategy table now under verification.";
     if (n < 5) this.status += " Boards below 5x5 are drawn with best play.";
     this.botTurn();
     this.render();
