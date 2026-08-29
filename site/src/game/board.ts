@@ -112,6 +112,10 @@ export class SagBoard extends HTMLElement {
     this.querySelector(".sag-size")!.textContent = `${n} × ${n}`;
     this.buildSvg();
     if (n < 5) this.status("boards below 5 x 5 are drawn with best play");
+    if (n > 15)
+      this.status(
+        "beyond the verified sizes: the strategy here is conjectured",
+      );
     if (replay && replay.length > 0) {
       for (const i of replay) {
         if (this.over) break;
