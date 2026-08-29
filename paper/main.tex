@@ -45,7 +45,8 @@ rather than a claim about a program. We conjecture that this
 table wins for every $n \ge 6$, which would replace the
 non-constructive argument by a single explicit strategy; the
 confinement geometry behind the conjecture is proved here, and the
-conjecture is verified for $6 \le n \le 14$.
+conjecture is verified for $6 \le n \le 15$, with unverified runs of
+a faster replica reaching $n = 17$.
 \end{abstract}
 
 \maketitle
@@ -94,9 +95,9 @@ geometric classes. For each $n$ in this range, an exhaustive search
 over all reply sequences certifies that the strategy wins.
 
 Exhaustive searches are only as trustworthy as the programs running
-them, and this game supplies a cautionary example: the first version
-of the search in \cite{jenrich} contained an error and was corrected
-in a later revision. We therefore formalize the computational part of
+them, and this game is a case in point: the first version of the
+search in \cite{jenrich} contained an error and was corrected in a
+later revision. We therefore formalize the computational part of
 this paper in Lean~4 \cite{lean4}, building on mathlib
 \cite{mathlib}: the game itself, a checker that replays the strategy
 against every reply sequence, a dual checker refuting first-player
@@ -195,7 +196,7 @@ exhibiting, for every first-player move, a reply after which the first
 player still cannot force one. Two standard reductions keep the tree
 small: a player able to complete a square wins immediately, and a
 player facing two distinct completion threats has lost. The
-$4 \times 4$ search visits roughly $10^5$ positions.
+$4 \times 4$ search runs in about ninety seconds compiled.
 Proposition~\ref{prop:small} confirms the report of \cite{jenrich}.
 
 \section{The strategy}\label{sec:strategy}
@@ -256,14 +257,14 @@ default class. The classes reflect the geometry of
 Lemma~\ref{lem:span}: every corner of a square through two stones of
 the corner region lies in one of the region's rows or columns, so only
 far replies aligned with the region can complete a square the strategy
-is building. Third, certain pairs of far replies can complete a square
-through a single cell of the corner region; each branch carries
-\emph{farm entries} for such pairs, keyed by that cell, whose plans
-never force the opponent onto it. When the first reply is not an
-exact key of the table, the pair's farm entry takes precedence over
-an exact entry for the second reply: exact entries answer the pair
-geometry of the board they were generated on, which one far stone can
-shift.
+is building. Third, a pair of far replies can form three corners of a
+square with a single cell of the corner region, and that cell is
+determined by the pair; each branch carries \emph{farm entries},
+keyed by that cell, storing plans that never force the opponent onto
+it. When the first reply is not an exact key of the table, the pair's
+farm entry takes precedence over an exact entry for the second reply:
+an exact entry answers the pair geometry of the board it was
+generated on, and one far stone shifts that geometry.
 
 The board of size $5$ is treated separately, and necessarily so: its
 table is not purely forcing. Exhaustive analysis shows that for
@@ -300,9 +301,10 @@ square achievement game on $\Board_n$.
 Proposition~\ref{prop:verify} is the soundness of exhaustive search;
 its formal counterpart is the theorem \texttt{check\_sound} of
 Section~\ref{sec:lean}. The strategy of Section~\ref{sec:strategy}
-verifies on $\Board_n$ for every $5 \le n \le 14$, which together with
-Propositions~\ref{prop:small} and~\ref{prop:large} proves
-Theorem~\ref{thm:main}. Table~\ref{tab:runs} reports the sizes of the
+verifies on $\Board_n$ for every $5 \le n \le 15$; the runs through
+$\Board_{14}$, together with Propositions~\ref{prop:small}
+and~\ref{prop:large}, prove Theorem~\ref{thm:main}, and the run at
+$\Board_{15}$ anchors Section~\ref{sec:uniform}. Table~\ref{tab:runs} reports the sizes of the
 verification trees and the running times of the compiled formal
 checker.
 
@@ -321,21 +323,27 @@ $n$ & positions & time (s) \\
 11 & --- & 426 \\
 12 & --- & 934 \\
 13 & --- & 2{,}009 \\
+14 & --- & 4{,}231 \\
+15 & --- & 8{,}348 \\
 \bottomrule
 \end{tabular}
 \medskip
 \caption{Verification runs. Position counts are the number of nodes of
-the verification tree, as reported by the reference implementation;
-times are wall-clock for the compiled Lean checker on a laptop.}
+the verification tree, reported by the reference implementation, which
+was run through $\Board_9$; times are wall-clock for the compiled
+Lean checker on a laptop.}
 \label{tab:runs}
 \end{table}
 
 The search was implemented three times independently: a reference
 implementation in Python used while discovering the tables, the formal
 checker in Lean, and a TypeScript replay driving the interactive page
-that accompanies the paper. All three agree on every board size
-tested. Only the Lean checker carries a soundness proof, and only its
-runs are cited in the proof of Theorem~\ref{thm:main}.
+that accompanies the paper. All three return the same verdict on
+every board size tested, and the TypeScript replay is additionally
+checked move for move against exhaustive replays of whole boards and
+of individual branches. Only the Lean checker carries a soundness
+proof, and only its runs are cited in the proof of
+Theorem~\ref{thm:main}.
 
 \section{Formalization}\label{sec:lean}
 
@@ -364,8 +372,8 @@ and \texttt{refute}, the dual search of Section~\ref{sec:small}, with
   \;\longrightarrow\; \text{the first player cannot win on } \Board_n.
 \]
 
-One design decision keeps both proofs short. The checker validates
-every move it plays: legality is enforced by guards, completions are
+Both soundness proofs are short for the same reason: the checker
+validates every move it plays. Legality is enforced by guards, completions are
 detected by an executable scan proved equivalent to the abstract
 predicate, and replies are enumerated exhaustively. Soundness
 therefore never inspects the strategy; any table surviving the guards
@@ -417,8 +425,9 @@ Consequently only boundedly many squares pass through two stones of
 the corner region, all contained in $\Board_{12}$, and a far reply
 can complete one only from the region's rows and columns, which is
 what the alignment classes record. What remains open is a simulation
-between the game on $\Board_n$ and the game on a fixed
-$\Board_{N_0}$, and the evidence locates the difficulty precisely. A
+between the game on $\Board_n$ and the game on a fixed board, which
+we expect to be the generation board $\Board_{15}$; the failed
+candidates show where the difficulty lies. A
 table generated on $\Board_g$ carries exact entries for every reply
 on $\Board_g$, so its class entries are consulted only for $n > g$:
 no verified size exercises the class fallback, and two earlier
@@ -429,16 +438,21 @@ mechanism on $\Board_{16}$. Instrumented runs confirm that on every
 verified size the strategy's moves and the squares behind its
 reflexes stay inside the corner region while far replies resolve
 through exact entries, so a larger generation board alone cannot
-settle the conjecture. The farm entries answer the mechanism
-directly: the pair of far replies determines the one region cell it
-can farm through, the entry for that cell never hands the cell over,
-and the precedence of farm entries over exact ones covers pairs whose
-farm sits off the generated geometry. With them the published table
-verifies through $\Board_{17}$, two sizes past its generation board.
-The conjecture remains open: what is missing is the simulation
-argument that turns bounded far-reply behavior into a statement for
-every $n$ at once, together with the checked table properties it
-rests on.
+settle the conjecture. The farm entries are built against this
+mechanism: the pair of far replies determines the one region cell it
+can farm through, the plan stored for that cell never hands the cell
+over, and farm entries take precedence over exact ones for the pairs
+whose farm sits off the generated geometry. With them the published
+table verifies through $\Board_{15}$ under the certified checker of
+Section~\ref{sec:lean}, and through $\Board_{17}$, two sizes past
+its generation board, under an optimized replica of that checker
+which carries no soundness proof but returns the same verdict as the
+certified checker on every size where both have run. The replica runs
+are evidence for the conjecture, not part of
+Theorem~\ref{thm:main}. The conjecture remains open: what is missing
+is the simulation argument that turns bounded far-reply behavior into
+a statement for every $n$ at once, together with the checked table
+properties it rests on.
 
 \begin{figure}[ht]
 \centering
@@ -454,8 +468,9 @@ rests on.
   \node[left=2pt] at (3.1,-12.5) {$o_2$};
   \node[right=2pt] at (16.0,-12.5) {$z$};
 \end{tikzpicture}
-\caption{A farm on $\Board_{16}$, from the refutation of the
-$\Board_{15}$ table. The opponent's (white) free replies $(0,15)$ and
+\caption{A farm on $\Board_{16}$, from the refutation of an earlier
+$\Board_{15}$ candidate without farm entries. The opponent's (white)
+free replies $(0,15)$ and
 $(12,3)$ align with the corner region (shaded); when a forced block
 lands on $(0,3)$, the dashed square threatens at the dashed cell
 $(12,15)$. Two of its corners lie outside $\Board_{15}$, so no search
@@ -468,7 +483,7 @@ on the generation board encounters this square.}
 The supplementary material contains the Lean development, with the
 tables as data and each theorem above as a named declaration; the
 generation pipeline (strategy search, extraction, and export); the
-reference verifier; and instructions reproducing every run of
+reference verifier; and the commands that reproduce the runs of
 Table~\ref{tab:runs}. The interactive page accompanying the paper
 replays the same tables move for move.
 
