@@ -219,18 +219,28 @@ def table_strategy(x2, scripts, opening=(2, 2), classify=None, meter=None):
             return second
         o2 = g.reply_to(second)
         table = lookup(scripts, o1)
-        entry = table.get(o2)
-        if entry is not None:
-            if meter is not None:
-                meter.key(o2, "exact")
-        else:
-            fk = farm_relation(o1, o2)
-            if fk is not None:
-                entry = table.get(fk)
-                if entry is not None and meter is not None:
-                    meter.key(o2, "farm")
-            if entry is None:
-                entry = lookup(table, o2)
+        entry = None
+        # an exact o2 entry is only pair-safe when o1 is exact too:
+        # shifting an abstract o1 moves the pair's farm cell away from
+        # the one the exact entry was generated against
+        fk = None if o1 in scripts else farm_relation(o1, o2)
+        if fk is not None:
+            entry = table.get(fk)
+            if entry is not None and meter is not None:
+                meter.key(o2, "farm")
+        if entry is None:
+            entry = table.get(o2)
+            if entry is not None:
+                if meter is not None:
+                    meter.key(o2, "exact")
+            else:
+                fk2 = farm_relation(o1, o2)
+                if fk2 is not None:
+                    entry = table.get(fk2)
+                    if entry is not None and meter is not None:
+                        meter.key(o2, "farm")
+                if entry is None:
+                    entry = lookup(table, o2)
         if entry is None:
             raise NotImplementedError(f"no plan for o1 {o1}, o2 {o2}")
         move = resolve(g, entry)

@@ -104,6 +104,20 @@ def main():
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 22
     x2_map, scripts = _tables()
     strategy = table_strategy(x2_map, scripts, classify=box_class)
+    # abstract o1 with an exact o2: the pair class that hid behind the
+    # exact key until the v2 refutation at n = 16
+    for o1, o2 in [
+        ((14, 15), (14, 3)),
+        ((15, 15), (14, 3)),
+        ((14, 15), (14, 1)),
+        ((16, 16), (13, 2)),
+        ((3, 15), (14, 3)),
+    ]:
+        verdict, g = adaptive(strategy, n, [o1, o2])
+        print(f"mixed pair o1={o1} o2={o2}: {verdict}", flush=True)
+        if verdict == "DOUBLE":
+            print(g.render())
+            return
     for a, b in [(0, 4), (0, 3), (0, 2)]:
         for s in range(11, n - 5):
             for pair in ([(a, b + s), (a + s, b + s)], [(a, b + s), (a + s, b)]):
