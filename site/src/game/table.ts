@@ -143,7 +143,7 @@ export function strategyDecision(
   if (o2 === null) return { move: null, source: "exhausted" };
   const entries = lookup(table.box, table.scripts, o1);
   if (entries === undefined) return { move: null, source: "exhausted" };
-  let entry = entries[cellKey(o2)];
+  let entry: Entry | undefined = entries[cellKey(o2)];
   if (entry === undefined) {
     const farm = farmKey(table.box, o1, o2);
     if (farm !== null) entry = entries[farm];
