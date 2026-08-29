@@ -7,11 +7,12 @@ import sys
 
 from . import P1, P2, Game
 from .forcing import box_class
-from .solve import build_general
 
 
 def narrate(moves, n):
-    x2_map, scripts = build_general()
+    from .audit_farms import _tables
+
+    x2_map, scripts = _tables()
     g = Game(n)
     opening = (2, 2)
 
