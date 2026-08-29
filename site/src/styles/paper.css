@@ -1,0 +1,157 @@
+/* The classic paper aesthetic: a well-typeset article, on paper. */
+
+:root {
+  --paper: #faf7f0;
+  --ink: #1c1a17;
+  --rule: #8a8377;
+  --accent: #7a2f2f;
+  --box: #f1ece1;
+  --serif: "STIX Two Text", "Charter", "Georgia", serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #191817;
+    --ink: #e8e4dc;
+    --rule: #6b655b;
+    --accent: #c98a8a;
+    --box: #221f1c;
+  }
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.55;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 44rem;
+  padding: 3rem 1.25rem 6rem;
+}
+
+header.masthead {
+  text-align: center;
+  border-top: 3px double var(--rule);
+  border-bottom: 3px double var(--rule);
+  padding: 1.6rem 0;
+  margin-bottom: 2.5rem;
+}
+
+header.masthead h1 {
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+
+header.masthead .byline {
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+}
+
+h2 {
+  font-size: 1.15rem;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  margin-top: 2.5rem;
+}
+
+.abstract {
+  font-size: 0.92em;
+  margin: 0 2rem 2rem;
+}
+
+.abstract strong {
+  font-variant: small-caps;
+}
+
+.theorem {
+  background: var(--box);
+  border-left: 3px solid var(--accent);
+  padding: 0.8rem 1.1rem;
+  margin: 1.4rem 0;
+}
+
+.theorem .label {
+  font-variant: small-caps;
+  font-weight: 600;
+}
+
+figure.game {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+figure.game figcaption {
+  font-size: 0.85em;
+  margin-top: 0.8rem;
+  color: var(--rule);
+}
+
+.sag-controls {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 0.9rem;
+  font-size: 0.9em;
+}
+
+.sag-n {
+  width: 3.4rem;
+  font: inherit;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+
+.sag-reset {
+  font: inherit;
+  font-size: 0.9em;
+  background: var(--box);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  padding: 0.15rem 0.7rem;
+  cursor: pointer;
+}
+
+.sag-grid {
+  display: grid;
+  gap: 2px;
+  justify-content: center;
+}
+
+.sag-cell {
+  font: inherit;
+  font-weight: 600;
+  background: var(--box);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  cursor: pointer;
+  min-width: 0;
+  padding: 0;
+  touch-action: manipulation;
+}
+
+.sag-cell:disabled {
+  cursor: default;
+}
+
+.sag-status {
+  font-style: italic;
+  font-size: 0.9em;
+  min-height: 1.4em;
+}
+
+footer {
+  margin-top: 4rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1rem;
+  font-size: 0.85em;
+  color: var(--rule);
+}

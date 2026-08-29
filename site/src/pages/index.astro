@@ -1,0 +1,99 @@
+---
+import "../styles/paper.css";
+import "katex/dist/katex.min.css";
+import katex from "katex";
+
+const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
+const kd = (tex: string) =>
+  katex.renderToString(tex, { throwOnError: true, displayMode: true });
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Square Achievement Game on n × n Boards</title>
+    <meta
+      name="description"
+      content="Two players claim cells of an n by n grid; the first to own four corners of a square wins. The first player wins exactly when n is at least 5, by a machine-checked strategy. Play against it."
+    />
+  </head>
+  <body>
+    <header class="masthead">
+      <h1>The Square Achievement Game on n × n Boards</h1>
+      <p class="byline">Sean Reid · August 2026</p>
+    </header>
+
+    <p class="abstract">
+      <strong>Abstract.</strong> Two players alternately claim cells of an
+      <span set:html={k("n \\times n")} /> grid; the first to hold all four corners
+      of an axis-aligned square wins. We show the first player has a winning strategy
+      precisely when <span set:html={k("n \\ge 5")} />, and that all smaller
+      boards are drawn under optimal play. The strategy is explicit, and the
+      theorem is verified end to end in Lean 4.
+    </p>
+
+    <figure class="game">
+      <sag-board n="5"></sag-board>
+      <figcaption>
+        Figure 1. Play the game: you are O, the bot opens as P1. Change n to
+        explore; below 5 × 5 you can always survive.
+      </figcaption>
+    </figure>
+
+    <h2>The game</h2>
+    <p>
+      Played on the cells of an <span set:html={k("n \\times n")} /> grid, P1 (X)
+      moving first. A winning set is any
+      <span
+        set:html={k("\\{(r,c),\\,(r,c{+}s),\\,(r{+}s,c),\\,(r{+}s,c{+}s)\\}")}
+      /> with <span set:html={k("s \\ge 1")} />: the four corners of an
+      axis-aligned square, from 2 × 2 blocks up. A full board with no completed
+      square is a draw.
+    </p>
+
+    <div class="theorem">
+      <span class="label">Theorem 1.</span> The first player has a winning strategy
+      in the square achievement game on the
+      <span set:html={k("n \\times n")} /> board if and only if
+      <span set:html={k("n \\ge 5")} />.
+    </div>
+
+    <h2>History</h2>
+    <p>
+      Achievement games on grids go back to Harary's animal achievement games;
+      this page will carry the full story, the structure of the winning
+      strategy, and the proof outline. The section is being written alongside
+      the paper.
+    </p>
+
+    <h2>Proof outline</h2>
+    <p>
+      The strategy is built from two reflexes and a finite table of forcing
+      plans confined to a corner region, so that a single verified table covers
+      every board size. A saturation argument reduces the general case to
+      finitely many sizes, each checked exhaustively:
+    </p>
+    <p
+      set:html={kd(
+        "\\text{check}(T, N_0) = \\texttt{true} \\;\\Longrightarrow\\; \\forall n \\ge N_0,\\; \\text{P1 wins on } n \\times n.",
+      )}
+    />
+
+    <h2>Formalization and downloads</h2>
+    <p>
+      The theorem is proved in Lean 4: the game semantics, an executable
+      verifier with a machine-checked soundness theorem, and the strategy tables
+      as certificates. The paper (PDF) and the Lean development will be
+      downloadable here.
+    </p>
+
+    <footer>
+      Code MIT · text CC BY 4.0 · built from the square-achievement repository.
+    </footer>
+
+    <script>
+      import "../game/board";
+    </script>
+  </body>
+</html>
