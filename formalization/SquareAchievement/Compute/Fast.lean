@@ -99,7 +99,8 @@ def strategyMoveB (t : Table) (corners : Array UInt32) (n : ℕ)
         else do
           let o2c ← o2
           let table ← lookup t.box t.scripts o1c
-          let entry ← lookup t.box table o2c
+          let entry ← lookupO2 t.box table
+            (t.scripts.lookup (.cell o1c)).isSome o1c o2c
           match entry with
           | .plan cells => cells.find? fun c => !heldP1 board n c
           | .quiet .. => none
