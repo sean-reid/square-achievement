@@ -35,16 +35,16 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
     <figure class="game">
       <sag-board n="5"></sag-board>
       <figcaption>
-        Figure 1. Play the game: you play white, and the bot plays black, moving
-        first and replaying the strategy below move for move. Change n to
-        explore; below 5 × 5 neither side can force a win.
+        Figure 1. Play the game: the bot moves first, replaying the strategy
+        below move for move, and you reply. Change n to explore; below 5 × 5
+        neither side can force a win.
       </figcaption>
     </figure>
 
     <h2>The game</h2>
     <p>
-      Played on the cells of an <span set:html={k("n \\times n")} /> grid, P1 (black)
-      moving first. A winning set is any
+      Played on the cells of an <span set:html={k("n \\times n")} /> grid, P1 moving
+      first. A winning set is any
       <span
         set:html={k("\\{(r,c),\\,(r,c{+}s),\\,(r{+}s,c),\\,(r{+}s,c{+}s)\\}")}
       /> with <span set:html={k("s \\ge 1")} />: the four corners of an
