@@ -3,16 +3,17 @@
 python3 -m squares.export_lean [data-dir] writes Data/TableGen.lean
 (the general table, regenerated) and Data/Table5.lean (the n=5 table
 with quiet forks) into the Lean project's Data directory, by default
-the formalization next to this pipeline.
+the formalization in the square-achievement repo.
 """
 
 import pathlib
 import sys
 
-LEAN_DATA = (
-    pathlib.Path(sys.argv[1])
+LEAN_DATA = pathlib.Path(
+    sys.argv[1]
     if len(sys.argv) > 1
-    else pathlib.Path(__file__).resolve().parents[2] / "formalization/SquareAchievement/Data"
+    else pathlib.Path.home()
+    / "workshop/square-achievement/formalization/SquareAchievement/Data"
 )
 
 
@@ -23,7 +24,9 @@ def key_lean(k):
         return f"Key.cell ({k[0]}, {k[1]})"
     if k[0] == "row":
         return f"Key.row {k[1]}"
-    return f"Key.col {k[1]}"
+    if k[0] == "col":
+        return f"Key.col {k[1]}"
+    return f"Key.farm ({k[1][0]}, {k[1][1]})"
 
 
 def entry_lean(e):
