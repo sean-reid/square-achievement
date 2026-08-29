@@ -250,6 +250,20 @@ figure.game figcaption {
   border-bottom: 1px solid var(--accent);
 }
 
+a.cite {
+  text-decoration: none;
+  font-size: 0.85em;
+}
+
+ol.refs {
+  font-size: 0.85em;
+  padding-left: 1.5rem;
+}
+
+ol.refs li {
+  margin-bottom: 0.4rem;
+}
+
 footer {
   margin-top: 4rem;
   border-top: 1px solid var(--rule);
