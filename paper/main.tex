@@ -3,16 +3,21 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage[margin=1.2in]{geometry}
 \usepackage{microtype}
-\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{xcolor}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
 
-\newtheorem{theorem}{Theorem}
+\newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{conjecture}[theorem]{Conjecture}
 \theoremstyle{definition}
 \newtheorem{definition}[theorem]{Definition}
 \theoremstyle{remark}
 \newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Board}{B}
+\newcommand{\Sq}{Q}
 
 \title{The square achievement game on $n \times n$ boards}
 \author{Sean Reid}
@@ -22,102 +27,408 @@
 
 \begin{abstract}
 Two players alternately claim cells of an $n \times n$ grid; the first
-to hold all four corners of an axis-aligned square wins. We prove the
-first player has a winning strategy if and only if $n \ge 5$. The
-strategy is explicit: two reflexes over a finite table of forcing plans
-confined to a corner region of the board, so a single certificate
-covers every sufficiently large board. All results, including the
-exhaustive analyses of small boards, are formalized and machine-checked
-in Lean~4.
+to hold all four corners of an axis-aligned square wins, and a full
+board with no such square is a draw. Erickson asked for which $n$ the
+first player has a winning strategy. The answer was known at the two
+ends: draws for $n \le 4$ and a first-player win for $n = 5$ by
+computer search, and a first-player win for $n \ge 15$ by a theorem of
+Bacher and Eliahou together with strategy stealing. We close the
+remaining range: the first player wins if and only if $n \ge 5$. The
+proof for $5 \le n \le 14$ is an explicit strategy, two simple
+reflexes over a fixed lookup table whose plans are confined to a
+$6 \times 6$ corner region, verified by exhaustive search. All results
+are formalized in Lean~4: the game, the strategy tables, and
+executable checkers whose soundness is machine-checked, so each
+exhaustive search yields a formal theorem. We conjecture that the same
+fixed table wins for every $n \ge 6$, which would replace the
+non-constructive argument for large boards by a single explicit
+strategy; the supporting geometry is proved here and the conjecture is
+verified for $6 \le n \le 14$.
 \end{abstract}
 
 \maketitle
 
-\section{Introduction}
+\section{Introduction}\label{sec:intro}
 
-% History and positioning: Harary's achievement games, positional game
-% theory (Beck), Maker--Maker conventions and why draws matter, prior
-% work on polyomino and square achievement, statement of results.
+Two players alternately claim empty cells of an $n \times n$ grid, the
+first player moving first. A player wins on holding all four corners
+of a square with horizontal and vertical sides, of any size: the cells
+$(r,c)$, $(r,c+s)$, $(r+s,c)$, $(r+s,c+s)$ for some $s \ge 1$. If the
+board fills with no player holding such a square, the game is a draw.
 
-The square achievement game is played on the cells of an $n \times n$
-grid. Two players alternately claim empty cells, the first player (P1)
-moving first, and a player wins on completing the four corners
-\[
-  \{(r,c),\ (r,c+s),\ (r+s,c),\ (r+s,c+s)\}, \qquad s \ge 1,
-\]
-of an axis-aligned square. If the board fills with no completed square
-the game is drawn.
+Erickson posed the game and asked for the outcome under optimal play
+\cite{erickson-pearls, opg}. It belongs to the family of achievement
+games introduced by Harary \cite{harary}, played in the Maker--Maker
+convention: both players pursue the same goal, and a player who loses
+the race may still hold out for a draw. For the general theory of
+positional games see Beck \cite{beck}.
+
+Two boundary results were known. Jenrich \cite{jenrich} reported
+computer searches showing that the second player can secure a draw for
+$n = 3, 4$ and that the first player can force a win for $n = 5$.
+Bacher and Eliahou \cite{bacher-eliahou} proved that every
+two-coloring of the $15 \times 15$ grid contains four equal-colored
+cells at the corners of an axis-aligned square, and that $15$ is least
+with this property. Since no completed game on a board of size $15$ or
+more is square-free, strategy stealing gives the first player a win
+there. Between these results the problem was open: for
+$6 \le n \le 14$ neither a winning strategy nor a drawing strategy was
+known \cite{opg}.
 
 \begin{theorem}\label{thm:main}
-P1 has a winning strategy in the square achievement game on the
-$n \times n$ board if and only if $n \ge 5$.
+In the square achievement game on the $n \times n$ board, the first
+player has a winning strategy if and only if $n \ge 5$.
 \end{theorem}
 
-\section{The game and conventions}
+The new content of Theorem~\ref{thm:main} is the range
+$5 \le n \le 14$, which we settle with an explicit strategy: two
+reflexes (complete a square when possible, otherwise block an imminent
+completion) over a fixed lookup table of forcing plans. The plans are
+confined to the $6 \times 6$ corner region of the board, and replies
+far from that region are looked up through finitely many geometric
+classes, so a single table serves every board size at once. For each
+$n$ in range, an exhaustive search over all reply sequences certifies
+that the strategy wins.
 
-% Formal definitions matching the Lean development: cells in the
-% quarter-plane, boards as finite subgrids, winning sets, the game tree,
-% draws counting against the first player for the purposes of the
-% threshold statement.
+Exhaustive searches are only as trustworthy as the programs running
+them, and this game has already supplied a cautionary example: the
+first version of the search in \cite{jenrich} contained an error, and
+its corrected form initially returned the opposite verdict for $n = 5$
+before further revision. We therefore formalize everything in Lean~4
+\cite{lean4}, building on mathlib \cite{mathlib}: the game itself, a
+checker that replays the strategy against every reply sequence, a dual
+checker refuting first-player wins on small boards, and soundness
+theorems for both. Each search then discharges a statement about the
+abstract game rather than about a program. The formal development
+accompanies this paper as supplementary material.
+
+The strategy-stealing argument for $n \ge 15$ proves existence without
+exhibiting a strategy. Our table is a candidate replacement: we
+conjecture it wins for every $n \ge 6$
+(Conjecture~\ref{conj:uniform}), prove the geometric lemma that
+confines its play to a bounded region, and verify the conjecture for
+$6 \le n \le 14$.
+
+\section{Definitions and conventions}\label{sec:defs}
+
+\begin{definition}
+Cells are pairs of non-negative integers, written $(r, c)$ for row and
+column. The board of size $n$ is $\Board_n = \{0, \dots, n-1\}^2$. For
+$s \ge 1$, the \emph{square} anchored at $(r, c)$ with side $s$ is the
+four-element set
+\[
+  \Sq(r,c,s) \;=\; \{(r,c),\ (r,c+s),\ (r+s,c),\ (r+s,c+s)\}.
+\]
+A set $A$ of cells \emph{contains a square} if
+$\Sq(r,c,s) \subseteq A$ for some $r, c \ge 0$ and $s \ge 1$.
+\end{definition}
+
+The case $s = 1$ is allowed: the smallest winning configuration is a
+$2 \times 2$ block of cells. This is the convention of
+\cite{jenrich, bacher-eliahou}.
+
+A \emph{position} is a pair of disjoint subsets of $\Board_n$, the
+stones of the first and the second player. Play alternates, the first
+player moving first, each move claiming an empty cell. A player wins
+at the first moment their stones contain a square; if the board fills
+with neither player holding one, the game is drawn. The game is finite
+with perfect information, so exactly one of three statements holds:
+the first player can force a win, the second player can force a win,
+or both can force at least a draw.
+
+\begin{lemma}[strategy stealing]\label{lem:stealing}
+The second player has no winning strategy.
+\end{lemma}
+
+\begin{proof}
+Suppose the second player had a winning strategy $\tau$. Let the first
+player open with an arbitrary move and thereafter follow $\tau$ as if
+the extra stone were absent, making a further arbitrary move whenever
+$\tau$ selects an occupied cell. The winning condition is monotone in
+a player's stone set, so surplus stones never hurt, and the first
+player wins; but $\tau$ was assumed to win against all first-player
+play, a contradiction.
+\end{proof}
+
+\begin{proposition}\label{prop:large}
+For $n \ge 15$ the first player has a winning strategy.
+\end{proposition}
+
+\begin{proof}
+A completed game two-colors the board, and by \cite{bacher-eliahou}
+any two-coloring of a fixed $15 \times 15$ subgrid contains a
+monochromatic square. Hence no completed game on $\Board_n$ with
+$n \ge 15$ is a draw. The second player cannot force a win by
+Lemma~\ref{lem:stealing}, so by finiteness the first player can.
+\end{proof}
 
 \section{Small boards}\label{sec:small}
 
-% Exhaustive refutation for n <= 4 with the pruned dual search; the
-% strategy-stealing argument showing P2 never wins, hence draws.
+\begin{proposition}\label{prop:small}
+For $n \le 4$ the first player has no winning strategy. With
+Lemma~\ref{lem:stealing}, these games are drawn under optimal play.
+\end{proposition}
 
-\section{The winning strategy}\label{sec:strategy}
+For $n \le 2$ no square fits the board. For $n = 3, 4$ the claim is a
+statement about a finite game tree, verified by an exhaustive search
+that is part of the formal development (Section~\ref{sec:lean}): the
+searcher shows that the player to move cannot force a win by
+exhibiting, for every first-player move, a reply after which the first
+player still cannot force one. Two standard reductions keep the tree
+small: a player able to complete a square wins immediately, and a
+player facing two distinct completion threats has lost. The
+$4 \times 4$ search visits roughly $10^5$ positions.
+Proposition~\ref{prop:small} confirms the report of \cite{jenrich}.
 
-% The reflex-plus-table architecture; forcing plans; the corner-box
-% confinement; the n = 5 special case and why pure forcing fails there;
-% the alignment classes for far replies.
+\section{The strategy}\label{sec:strategy}
 
-\section{Search and extraction}\label{sec:pipeline}
+The strategy has two layers.
 
-% How the tables were found: the forcing-script search, the exact
-% solver for n = 5, extraction of strategy trees, and the two
-% independent verifiers (Python and compiled Lean) used during
-% development.
+\subsection{Reflexes}
+Before consulting any table, the strategy plays
+\begin{enumerate}
+  \item the least cell (in lexicographic order) completing one of its
+    own squares, if such a cell exists; otherwise
+  \item the least cell completing an opponent square, if such a cell
+    exists.
+\end{enumerate}
+The reflexes absorb every forced exchange: the final move of each
+winning line is played by reflex~(1), and the counter-threats that
+arise as the opponent's forced blocks accumulate are answered by
+reflex~(2). The table therefore records only free choices.
 
-\section{The saturation argument}\label{sec:saturation}
+\subsection{The table}
+When no reflex applies, the strategy consults a lookup table. The
+opening move is $(2,2)$. The table maps the opponent's first reply
+$o_1$ to a second move, and the pair $(o_1, o_2)$ of the first two
+replies to a \emph{plan}: an ordered list of cells, of which the
+strategy plays the first not already held. Plans are forcing: in the
+verified lines each plan move completes three corners of some square,
+so every reply is forced, until some move creates two threats at once
+and reflex~(1) converts.
 
-% The subsumption theorem: activity is confined, far stones interact
-% through finitely many alignment classes, and one verified bound
-% covers all larger boards.
+Two features let one table serve all boards. First, every cell a plan
+can play lies in the corner region $\{0,\dots,5\}^2$, so each square
+the strategy builds exists on every board with $n \ge 6$; this
+confinement is a checked property of the table. Second, replies
+outside the region are looked up through \emph{alignment classes}: a
+far reply in row $r < 6$ falls in class $(\mathrm{row},\, r)$, one in
+column $c < 6$ in class $(\mathrm{col},\, c)$, and the rest in a
+default class. The classes reflect the geometry of
+Lemma~\ref{lem:span}: a far stone joins a square through two stones of
+the corner region only when it shares a row or column with the region.
+
+The board of size $5$ is treated separately, and necessarily so: its
+table is not purely forcing. Exhaustive analysis shows that from
+twenty of the possible $(o_1, o_2)$ openings no all-forcing
+continuation wins on $\Board_5$. The $5 \times 5$ table therefore
+contains \emph{quiet forks}, a non-threatening move together with a
+sub-table indexed by the reply to it, extracted from a full solution
+of the $5 \times 5$ game ($1.03 \times 10^8$ positions searched, draws
+scored against the first player).
+
+The general table holds $237$ branch keys (the first replies of the
+generation board, thirteen alignment classes, and a default) with
+$8{,}135$ plan entries in all; the $5 \times 5$ table holds $24$
+branches. Both are included with the supplementary material in source
+and machine-readable form.
+
+\section{Verification}\label{sec:verify}
+
+Fix a strategy $\sigma$ and a board size $n$. The \emph{verification
+tree} of $\sigma$ on $\Board_n$ is the game tree in which the first
+player's moves are given by $\sigma$ and the second player's moves
+range over all empty cells. Say that $\sigma$ \emph{verifies} on
+$\Board_n$ if every branch ends in a first-player square: no branch
+reaches a second-player square, a full board, or a position where
+$\sigma$ produces no legal move.
+
+\begin{proposition}\label{prop:verify}
+If $\sigma$ verifies on $\Board_n$, then the first player wins the
+square achievement game on $\Board_n$.
+\end{proposition}
+
+Proposition~\ref{prop:verify} is the soundness of exhaustive search;
+its formal counterpart is the theorem \texttt{check\_sound} of
+Section~\ref{sec:lean}. The strategy of Section~\ref{sec:strategy}
+verifies on $\Board_n$ for every $5 \le n \le 14$, which together with
+Propositions~\ref{prop:small} and~\ref{prop:large} proves
+Theorem~\ref{thm:main}. Table~\ref{tab:runs} reports the sizes of the
+verification trees and the running times of the compiled formal
+checker.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrr}
+\toprule
+$n$ & positions & time (s) \\
+\midrule
+5 & $391{,}377$ & 1.5 \\
+6 & $185{,}811$ & 1.0 \\
+7 & $564{,}879$ & 4.8 \\
+8 & $1{,}450{,}956$ & 20 \\
+9 & $3{,}243{,}321$ & 57 \\
+10 & --- & 166 \\
+11 & --- & 426 \\
+12 & --- & 934 \\
+13 & --- & 2{,}009 \\
+\bottomrule
+\end{tabular}
+\medskip
+\caption{Verification runs. Position counts are the number of nodes of
+the verification tree, as reported by the reference implementation;
+times are wall-clock for the compiled Lean checker on a laptop.}
+\label{tab:runs}
+\end{table}
+
+The search was implemented three times independently: a reference
+implementation in Python used while discovering the tables, the formal
+checker in Lean, and a TypeScript replay driving the interactive page
+that accompanies the paper. All three agree on every board size
+tested. Only the Lean checker carries a soundness proof, and only its
+runs are cited in the proof of Theorem~\ref{thm:main}.
 
 \section{Formalization}\label{sec:lean}
 
-% The Lean architecture: the game as an inductive winning predicate,
-% executable checkers with machine-checked soundness in both
-% directions, certificates discharged by native_decide, and the axiom
-% footprint.
+The Lean development defines cells in the quarter-plane, boards as
+finite subsets, squares as in Section~\ref{sec:defs}, and the winning
+predicate as an inductive family: the first player \emph{can win} from
+a position if some legal move completes one of their squares, or some
+legal move admits at least one reply and every reply both fails to
+complete an opponent square and leads to a position from which the
+first player can win. A derivation of the predicate is literally a
+strategy tree, one first-player move per node with all replies
+covered, and draws are failures by construction.
 
-\section{Reproducibility}
+Two executable checkers are proved sound against this semantics:
+\texttt{check}, which replays a strategy table against all reply
+sequences, with
+\[
+  \texttt{check\_sound} \;:\;
+  \texttt{check}\ t\ n = \texttt{true}
+  \;\longrightarrow\; \text{the first player can win on } \Board_n,
+\]
+and \texttt{refute}, the dual search of Section~\ref{sec:small}, with
+\[
+  \texttt{refute\_sound} \;:\;
+  \texttt{refute}\ n = \texttt{true}
+  \;\longrightarrow\; \text{the first player cannot win on } \Board_n.
+\]
 
-% Repository layout, how to regenerate tables, re-run every
-% verification, and rebuild this paper.
+One design decision kept both proofs short. The checker validates
+every move it plays: legality is enforced by guards, completions are
+detected by an executable scan proved equivalent to the abstract
+predicate, and replies are enumerated exhaustively. Soundness
+therefore never inspects the strategy; any table surviving the guards
+yields a winning derivation, and the tables enter the development
+purely as data.
+
+Concrete board sizes are discharged by native evaluation
+(\texttt{native\_decide}): for instance, the statement that the first
+player can win on $\Board_5$ is \texttt{check\_sound} applied to one
+evaluated run of \texttt{check}. The axiom footprint of these theorems
+is \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound},
+and Lean's evaluation axiom for compiled reduction, the usual trust
+base for kernel-external computation.
+
+\section{Toward a uniform strategy}\label{sec:uniform}
+
+Proposition~\ref{prop:large} is not constructive. The table of
+Section~\ref{sec:strategy} suggests a stronger statement.
+
+\begin{conjecture}\label{conj:uniform}
+The table strategy wins the square achievement game on $\Board_n$ for
+every $n \ge 6$.
+\end{conjecture}
+
+The conjecture holds for $6 \le n \le 14$ by
+Section~\ref{sec:verify}. The intended proof for general $n$ is a
+saturation argument: the strategy's own stones stay in the corner
+region, and the geometry bounds the reach of the opponent's play. The
+elementary confinement lemma is already formalized.
+
+\begin{lemma}\label{lem:span}
+Let $x \ne y$ be distinct corners of a square $\Sq(r,c,s)$ with
+$x, y \in \Board_B$. Then $r + s < 2B$ and $c + s < 2B$; in particular
+$\Sq(r,c,s) \subseteq \Board_{2B}$.
+\end{lemma}
+
+\begin{proof}
+Two distinct corners either share a coordinate and differ by $s$ in
+the other, or differ by $s$ in both; either way $s < B$. Each anchor
+coordinate is bounded by the corresponding coordinate of a corner, so
+$r, c < B$ and the claim follows.
+\end{proof}
+
+Consequently only boundedly many squares can ever pass through two
+stones of the strategy's region, and a far reply interacts with play
+only through its alignment class. What remains is the bookkeeping that
+turns this confinement into a simulation between the game on
+$\Board_n$ and the game on a fixed $\Board_{N_0}$; this is under way
+in the formal development. One subtlety deserves record: the
+opponent's forced blocks accumulate, and an aligned far stone can seed
+squares whose side grows with the board, so class representatives must
+be generated on boards large enough to exhibit the longest such
+exchanges. A table generated on too small a board verifies there and
+fails on larger boards; the table published here was generated on
+$\Board_{15}$ after an earlier candidate, generated on $\Board_{12}$,
+failed on $\Board_{13}$ in exactly this way.
+
+\section{Reproducibility}\label{sec:repro}
+
+The supplementary material contains the Lean development, with the
+tables as data and each theorem above as a named declaration; the
+generation pipeline (strategy search, extraction, and export); the
+reference verifier; and instructions reproducing every run of
+Table~\ref{tab:runs}. The interactive page accompanying the paper
+replays the same tables move for move.
 
 \begin{thebibliography}{9}
+
+\bibitem{bacher-eliahou}
+R.~Bacher and S.~Eliahou,
+\emph{Extremal binary matrices without constant 2-squares},
+J. Combinatorics \textbf{1} (2010), no.~1, 77--100.
+
+\bibitem{beck}
+J.~Beck,
+\emph{Combinatorial Games: Tic-Tac-Toe Theory},
+Encyclopedia of Mathematics and its Applications, vol.~114,
+Cambridge University Press, 2008.
+
+\bibitem{erickson-pearls}
+M.~Erickson,
+\emph{Pearls of Discrete Mathematics},
+CRC Press, 2010.
 
 \bibitem{harary}
 F.~Harary,
 \emph{Achievement and avoidance games for graphs},
 Ann. Discrete Math. \textbf{13} (1982), 111--119.
 
-\bibitem{beck}
-J.~Beck,
-\emph{Combinatorial Games: Tic-Tac-Toe Theory},
-Encyclopedia of Mathematics and its Applications 114,
-Cambridge University Press, 2008.
+\bibitem{jenrich}
+T.~Jenrich,
+\emph{Guaranteed successful strategies for a square achievement game
+on an $n \times n$ grid},
+arXiv:1109.2341, 2012.
 
 \bibitem{lean4}
 L.~de~Moura and S.~Ullrich,
 \emph{The Lean 4 theorem prover and programming language},
-CADE 28, 2021.
+Automated Deduction -- CADE 28, Lecture Notes in Computer Science,
+vol.~12699, Springer, 2021, pp.~625--635.
 
 \bibitem{mathlib}
 The mathlib Community,
 \emph{The Lean mathematical library},
-CPP 2020.
+Proceedings of the 9th ACM SIGPLAN International Conference on
+Certified Programs and Proofs (CPP 2020), 2020, pp.~367--381.
+
+\bibitem{opg}
+M.~Erickson,
+\emph{Square achievement game on an $n \times n$ grid},
+Open Problem Garden,
+\url{http://www.openproblemgarden.org/op/a_game_on_an_n_x_n_grid}.
 
 \end{thebibliography}
 
