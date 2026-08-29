@@ -1,0 +1,124 @@
+\documentclass[11pt]{amsart}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{microtype}
+\usepackage{tikz}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{The square achievement game on $n \times n$ boards}
+\author{Sean Reid}
+\date{August 2026}
+
+\begin{document}
+
+\begin{abstract}
+Two players alternately claim cells of an $n \times n$ grid; the first
+to hold all four corners of an axis-aligned square wins. We prove the
+first player has a winning strategy if and only if $n \ge 5$. The
+strategy is explicit: two reflexes over a finite table of forcing plans
+confined to a corner region of the board, so a single certificate
+covers every sufficiently large board. All results, including the
+exhaustive analyses of small boards, are formalized and machine-checked
+in Lean~4.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+% History and positioning: Harary's achievement games, positional game
+% theory (Beck), Maker--Maker conventions and why draws matter, prior
+% work on polyomino and square achievement, statement of results.
+
+The square achievement game is played on the cells of an $n \times n$
+grid. Two players alternately claim empty cells, the first player (P1)
+moving first, and a player wins on completing the four corners
+\[
+  \{(r,c),\ (r,c+s),\ (r+s,c),\ (r+s,c+s)\}, \qquad s \ge 1,
+\]
+of an axis-aligned square. If the board fills with no completed square
+the game is drawn.
+
+\begin{theorem}\label{thm:main}
+P1 has a winning strategy in the square achievement game on the
+$n \times n$ board if and only if $n \ge 5$.
+\end{theorem}
+
+\section{The game and conventions}
+
+% Formal definitions matching the Lean development: cells in the
+% quarter-plane, boards as finite subgrids, winning sets, the game tree,
+% draws counting against the first player for the purposes of the
+% threshold statement.
+
+\section{Small boards}\label{sec:small}
+
+% Exhaustive refutation for n <= 4 with the pruned dual search; the
+% strategy-stealing argument showing P2 never wins, hence draws.
+
+\section{The winning strategy}\label{sec:strategy}
+
+% The reflex-plus-table architecture; forcing plans; the corner-box
+% confinement; the n = 5 special case and why pure forcing fails there;
+% the alignment classes for far replies.
+
+\section{Search and extraction}\label{sec:pipeline}
+
+% How the tables were found: the forcing-script search, the exact
+% solver for n = 5, extraction of strategy trees, and the two
+% independent verifiers (Python and compiled Lean) used during
+% development.
+
+\section{The saturation argument}\label{sec:saturation}
+
+% The subsumption theorem: activity is confined, far stones interact
+% through finitely many alignment classes, and one verified bound
+% covers all larger boards.
+
+\section{Formalization}\label{sec:lean}
+
+% The Lean architecture: the game as an inductive winning predicate,
+% executable checkers with machine-checked soundness in both
+% directions, certificates discharged by native_decide, and the axiom
+% footprint.
+
+\section{Reproducibility}
+
+% Repository layout, how to regenerate tables, re-run every
+% verification, and rebuild this paper.
+
+\begin{thebibliography}{9}
+
+\bibitem{harary}
+F.~Harary,
+\emph{Achievement and avoidance games for graphs},
+Ann. Discrete Math. \textbf{13} (1982), 111--119.
+
+\bibitem{beck}
+J.~Beck,
+\emph{Combinatorial Games: Tic-Tac-Toe Theory},
+Encyclopedia of Mathematics and its Applications 114,
+Cambridge University Press, 2008.
+
+\bibitem{lean4}
+L.~de~Moura and S.~Ullrich,
+\emph{The Lean 4 theorem prover and programming language},
+CADE 28, 2021.
+
+\bibitem{mathlib}
+The mathlib Community,
+\emph{The Lean mathematical library},
+CPP 2020.
+
+\end{thebibliography}
+
+\end{document}
