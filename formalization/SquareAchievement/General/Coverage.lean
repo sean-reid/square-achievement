@@ -93,6 +93,98 @@ private theorem farmCase_none_bent {box x y x' y' : ℕ}
   · simp only [Bool.and_eq_true, decide_eq_true_eq, beq_iff_eq]
     omega
 
+/-- What a fired `farmCase` certifies, orientation by orientation. -/
+theorem farmCase_spec {box : ℕ} {p q h : Cell}
+    (hc : farmCase box p q = some (.farm h)) :
+    (p.1 < box ∧ p.2 = q.2 ∧ p.1 < q.1 ∧ q.1 - p.1 ≤ p.2 ∧
+      p.2 - (q.1 - p.1) < box ∧ h.1 = p.1 ∧ h.2 = p.2 - (q.1 - p.1)) ∨
+    (p.2 < box ∧ p.1 = q.1 ∧ p.2 < q.2 ∧ q.2 - p.2 ≤ p.1 ∧
+      p.1 - (q.2 - p.2) < box ∧ h.1 = p.1 - (q.2 - p.2) ∧ h.2 = p.2) ∨
+    (p.1 < box ∧ q.2 < box ∧ 1 ≤ p.2 - q.2 ∧ p.2 - q.2 = q.1 - p.1 ∧
+      h.1 = p.1 ∧ h.2 = q.2) := by
+  unfold farmCase at hc
+  split at hc
+  · rename_i hcond
+    simp only [Bool.and_eq_true, decide_eq_true_eq, beq_iff_eq] at hcond
+    obtain ⟨⟨⟨⟨h1, h2⟩, h3⟩, h4⟩, h5⟩ := hcond
+    have hh := Key.farm.inj (Option.some_inj.mp hc)
+    exact Or.inl ⟨h1, h2, h3, h4, h5, by rw [← hh], by rw [← hh]⟩
+  · rename_i hn1
+    split at hc
+    · rename_i hcond
+      simp only [Bool.and_eq_true, decide_eq_true_eq, beq_iff_eq] at hcond
+      obtain ⟨⟨⟨⟨h1, h2⟩, h3⟩, h4⟩, h5⟩ := hcond
+      have hh := Key.farm.inj (Option.some_inj.mp hc)
+      exact Or.inr (Or.inl ⟨h1, h2, h3, h4, h5, by rw [← hh], by rw [← hh]⟩)
+    · rename_i hn2
+      split at hc
+      · rename_i hcond
+        simp only [Bool.and_eq_true, decide_eq_true_eq, beq_iff_eq] at hcond
+        obtain ⟨⟨⟨h1, h2⟩, h3⟩, h4⟩ := hcond
+        have hh := Key.farm.inj (Option.some_inj.mp hc)
+        exact Or.inr (Or.inr ⟨h1, h2, h3, h4, by rw [← hh], by rw [← hh]⟩)
+      · exact absurd hc (by simp)
+
+/-- What a fired `farmKey` certifies: the far gate and one fired
+orientation. -/
+theorem farmKey_spec {box : ℕ} {o1 o2 h : Cell}
+    (hk : farmKey box o1 o2 = some (.farm h)) :
+    2 * box ≤ max o1.1 o1.2 ∧ 2 * box ≤ max o2.1 o2.2 ∧
+      (farmCase box o1 o2 = some (.farm h) ∨
+        farmCase box o2 o1 = some (.farm h)) := by
+  unfold farmKey at hk
+  split at hk
+  · exact absurd hk (by simp)
+  · rename_i hgate
+    simp only [Bool.or_eq_true, decide_eq_true_eq, not_or, Nat.not_lt]
+      at hgate
+    refine ⟨hgate.1, hgate.2, ?_⟩
+    split at hk
+    · rename_i k hcase
+      rw [Option.some_inj.mp hk] at hcase
+      exact Or.inl hcase
+    · exact Or.inr hk
+
+/-- The near member of a farm pair reaching beyond the base board is
+box-aligned with one far coordinate, the farm cell shares its
+box-aligned coordinate, and the pair's square escapes the base. -/
+theorem farm_near_fst {o1 o2 h : Cell}
+    (hk : farmKey 6 o1 o2 = some (.farm h))
+    (h1b : o1 ∈ board 17) (h2b : o2 ∉ board 17) :
+    (o1.1 < 6 ∧ 12 ≤ o1.2 ∧ o1.2 < 17 ∧ h.1 = o1.1 ∧ h.2 < 6 ∧
+      h.2 ≤ o1.2 ∧ 17 ≤ o1.1 + o1.2 - h.2) ∨
+    (o1.2 < 6 ∧ 12 ≤ o1.1 ∧ o1.1 < 17 ∧ h.2 = o1.2 ∧ h.1 < 6 ∧
+      h.1 ≤ o1.1 ∧ 17 ≤ o1.2 + o1.1 - h.1) := by
+  obtain ⟨hg1, hg2, hcase⟩ := farmKey_spec hk
+  rw [mem_board] at h1b
+  have h2b' : 17 ≤ o2.1 ∨ 17 ≤ o2.2 := by
+    rw [mem_board] at h2b
+    omega
+  rcases hcase with hcase | hcase <;>
+    rcases farmCase_spec hcase with
+      ⟨c1, c2, c3, c4, c5, e1, e2⟩ | ⟨c1, c2, c3, c4, c5, e1, e2⟩ |
+      ⟨c1, c2, c3, c4, e1, e2⟩ <;>
+    omega
+
+/-- The mirror statement for a near second reply. -/
+theorem farm_near_snd {o1 o2 h : Cell}
+    (hk : farmKey 6 o1 o2 = some (.farm h))
+    (h1b : o1 ∉ board 17) (h2b : o2 ∈ board 17) :
+    (o2.1 < 6 ∧ 12 ≤ o2.2 ∧ o2.2 < 17 ∧ h.1 = o2.1 ∧ h.2 < 6 ∧
+      h.2 ≤ o2.2 ∧ 17 ≤ o2.1 + o2.2 - h.2) ∨
+    (o2.2 < 6 ∧ 12 ≤ o2.1 ∧ o2.1 < 17 ∧ h.2 = o2.2 ∧ h.1 < 6 ∧
+      h.1 ≤ o2.1 ∧ 17 ≤ o2.2 + o2.1 - h.1) := by
+  obtain ⟨hg1, hg2, hcase⟩ := farmKey_spec hk
+  rw [mem_board] at h2b
+  have h1b' : 17 ≤ o1.1 ∨ 17 ≤ o1.2 := by
+    rw [mem_board] at h1b
+    omega
+  rcases hcase with hcase | hcase <;>
+    rcases farmCase_spec hcase with
+      ⟨c1, c2, c3, c4, c5, e1, e2⟩ | ⟨c1, c2, c3, c4, c5, e1, e2⟩ |
+      ⟨c1, c2, c3, c4, e1, e2⟩ <;>
+    omega
+
 set_option maxHeartbeats 6400000 in
 /-- In an escaping square whose corners come from a reply, the two
 reply stones, and box cells, the box cell is unique and the reply

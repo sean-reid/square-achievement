@@ -21,9 +21,10 @@ def main (args : List String) : IO Unit := do
     let ms := (← IO.monoMsNow) - start
     IO.println s!"farm entries: {if ok then "SAFE" else "UNSAFE"} ({ms}ms)"
   else if args.contains "exactfarm" then
-    let ok ← IO.lazyPure fun _ => exactFarmSafe table && classFarmSafe table
+    let ok ← IO.lazyPure fun _ =>
+      farFarmSafe table && exactFarmSafe table && farNearFarmSafe table
     let ms := (← IO.monoMsNow) - start
-    IO.println s!"exact and class keys: {if ok then "FARM-SAFE" else "FARM-UNSAFE"} ({ms}ms)"
+    IO.println s!"anchored farm cells: {if ok then "SAFE" else "UNSAFE"} ({ms}ms)"
   else if args.contains "forced" then
     let ok ← IO.lazyPure fun _ => checkForced table n
     let ms := (← IO.monoMsNow) - start

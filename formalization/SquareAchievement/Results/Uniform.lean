@@ -30,14 +30,16 @@ theorem gen_anchors_valid : anchorsValid genTable = true := by native_decide
 subtree without ever forcing the opponent onto its farm cell. -/
 theorem farm_safe_gen : farmSafe genTable = true := by native_decide
 
-/-- Every class branch is safe for every farm cell its anchor
-realizes, entries or not. -/
-theorem class_farm_safe_gen : classFarmSafe genTable = true := by
+/-- Both replies far: one anchored run per farm cell. -/
+theorem far_farm_safe_gen : farFarmSafe genTable = true := by
   native_decide
 
-/-- Every far-reaching exact key is safe for every farm cell whose
-square escapes the base board. -/
+/-- A box-aligned near first reply, every escaping farm cell. -/
 theorem exact_farm_safe_gen : exactFarmSafe genTable = true := by
+  native_decide
+
+/-- A box-aligned near second reply, every escaping farm cell. -/
+theorem far_near_farm_safe_gen : farNearFarmSafe genTable = true := by
   native_decide
 
 /-- The forced-tree certificate at the base board. -/
@@ -52,8 +54,9 @@ theorem check_sound_uniform {t : Table} {n : ℕ} (hn : 17 ≤ n)
     (hbox : t.box = 6)
     (hconf : planConfined t = true)
     (hforce : checkForced t 17 = true)
-    (hclass : classFarmSafe t = true)
-    (hexact : exactFarmSafe t = true) :
+    (hfar : farFarmSafe t = true)
+    (hexact : exactFarmSafe t = true)
+    (hfarnear : farNearFarmSafe t = true) :
     P1CanWin n ∅ ∅ := by
   sorry
 
