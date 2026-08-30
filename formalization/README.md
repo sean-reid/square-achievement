@@ -63,9 +63,11 @@ echo 'import SquareAchievement
 #print axioms SquareAchievement.p1_wins_of_five_le' | lake env lean --stdin
 ```
 
-The axioms are `propext`, `Classical.choice`, `Quot.sound`, and
-`Lean.ofReduceBool`: the standard base plus the compiler-evaluation
-axiom behind `native_decide`.
+The axioms are `propext`, `Classical.choice`, `Quot.sound`, and one
+`..._native.native_decide.ax...` entry per evaluated certificate:
+the standard base plus the compiler-evaluation trust behind
+`native_decide`. A `sorryAx` in the list means stale build
+artifacts from an older checkout; rebuild and print again.
 
 ## Running the checker
 
