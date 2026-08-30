@@ -62,6 +62,26 @@ Verified on macOS (Apple silicon) and Linux x86-64; on Windows, use
 WSL, which is the Linux path above. The native Windows toolchain is
 untested here.
 
+## Checking the theorem
+
+The build is the proof. `lake build` elaborates every file and the
+kernel checks every theorem, evaluating the certificates along the
+way, so a successful build verifies everything in the results table,
+the boards from 17 up included through `check_sound_uniform`. The
+checker executable below demonstrates the same runs interactively
+but is not the proof; the runs the theorems cite happen inside the
+build. To display the headline theorem and the axioms behind it, after building:
+
+```
+echo 'import SquareAchievement
+#check @SquareAchievement.p1_wins_of_five_le
+#print axioms SquareAchievement.p1_wins_of_five_le' | lake env lean --stdin
+```
+
+The axioms are `propext`, `Classical.choice`, `Quot.sound`, and
+`Lean.ofReduceBool`, the standard base plus the compiler-evaluation
+axiom behind `native_decide`.
+
 ## Running the checker
 
 ```
