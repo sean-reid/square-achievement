@@ -221,7 +221,9 @@ When no reflex applies, the strategy consults a lookup table. The
 opening move is $(2,2)$. The table maps the opponent's first reply
 $o_1$ to the strategy's second move, and the pair $(o_1, o_2)$ of the first two
 replies to a \emph{plan}: an ordered list of cells, of which the
-strategy plays the first not already held. Plans are forcing: in the
+strategy plays the first not already held. Against $o_1 = (0,0)$ and
+$o_2 = (4,4)$, for instance, the stored plan is $(2,1)$, $(1,1)$,
+$(1,0)$, $(2,3)$, $(0,3)$, $(2,5)$, $(4,3)$. Plans are forcing: in the
 verified lines each plan move creates a threat, three corners of a
 square whose fourth cell is empty, so every reply is a forced block,
 until a move creates two threats at once; whichever the opponent
@@ -243,6 +245,36 @@ $(3,2)$, and the plan move $(2,1)$, the strategy (black) holds three corners
 of the dashed block; the opponent must take the dashed cell $(3,1)$ or
 lose on the next move.}
 \label{fig:forcing}
+\end{figure}
+
+The plan above runs to completion against an opponent who always
+blocks. On $\Board_6$ the line is
+\[
+  (2,2),\ (0,0),\ (3,2),\ (4,4),\ (2,1),\ (3,1),\ (1,1),\ (1,2),\ (1,0),
+\]
+\[
+  (2,0),\ (2,3),\ (3,3),\ (0,3),\ (0,1),\ (2,5),\ (0,5),\ (4,3),
+\]
+first- and second-player moves alternating; every second-player move
+is the unique block, and the last move threatens at both $(4,1)$ and
+$(4,5)$, so one block leaves the other and reflex~(1) completes.
+Figure~\ref{fig:line} shows the final position.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=0.5]
+  \draw[gray!60] (0,0) grid (6,-6);
+  \foreach \r/\c in {2/2, 3/2, 2/1, 1/1, 1/0, 2/3, 0/3, 2/5, 4/3}
+    \fill[black] (\c+0.5,-\r-0.5) circle (0.26);
+  \foreach \r/\c in {0/0, 4/4, 3/1, 1/2, 2/0, 3/3, 0/1, 0/5}
+    \draw[thick] (\c+0.5,-\r-0.5) circle (0.26);
+  \draw[thick,dashed] (1.5,-4.5) circle (0.28);
+  \draw[thick,dashed] (5.5,-4.5) circle (0.28);
+\end{tikzpicture}
+\caption{The end of the displayed line. The strategy (black) threatens
+at both dashed cells through the squares $\Sq(2,1,2)$ and
+$\Sq(2,3,2)$; no single block answers both.}
+\label{fig:line}
 \end{figure}
 
 Two features let one table serve every board of size at least six.
@@ -274,6 +306,29 @@ contains \emph{quiet forks}, a non-threatening move together with a
 sub-table indexed by the reply to it, extracted from a full solution
 of the $5 \times 5$ game ($1.03 \times 10^8$ positions searched, draws
 scored against the first player).
+
+\subsection{The move function}
+The layers combine into one procedure, stated here as it is defined in
+the formal development (Section~\ref{sec:lean}). Lookups fall back
+from exact keys to alignment classes to the default; the farm key of
+the reply pair, when the pair has one, is taken before the exact key
+for $o_2$ if $o_1$ has no exact key, and after it otherwise.
+
+\medskip
+\noindent$\textsc{Move}$(position):
+\begin{enumerate}
+  \item if some cell completes one of our squares, play the least;
+  \item else if some cell completes an opponent square, play the
+    least;
+  \item else if we have not yet moved, play $(2,2)$;
+  \item else look up the second move by $o_1$; if we do not hold it,
+    play it;
+  \item else select the entry by $(o_1, o_2)$ and follow it: play the
+    first plan cell we do not hold; a quiet fork plays its move, then
+    recurses on the sub-table entry selected by the reply to that
+    move.
+\end{enumerate}
+\medskip
 
 The general table holds $237$ branch keys (the $224$ possible first
 replies on the board it was generated on, $\Board_{15}$ of
@@ -356,7 +411,9 @@ legal move admits at least one reply and every reply both fails to
 complete an opponent square and leads to a position from which the
 first player can win. A derivation of the predicate is precisely a
 strategy tree, one first-player move per node with all replies
-covered, and draws are failures by construction.
+covered, and draws are failures by construction. These definitions,
+some thirty lines, are the whole specification: a reader audits them
+by eye, and everything else is proved against them.
 
 Two executable checkers are proved sound against this semantics:
 \texttt{check}, which replays a strategy table against all reply
@@ -372,19 +429,28 @@ and \texttt{refute}, the dual search of Section~\ref{sec:small}, with
   \texttt{refute}\ n = \texttt{true}
   \;\longrightarrow\; \text{the first player cannot win on } \Board_n.
 \]
+The move function that \texttt{check} replays, reflexes, the lookup
+chain with its exact, farm, class, and default keys, and plan
+resolution, is itself a Lean definition; Section~\ref{sec:strategy}
+describes it, but the theorems depend only on the code.
 
 Both soundness proofs are short for the same reason: the checker
 validates every move it plays. Legality is enforced by guards, completions are
 detected by an executable scan proved equivalent to the abstract
-predicate, and replies are enumerated exhaustively. Soundness
+predicate, and replies are enumerated exhaustively. Each proof is an
+induction over the checker's recursion, and at every node the guards
+supply exactly the premises of the corresponding constructor of the
+winning predicate. Soundness
 therefore never inspects the strategy; any table surviving the guards
 yields a winning derivation, and the tables enter the development
-purely as data.
+purely as data. The recursion is fueled, and exhausted fuel returns
+failure, so fuel can cost completeness but never soundness.
 
 Concrete board sizes are discharged by native evaluation
-(\texttt{native\_decide}): for instance, the statement that the first
-player can win on $\Board_5$ is \texttt{check\_sound} applied to one
-evaluated run of \texttt{check}. The axiom footprint of these theorems
+(\texttt{native\_decide}): the statement that the first player can
+win on $\Board_5$ is \texttt{check\_sound} applied to one evaluated
+run of \texttt{check}, and each run of Table~\ref{tab:runs} is
+discharged the same way in the released development. The axiom footprint of these theorems
 is \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound},
 and Lean's evaluation axiom for compiled reduction, the usual trust
 base for kernel-external computation.
@@ -421,6 +487,25 @@ and $y$ share a row, the two remaining corners inherit their columns,
 both below $B$; a shared column is symmetric; and if $x$ and $y$ are
 diagonally opposite, all four corners lie in $\Board_B$.
 \end{proof}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=0.3]
+  \fill[gray!12] (0,0) rectangle (12,-12);
+  \fill[gray!30] (0,0) rectangle (6,-6);
+  \draw[gray!60] (0,0) grid (16,-16);
+  \draw[thick] (0,0) rectangle (6,-6);
+  \draw[thick,dashed] (0,0) rectangle (12,-12);
+  \node at (3,-3) {$\Board_6$};
+  \node at (9,-9) {$\Board_{12}$};
+\end{tikzpicture}
+\caption{The regions of the argument, drawn on $\Board_{16}$. Plans
+stay in $\Board_6$; by Lemma~\ref{lem:span} every square through two
+stones of $\Board_6$ lies in $\Board_{12}$; a stone beyond
+$\Board_{12}$ shares no square with two near stones and meets the
+play only through the classes and the farm entries.}
+\label{fig:zones}
+\end{figure}
 
 Consequently only boundedly many squares pass through two stones of
 the corner region, all contained in $\Board_{12}$, and a far reply
@@ -482,7 +567,10 @@ on the generation board encounters this square.}
 \section{Reproducibility}\label{sec:repro}
 
 The supplementary material contains the Lean development, with the
-tables as data and each theorem above as a named declaration; the
+tables as data and each theorem above as a named declaration:
+\texttt{small\_board\_no\_win}, \texttt{p1\_wins\_five},
+\texttt{check\_sound}, \texttt{refute\_sound},
+\texttt{plan\_confined}, and \texttt{farm\_safe\_gen}; the
 generation pipeline (strategy search, extraction, and export); the
 reference verifier; and the commands that reproduce the runs of
 Table~\ref{tab:runs}. The interactive page accompanying the paper
