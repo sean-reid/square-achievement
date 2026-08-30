@@ -88,7 +88,7 @@ def main():
     from . import strategy5
     from .solve import build_general
 
-    x2_map, scripts = build_general()
+    x2_map, scripts = build_general(gen_n=15)
     emit("TableGen.lean", "gen", (2, 2), 6, x2_map, as_entries(scripts))
     emit("Table5.lean", "five", (2, 2), 5, strategy5.X2, as_entries(strategy5.SCRIPTS))
 
