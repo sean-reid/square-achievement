@@ -218,19 +218,16 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       for them.
     </p>
     <p>
-      The proof is a simulation. Every square the opponent could ever complete
-      stands on a corner-region cell, the two reply stones, and the finishing
-      move, and a case analysis proved in Lean shows each such square either
-      fits inside the 17 × 17 board, where one exhaustive run has excluded it,
-      or is latent with its region cell determined by the two replies. The
-      strategy surrenders a region cell only as the unique block of a threat, and
-      anchored runs check, for every reachable latent cell, that this never
-      happens. A replay argument then transports the run at 17 to any board:
-      near replies verbatim, a reply that ignores a threat loses to it at once,
-      and far replies act through stand-ins. The result is the theorem
-      check_sound_uniform; its hypotheses are finitely many machine-checked
-      certificates, and all of them evaluate in seconds to minutes. Together
-      with the runs at 5 through 16 this proves the first player wins on every
+      The proof is a simulation. A case analysis proved in Lean shows every
+      square the opponent could complete either fits inside the 17 × 17 board,
+      where one exhaustive run has excluded it, or is latent, with its region
+      cell determined by the two reply stones. Anchored runs check that the
+      strategy never offers a latent cell as the unique block of a threat, and a
+      replay argument transports the run at 17 to any board: near replies
+      verbatim, a reply that ignores a threat loses to it, far replies act
+      through stand-ins. The result is the theorem check_sound_uniform, whose
+      hypotheses are finitely many certificates, all evaluated in seconds to
+      minutes. With the runs at 5 through 16, the first player wins on every
       board of size at least 5, with one explicit strategy for all sizes from 6
       up.
     </p>

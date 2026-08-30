@@ -285,15 +285,13 @@ default class. The classes reflect the geometry of
 Lemma~\ref{lem:span}: every corner of a square through two stones of
 the corner region lies in one of the region's rows or columns, so only
 far replies aligned with the region can complete a square the strategy
-is building. Third, a pair of far replies can form three corners of a square
-with a single cell of the corner region, and that cell is determined
-by the pair; we call such a square \emph{latent}. Each branch
-carries entries keyed by the latent square's region corner, storing
-plans that never surrender it. When the first reply is not an exact
-key of the table, the pair's latent entry takes precedence over an
-exact entry for the second reply: an exact entry answers the pair
-geometry of the board it was generated on, and one far stone shifts
-that geometry.
+is building. Third, a pair of far replies and a single region cell can be
+three corners of one square; each branch carries entries keyed by
+that cell, the pair's \emph{latent corner}
+(Definition~\ref{def:latent}), storing plans that never surrender
+it. When the first reply is not an exact key, the pair's latent
+entry precedes the exact entry for $o_2$: exact entries answer the
+generated board's geometry, which one far stone shifts.
 
 The board of size $5$ is treated separately, and necessarily so: its
 table is not purely forcing. Exhaustive analysis shows that for
@@ -353,25 +351,36 @@ If $\sigma$ verifies on $\Board_n$, then the first player wins the
 square achievement game on $\Board_n$.
 \end{proposition}
 
-The $5 \times 5$ table is verified by a checker that walks this tree
-in full; its soundness is the theorem \texttt{check\_sound} of
-Section~\ref{sec:lean}. The forcing table is verified by a second
-checker that walks only the tree's skeleton. It enumerates the two
-reply levels in full, and past them demands at every node that the
-strategy's move win outright or leave a threat, that every
-non-winning move and every threat cell lie in the corner region, and
-that no empty cell complete an opponent square; it then recurses on
-the blocking replies alone. A reply that blocks no threat loses to a
-standing threat on the next move, and that two-move argument enters
-the soundness proof (\texttt{checkForced\_sound}) as a lemma applied
-at every node, so the checker never visits such replies. The demands
-beyond winning are exactly the hypotheses that
-Section~\ref{sec:uniform} consumes.
+The $5 \times 5$ table is verified by a checker that walks this
+tree in full; its soundness is the theorem \texttt{check\_sound} of
+Section~\ref{sec:lean}. The forcing table is verified on a smaller
+tree. The \emph{forced tree} of $\sigma$ on $\Board_n$ enumerates
+the two reply levels in full and, below every later node, keeps only
+the replies that block a threat of the move just played.
 
-The forcing table passes this checker for every $6 \le n \le 17$
-(Table~\ref{tab:runs}); with the $5 \times 5$ run, the refutations
-of Section~\ref{sec:small}, and Theorem~\ref{thm:uniform}, this
-proves Theorem~\ref{thm:main}.
+\begin{proposition}\label{prop:forced}
+Suppose that past the second reply, at every node of the forced
+tree, the strategy's move wins outright or leaves a threat, every
+non-winning move and every threat cell lies in $\Board_6$, and no
+empty cell completes an opponent square. If every branch of the
+forced tree ends in a first-player square, then the first player
+wins on $\Board_n$.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+A reply blocking no threat leaves one standing, and the strategy
+completes it on the next move, so every omitted reply loses in two
+plies; the remaining obligations are those of
+Proposition~\ref{prop:verify}. The formal statement is
+\texttt{checkForced\_sound}.
+\end{proof}
+
+The forcing table satisfies these hypotheses for every
+$6 \le n \le 17$ (Table~\ref{tab:runs}); with the $5 \times 5$ run,
+the refutations of Section~\ref{sec:small}, and
+Theorem~\ref{thm:uniform}, this proves Theorem~\ref{thm:main}. The
+guards beyond winning are exactly the hypotheses
+Section~\ref{sec:uniform} consumes.
 
 \begin{table}[ht]
 \centering
@@ -531,47 +540,70 @@ play only through the classes and the latent entries.}
 \end{figure}
 
 In a position the forced run can reach, the opponent's lasting
-stones are the two replies and forced blocks, and the checked guards
-confine the blocks to the corner region. An opponent square
-therefore stands on a region cell, the two replies, and the
-completing move; a square with two region corners is contained
-outright by Lemma~\ref{lem:span}. The dichotomy at the heart of the
-proof (\texttt{escape\_farm} in the development) is that a square of
-this shape either fits inside $\Board_{17}$, where the checked run
-has excluded it, or is latent: its region corner is then its
-northwest corner, its side is at least $12$, and the reply pair
-determines the corner through one of the three orientations of the
-latency relation. The base $17 = 6 + 2 \cdot 6 - 1$ is least. With
-base $15$, for instance, the replies $(0,16)$ and $(11,5)$ span a
+stones are the two replies and forced blocks, and the guards of
+Proposition~\ref{prop:forced} confine the blocks to $\Board_6$. An
+opponent square therefore stands on a region cell, the two replies,
+and the completing move.
+
+\begin{definition}\label{def:latent}
+A square is \emph{latent} for a pair of cells if both cells are
+among its corners, a third corner lies in $\Board_6$, and the square
+is not contained in $\Board_{17}$. The region corner is the pair's
+\emph{latent corner}.
+\end{definition}
+
+\begin{lemma}\label{lem:dichotomy}
+Let $\Sq(r,c,s)$ be latent for $\{x, y\}$, with region corner $b$
+and $b, x, y$ distinct. Then $b = (r,c)$, $s \ge 12$, each of $x, y$
+has a coordinate at least $12$, and $b$ depends only on $\{x, y\}$:
+two squares latent for the same pair have the same latent corner.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+Two corners in $\Board_6$ put the square inside $\Board_{11}$ by
+Lemma~\ref{lem:span}, against escape; so $b$ is alone in the region,
+and the corner positions force it northwest with $s \ge 12$. Each of
+the three placements of $\{x, y\}$ on the remaining corners pins
+$b$: an aligned member fixes a coordinate and the side, a diagonal
+pair fixes both coordinates. The formal statement is
+\texttt{escape\_farm}.
+\end{proof}
+
+\begin{remark}
+The base $17 = 6 + 2 \cdot 6 - 1$ in Definition~\ref{def:latent} is
+least. With base $15$, the replies $(0,16)$ and $(11,5)$ span a
 square through the region cell $(0,5)$ completing at $(11,16)$: it
-fits no board of size $15$, and the stone $(11,5)$ sits below the
-far threshold, so neither escape route applies.
+fits no board of size $15$, and $(11,5)$ has no coordinate at
+$12$, so neither escape route of the dichotomy applies.
+\end{remark}
 
-A latent square harms the strategy only if the opponent obtains its
-region corner, and the strategy surrenders a region cell only as the
-unique block of a threat. Three families of anchored runs, one per
-shape of reply pair (both replies far; a region-aligned near first
-reply with a far partner; the mirror with the members exchanged),
-replay the strategy on $\Board_{23}$ from a concrete pair for every
-reachable latent corner and verify, under the guards of
-Section~\ref{sec:verify}, that the corner is never the unique block.
-The iterations range over coordinates rather than table keys, so
-they are complete by construction. Figure~\ref{fig:farm} shows a
-latent square realized in play, from the refutation of an earlier
-table without latent entries.
+\begin{lemma}[anchored safety]\label{lem:anchors}
+For every region cell and every shape of pair admitting a latent
+square with that corner (both members far; a region-aligned near
+first member with a far partner; the mirror), the strategy, replayed
+on $\Board_{23}$ from a concrete such pair under the guards of
+Proposition~\ref{prop:forced}, never offers the corner as the unique
+block. The runs range over coordinates rather than table keys,
+finitely many in all, and each passes by evaluation.
+\end{lemma}
 
-The proof of Theorem~\ref{thm:uniform} (\texttt{simulate} and
-\texttt{check\_sound\_uniform}) replays the base run on $\Board_n$.
-Replies on the base board follow the checked tree verbatim; a reply
-that blocks no standing threat loses to the threat at once; and the
-two reply stones, when they leave the base board, are abstracted,
-through stand-in cells when the pair is not latent and through the
-anchored runs when it is, a block on the latent corner itself being
-answered by the standing second threat. The safety obligation at
-every node reduces to the dichotomy above, so the interchangeability
-of far stones does the work that a monotonicity principle cannot:
-winning positions do not embed across board sizes, but forced trees
-do.
+Figure~\ref{fig:farm} shows a latent square realized in play,
+against an earlier table without latent entries.
+
+\begin{proof}[Proof of Theorem~\ref{thm:uniform}, sketch]
+Replay the checked run of $\Board_{17}$ on $\Board_n$. Replies on
+the base board follow the checked tree verbatim; a reply that blocks
+no standing threat loses to the threat at once; and the two reply
+stones, when they leave the base board, are abstracted, through
+stand-in cells when the pair has no latent corner and through the
+runs of Lemma~\ref{lem:anchors} when it does, a block on the latent
+corner itself being answered by the standing second threat. The
+safety obligation at every node reduces to
+Lemma~\ref{lem:dichotomy}: an opponent square is either inside
+$\Board_{17}$ and excluded by the base run, or latent with a corner
+the opponent never holds. The formal proof is \texttt{simulate} and
+\texttt{check\_sound\_uniform}.
+\end{proof}
 
 \begin{figure}[ht]
 \centering
