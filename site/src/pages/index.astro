@@ -153,7 +153,9 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       quiet moves, and those come from a fixed lookup table. The strategy opens
       at (2,2), answers the opponent's first reply with a tabled second move,
       and the first two replies together select a plan: a short list of cells
-      played in order.
+      played in order. Against a first reply at (0,0) and a second at (4,4), for
+      instance, the stored plan is (2,1), (1,1), (1,0), (2,3), (0,3), (2,5),
+      (4,3). The demo button under the board plays full lines out.
     </p>
     <p>
       Plans are forcing. Each plan move puts three corners of some square in
@@ -196,9 +198,11 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       proof rests on the Lean version alone. It comes with a soundness theorem,
       itself machine-checked, which says that whenever the checker answers true,
       a winning strategy tree exists for the game as defined mathematically.
-      Nothing about how the tables were found has to be taken on faith; they sit
-      in the development as plain data, and a wrong table would fail the check
-      rather than slip through it.
+      That definition, some thirty lines of Lean, is the only part a skeptic has
+      to read; everything else is proved against it. Nothing about how the
+      tables were found has to be taken on faith; they sit in the development as
+      plain data, and a wrong table would fail the check rather than slip
+      through it.
     </p>
 
     <h2>Toward every board at once</h2>
@@ -214,11 +218,83 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
       reaches three corners, the strategy has to spend a move on it. The table
       was generated and checked on a board of size 15; a larger board can steer
       it into positions its plans were never checked against. Figure 3 shows the
-      smallest example we know from an earlier version of the table. Everything
-      through 16 × 16 is settled unconditionally, a faster but unproven replica
-      of the checker verifies the current table through 17 × 17, and the general
+      regions this argument lives in, and Figure 4 the smallest off-script
+      example we know, from an earlier version of the table. Everything through
+      16 × 16 is settled unconditionally, a faster but unproven replica of the
+      checker verifies the current table through 17 × 17, and the general
       statement is work we have not finished.
     </p>
+    <figure class="diagram">
+      <svg
+        viewBox="-4 -4 328 328"
+        role="img"
+        aria-label="Nested regions on a 16 by 16 board: the 6 by 6 corner region inside the 12 by 12 interaction region"
+      >
+        <defs>
+          <pattern
+            id="gridz"
+            width="20"
+            height="20"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d="M20 0H0V20"
+              fill="none"
+              stroke="var(--rule)"
+              stroke-width="0.7"
+              opacity="0.45"></path>
+          </pattern>
+        </defs>
+        <rect width="320" height="320" fill="url(#gridz)"></rect>
+        <rect
+          width="320"
+          height="320"
+          fill="none"
+          stroke="var(--rule)"
+          stroke-width="0.7"
+          opacity="0.45"></rect>
+        <rect width="240" height="240" fill="var(--accent)" fill-opacity="0.05"
+        ></rect>
+        <rect width="120" height="120" fill="var(--accent)" fill-opacity="0.1"
+        ></rect>
+        <rect
+          width="120"
+          height="120"
+          fill="none"
+          stroke="var(--ink)"
+          stroke-width="1.5"></rect>
+        <rect
+          x="0"
+          y="0"
+          width="240"
+          height="240"
+          fill="none"
+          stroke="var(--ink)"
+          stroke-width="1.2"
+          stroke-dasharray="6 4"></rect>
+        <text
+          x="60"
+          y="66"
+          text-anchor="middle"
+          font-size="15"
+          fill="var(--ink)">6 × 6</text
+        >
+        <text
+          x="180"
+          y="186"
+          text-anchor="middle"
+          font-size="15"
+          fill="var(--ink)">12 × 12</text
+        >
+      </svg>
+      <figcaption>
+        Figure 3. The regions of the argument. Plans stay in the 6 × 6 corner;
+        every square through two of its cells fits in the 12 × 12; a stone
+        beyond that shares no square with two near stones and matters only
+        through the classes and farm entries.
+      </figcaption>
+    </figure>
+
     <figure class="diagram">
       <svg
         viewBox="-8 -24 356 352"
@@ -322,7 +398,7 @@ const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
         >
       </svg>
       <figcaption>
-        Figure 3. A farm on the 16 × 16 board. The opponent's far replies o1 and
+        Figure 4. A farm on the 16 × 16 board. The opponent's far replies o1 and
         o2 align with the corner region (shaded); once a forced block lands on
         t, the dashed square threatens at the dashed cell z. The square does not
         fit any smaller board.
