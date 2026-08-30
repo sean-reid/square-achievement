@@ -1,6 +1,7 @@
 import SquareAchievement.Compute.Checker
 import SquareAchievement.Compute.Refute
 import SquareAchievement.Compute.Uniform
+import SquareAchievement.Compute.ExactFarm
 import SquareAchievement.Compute.Fast
 import SquareAchievement.Data.TableGen
 import SquareAchievement.Data.Table5
@@ -19,10 +20,15 @@ def main (args : List String) : IO Unit := do
     let ok ← IO.lazyPure fun _ => anchorsValid table && farmSafe table
     let ms := (← IO.monoMsNow) - start
     IO.println s!"farm entries: {if ok then "SAFE" else "UNSAFE"} ({ms}ms)"
-  else if args.contains "forcing" then
-    let ok ← IO.lazyPure fun _ => forcingComplete table n
+  else if args.contains "exactfarm" then
+    let ok ← IO.lazyPure fun _ =>
+      farFarmSafe table && exactFarmSafe table && farNearFarmSafe table
     let ms := (← IO.monoMsNow) - start
-    IO.println s!"n={n}: {if ok then "FORCING-COMPLETE" else "NOT FORCING"} ({ms}ms)"
+    IO.println s!"anchored farm cells: {if ok then "SAFE" else "UNSAFE"} ({ms}ms)"
+  else if args.contains "forced" then
+    let ok ← IO.lazyPure fun _ => checkForced table n
+    let ms := (← IO.monoMsNow) - start
+    IO.println s!"n={n}: {if ok then "FORCED-PROVEN" else "FORCED-REFUTED"} ({ms}ms)"
   else if args.contains "refute" then
     let ok ← IO.lazyPure fun _ => refute n
     let ms := (← IO.monoMsNow) - start

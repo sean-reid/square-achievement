@@ -1,33 +1,26 @@
-import SquareAchievement.Compute.Uniform
-import SquareAchievement.Results.Subsumption
+import SquareAchievement.General.Wrapper
+import SquareAchievement.Data.TableGen
 
 /-!
 # The uniform theorem
 
-One checked run at the generation board, together with executable
-table properties, should win every larger board at once. The intended
-proof strengthens the soundness induction of `check_sound`: the
-invariant carries a position of the generation board plus inert far
-opponent stones, replies split into near ones, which the checked run
-enumerates, and far ones, which resolve through class and farm
-entries; `forcingComplete` confines the opponent's unforced replies
-to the first two, `plan_confined` and the span geometry keep every
-square the strategy touches inside the generation board, and the farm
-entries, anchored by `checkFrom` runs on a board large enough to
-realize each farm, cover the pairs that can reach into the corner
-region. The statement is expected to grow a farm-safety hypothesis
-once its executable form is fixed.
+One forced-tree run at the base board, together with executable table
+properties, wins every larger board at once. The base is
+`17 = box + far - 1`: an opponent square with a corner in the box and
+a stone below the far threshold fits inside the base board, where the
+run has checked it, so every square escaping the base has both reply
+stones at the far threshold or beyond, which is exactly the territory
+the farm entries govern. The intended proof replays the base run:
+near replies verbatim, unforced replies answered by the standing
+threat, the two reply stones abstracted through class representatives
+or, for farming pairs, through the anchored farm subtrees. The
+statement is expected to grow a farm-completeness hypothesis once its
+executable form is fixed.
 -/
 
 namespace SquareAchievement
 
 set_option linter.style.nativeDecide false
-
-/-- Smoke instances of the forcing property on small boards; the run
-at the generation board is the release-build certificate. -/
-theorem forcing_six : forcingComplete genTable 6 = true := by native_decide
-
-theorem forcing_seven : forcingComplete genTable 7 = true := by native_decide
 
 /-- The anchor formulas reproduce every farm entry's cell. -/
 theorem gen_anchors_valid : anchorsValid genTable = true := by native_decide
@@ -36,21 +29,39 @@ theorem gen_anchors_valid : anchorsValid genTable = true := by native_decide
 subtree without ever forcing the opponent onto its farm cell. -/
 theorem farm_safe_gen : farmSafe genTable = true := by native_decide
 
-/-- The forcing property at the generation board. The compiled run
-returns true in about two hours, so like the per-size checks this
-stays `sorry` until the final build discharges it by
-`native_decide`. -/
-theorem forcing_fifteen : forcingComplete genTable 15 = true := by
-  sorry
+/-- Both replies far: one anchored run per farm cell. -/
+theorem far_farm_safe_gen : farFarmSafe genTable = true := by
+  native_decide
 
-/-- One checked run at the generation board wins every board from the
-generation board up. -/
-theorem check_sound_uniform {t : Table} {n : ℕ} (hn : 15 ≤ n)
-    (hcheck : check t 15 = true)
+/-- A box-aligned near first reply, every escaping farm cell. -/
+theorem exact_farm_safe_gen : exactFarmSafe genTable = true := by
+  native_decide
+
+/-- A box-aligned near second reply, every escaping farm cell. -/
+theorem far_near_farm_safe_gen : farNearFarmSafe genTable = true := by
+  native_decide
+
+/-- The forced-tree certificate at the base board. -/
+theorem forced_seventeen : checkForced genTable 17 = true := by
+  native_decide
+
+theorem plan_confined : planConfined genTable = true := by native_decide
+
+/-- The x2 map avoids the opening and keys only generation-board
+cells. -/
+theorem x2_sane_gen : x2Sane genTable = true := by native_decide
+
+/-- One forced run at the base board wins every board from the base
+up. -/
+theorem check_sound_uniform {t : Table} {n : ℕ} (hn : 17 ≤ n)
+    (hbox : t.box = 6)
     (hconf : planConfined t = true)
-    (hforce : forcingComplete t 15 = true)
-    (hfarm : farmSafe t = true) :
-    P1CanWin n ∅ ∅ := by
-  sorry
+    (hforce : checkForced t 17 = true)
+    (hfar : farFarmSafe t = true)
+    (hexact : exactFarmSafe t = true)
+    (hfarnear : farNearFarmSafe t = true)
+    (hsane : x2Sane t = true) :
+    P1CanWin n ∅ ∅ :=
+  check_sound_uniform_aux hn hbox hconf hforce hfar hexact hfarnear hsane
 
 end SquareAchievement
