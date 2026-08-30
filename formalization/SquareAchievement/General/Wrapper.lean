@@ -344,4 +344,132 @@ theorem empties_nonempty {n : ℕ} (hn : 17 ≤ n) {p1 p2 : Finset Cell}
   have := Finset.card_le_card hsub
   omega
 
+set_option maxHeartbeats 3200000 in
+/-- The wrapper: one forced base run and the three anchored farm
+certificates win every board from the base up. -/
+theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
+    (hbox : t.box = 6)
+    (hconf : planConfined t = true)
+    (hforce : checkForced t 17 = true)
+    (hfar : farFarmSafe t = true)
+    (hexact : exactFarmSafe t = true)
+    (hfarnear : farNearFarmSafe t = true)
+    (hsane : x2Sane t = true) :
+    P1CanWin n ∅ ∅ := by
+  have hop6 : t.opening ∈ board 6 := hbox ▸ planConfined_opening hconf
+  have hb6n : ∀ w : Cell, w ∈ board 6 → w ∈ board n := by
+    intro w hw
+    rw [mem_board] at hw ⊢
+    omega
+  have hb617 : ∀ w : Cell, w ∈ board 6 → w ∈ board 17 := by
+    intro w hw
+    rw [mem_board] at hw ⊢
+    omega
+  -- open the base run at the first level
+  rw [checkForced] at hforce
+  obtain ⟨fuel, hfuel⟩ : ∃ f, 17 * 17 + 1 = f + 1 := ⟨17 * 17, rfl⟩
+  rw [hfuel] at hforce
+  simp only [goForced, strategyMove_nil] at hforce
+  split at hforce
+  · exact absurd hforce (by simp)
+  · rename_i hguard0
+    split at hforce
+    · rename_i hwin0
+      exfalso
+      have := hasSquareL_sound (n := 17) hwin0
+      exact no_square_card
+        (lt_of_le_of_lt (List.toFinset_card_le _) (by simp [stonesOf])) this
+    · split at hforce
+      · exact absurd hforce (by simp)
+      · split at hforce
+        · exact absurd hforce (by simp)
+        · split at hforce
+          · rename_i hlv0
+            split at hforce
+            · exact absurd hforce (by simp)
+            · rename_i hrep0
+              rw [List.all_eq_true] at hforce
+              -- the level-one walk, shared by every first-reply shape
+              have hsub2 : ∀ r1 : Cell, r1 ∈ board 17 → r1 ≠ t.opening →
+                  ∃ x2v fuel', lookup t.box t.x2 r1 = some x2v ∧
+                    x2v ≠ r1 ∧
+                    (∀ o2c : Cell, o2c ∈ board 17 → o2c ≠ t.opening →
+                      o2c ≠ r1 → o2c ≠ x2v →
+                      goForced t (squaresList 17) 17 none fuel'
+                        (t.opening :: r1 :: x2v :: o2c :: []) = true) := by
+                intro r1 hr117 hr1op
+                have hbr1 := hforce r1 (by
+                  rw [List.mem_filter]
+                  refine ⟨mem_allCells.mpr hr117, ?_⟩
+                  simp [List.contains_iff_mem, stonesOf]
+                  exact fun he => hr1op (by simp [he]))
+                rcases fuel with _ | fuel1
+                · simp [goForced] at hbr1
+                have hcons : (([] : List Cell) ++ [t.opening]) ++ [r1] =
+                    [t.opening, r1] := by simp
+                rw [hcons] at hbr1
+                simp only [goForced, strategyMove_two hsane] at hbr1
+                rcases hx2l : lookup t.box t.x2 r1 with _ | x2v
+                · simp only [hx2l] at hbr1
+                  exact absurd hbr1 (by simp)
+                · simp only [hx2l] at hbr1
+                  split at hbr1
+                  · exact absurd hbr1 (by simp)
+                  · rename_i hguard1
+                    simp only [Bool.or_eq_true, not_or, Bool.not_eq_true',
+                      Bool.not_eq_true, List.contains_iff_mem] at hguard1
+                    obtain ⟨⟨-, hx2p1⟩, hx2p2⟩ := hguard1
+                    have hx2r1 : x2v ≠ r1 := by
+                      intro he
+                      simp [stonesOf, he] at hx2p2
+                    split at hbr1
+                    · rename_i hwin1
+                      exfalso
+                      have := hasSquareL_sound (n := 17) hwin1
+                      exact no_square_card (lt_of_le_of_lt
+                        (List.toFinset_card_le _) (by simp [stonesOf])) this
+                    · split at hbr1
+                      · exact absurd hbr1 (by simp)
+                      · split at hbr1
+                        · exact absurd hbr1 (by simp)
+                        · split at hbr1
+                          · rename_i hlv1
+                            split at hbr1
+                            · exact absurd hbr1 (by simp)
+                            · rename_i hrep1
+                              rw [List.all_eq_true] at hbr1
+                              refine ⟨x2v, fuel1, rfl, hx2r1, ?_⟩
+                              intro o2c ho2c17 ho2op ho2r1 ho2x2
+                              have hbr2 := hbr1 o2c (by
+                                rw [List.mem_filter]
+                                refine ⟨mem_allCells.mpr ho2c17, ?_⟩
+                                simp [List.contains_iff_mem]
+                                exact ⟨fun he => ho2op (by simp [he]),
+                                  fun he => ho2r1 (by simp [he]),
+                                  fun he => ho2x2 (by simp [he])⟩)
+                              have hsh : ([t.opening, r1] ++ [x2v]) ++ [o2c] =
+                                  t.opening :: r1 :: x2v :: o2c :: [] := by
+                                simp
+                              rwa [hsh] at hbr2
+                          · rename_i hlv1
+                            exfalso
+                            simp at hlv1
+              -- assemble the root step
+              refine P1CanWin.step t.opening
+                (mem_empties.mpr ⟨hb6n _ hop6, by simp, by simp⟩)
+                (empties_nonempty hn (by simp))
+                (fun r _ => no_square_card (by
+                  have := Finset.card_insert_le r (∅ : Finset Cell)
+                  simp at this ⊢))
+                ?_
+              intro o1r ho1E
+              obtain ⟨ho1n, ho1p1, -⟩ := mem_empties.mp ho1E
+              have ho1op : o1r ≠ t.opening := by
+                intro he
+                exact ho1p1 (he ▸ Finset.mem_insert_self _ _)
+              sorry
+          · rename_i hlv0
+            exfalso
+            simp at hlv0
+
 end SquareAchievement
