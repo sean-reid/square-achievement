@@ -58,7 +58,9 @@ recipe CI runs). The first build also compiles mathlib's native code
 and then evaluates every certificate; expect roughly half an hour on
 a laptop, dominated by the batched runs at sizes 6 through 16 and
 the base run at 17. Later builds only re-evaluate what changed.
-Verified on macOS (Apple silicon) and Linux x86-64.
+Verified on macOS (Apple silicon) and Linux x86-64; on Windows, use
+WSL, which is the Linux path above. The native Windows toolchain is
+untested here.
 
 ## Running the checker
 
