@@ -10,5 +10,7 @@ import SquareAchievement.Compute.Uniform
 import SquareAchievement.Compute.ForcedSound
 import SquareAchievement.Compute.ExactFarm
 import SquareAchievement.General.Simulation
+import SquareAchievement.General.Coverage
+import SquareAchievement.General.Wrapper
 import SquareAchievement.Results.Uniform
 import SquareAchievement.Results.Threshold

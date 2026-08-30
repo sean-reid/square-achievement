@@ -1,5 +1,4 @@
-import SquareAchievement.Compute.ForcedSound
-import SquareAchievement.Compute.ExactFarm
+import SquareAchievement.General.Wrapper
 import SquareAchievement.Data.TableGen
 
 /-!
@@ -48,6 +47,10 @@ theorem forced_seventeen : checkForced genTable 17 = true := by
 
 theorem plan_confined : planConfined genTable = true := by native_decide
 
+/-- The x2 map avoids the opening and keys only generation-board
+cells. -/
+theorem x2_sane_gen : x2Sane genTable = true := by native_decide
+
 /-- One forced run at the base board wins every board from the base
 up. -/
 theorem check_sound_uniform {t : Table} {n : ℕ} (hn : 17 ≤ n)
@@ -56,8 +59,9 @@ theorem check_sound_uniform {t : Table} {n : ℕ} (hn : 17 ≤ n)
     (hforce : checkForced t 17 = true)
     (hfar : farFarmSafe t = true)
     (hexact : exactFarmSafe t = true)
-    (hfarnear : farNearFarmSafe t = true) :
-    P1CanWin n ∅ ∅ := by
-  sorry
+    (hfarnear : farNearFarmSafe t = true)
+    (hsane : x2Sane t = true) :
+    P1CanWin n ∅ ∅ :=
+  check_sound_uniform_aux hn hbox hconf hforce hfar hexact hfarnear hsane
 
 end SquareAchievement

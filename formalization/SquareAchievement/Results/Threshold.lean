@@ -56,5 +56,6 @@ theorem p1_wins_of_five_le {n : ℕ} (h : 5 ≤ n) : P1CanWin n ∅ ∅ := by
       exact (List.all_eq_true.mp forced_below_seventeen) n hmem
     · exact check_sound_uniform hge rfl plan_confined forced_seventeen
         far_farm_safe_gen exact_farm_safe_gen far_near_farm_safe_gen
+        x2_sane_gen
 
 end SquareAchievement
