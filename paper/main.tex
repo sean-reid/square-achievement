@@ -488,6 +488,15 @@ both below $B$; a shared column is symmetric; and if $x$ and $y$ are
 diagonally opposite, all four corners lie in $\Board_B$.
 \end{proof}
 
+The constant $2B$ matches the development, which classifies a stone
+as far exactly when one of its coordinates reaches $2B$; the bound
+itself is not tight. A diagonal pair of corners confines the square
+to $\Board_B$, and a same-row or same-column pair reaches coordinate
+$2B - 2$ at most, attained by $\Sq(B-1, 0, B-1)$, so the tight
+envelope is $\Board_{2B-1}$. A stone in the remaining ring is inert
+by the same argument; the development counts it as near and resolves
+it through exact entries, which loses nothing.
+
 \begin{figure}[ht]
 \centering
 \begin{tikzpicture}[scale=0.3]
