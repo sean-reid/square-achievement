@@ -21,13 +21,16 @@ when n >= 5, by a machine-checked strategy.
 
 ## Develop
 
-Site: `cd site && npm install && npm run dev` (Node 22); `npm test`
-for unit tests, `npm run e2e` for Playwright. Paper: `cd paper &&
+Site: `cd site && npm install && npm run dev` (Node 22, from
+[nodejs.org](https://nodejs.org) or a version manager); `npm test`
+for unit tests, `npm run e2e` for Playwright, after a one-time
+`npx playwright install`. Paper: `cd paper &&
 latexmk -pdf main.tex` (any TeX Live with amsart, tikz, algorithm).
 Formalization: `cd formalization && lake exe cache get && lake build`;
 see `formalization/README.md` for the Linux environment note, the
 expected build time, and the commands reproducing the paper's Table 1.
 Pipeline: Python 3.11+, no third-party dependencies at runtime;
 `cd pipeline && uv run --with pytest python -m pytest squares/tests`.
+Commands assume a POSIX shell; on Windows, work inside WSL.
 
 Licensing: code MIT; paper text and figures CC BY 4.0.
