@@ -344,7 +344,12 @@ theorem empties_nonempty {n : ℕ} (hn : 17 ≤ n) {p1 p2 : Finset Cell}
   have := Finset.card_le_card hsub
   omega
 
+/-- Small positions are square-free. -/
+private theorem small2 {a b : Cell} : ¬ HasSquare (([a, b] : List Cell).toFinset) :=
+  no_square_card (lt_of_le_of_lt (List.toFinset_card_le _) (by simp))
+
 set_option maxHeartbeats 3200000 in
+set_option maxRecDepth 4096 in
 /-- The wrapper: one forced base run and the three anchored farm
 certificates win every board from the base up. -/
 theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
@@ -467,7 +472,390 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
               have ho1op : o1r ≠ t.opening := by
                 intro he
                 exact ho1p1 (he ▸ Finset.mem_insert_self _ _)
-              sorry
+              -- shared facts and conversions
+              have hx2val_ne : ∀ {c v : Cell},
+                  lookup t.box t.x2 c = some v → v ≠ t.opening := by
+                intro c v hl
+                obtain ⟨key, hmem⟩ := lookup_val hl
+                have hs := hsane
+                rw [x2Sane, List.all_eq_true] at hs
+                have := hs _ hmem
+                rw [Bool.and_eq_true] at this
+                simpa using this.1
+              have hpair12 : ∀ a b : Cell, ([a, b] : List Cell).toFinset =
+                  insert b (insert a ∅) := by
+                intro a b
+                ext w
+                simp
+                tauto
+              have hcard3 : ∀ a b c : Cell,
+                  ((insert a (insert b ∅) : Finset Cell) ∪
+                    insert c ∅).card ≤ 3 := by
+                intro a b c
+                refine le_trans (Finset.card_union_le _ _) ?_
+                have h1 := Finset.card_insert_le a
+                  (insert b (∅ : Finset Cell))
+                have h2 := Finset.card_insert_le b (∅ : Finset Cell)
+                have h3 := Finset.card_insert_le c (∅ : Finset Cell)
+                rw [Finset.card_empty] at h2 h3
+                omega
+              have hb1223 : ∀ w : Cell, w ∈ board 17 → w ∈ board 23 := by
+                intro w hw
+                rw [mem_board] at hw ⊢
+                omega
+              have hno12 : ∀ w : Cell, w ∉ board 17 → w ∉ board 12 := by
+                intro w hw hc
+                rw [mem_board] at hc
+                exact hw (by rw [mem_board]; omega)
+              -- the default x2 entry, witnessed by the corner anchor
+              obtain ⟨x2d, hx2d17, hrun00⟩ := anchorRun_spec
+                (farFarmSafe_run hfar (h1 := 0) (h2 := 0)
+                  (by rw [hbox]; omega) (by rw [hbox]; omega))
+              have hdflt : t.x2.lookup Key.dflt = some x2d := by
+                rw [← lookup_x2_far hbox hsane (c := (0 + 17 - 0, 17))
+                  (by dsimp only; omega) (by dsimp only; omega)
+                  (by dsimp only; omega)]
+                exact hx2d17
+              have hx2dbox : x2d ∈ board 6 :=
+                hbox ▸ planConfined_x2 hconf hx2d17
+              have hx2dop : x2d ≠ t.opening := hx2val_ne hx2d17
+              have hlookdflt : ∀ {c : Cell}, 15 ≤ c.1 ∨ 15 ≤ c.2 →
+                  6 ≤ c.1 → 6 ≤ c.2 → lookup t.box t.x2 c = some x2d := by
+                intro c hfarc h1 h2
+                rw [lookup_x2_far hbox hsane hfarc h1 h2]
+                exact hdflt
+              by_cases ho117 : o1r ∈ board 17
+              · -- a first reply on the base board
+                obtain ⟨x2v, fuel1, hx2l, hx2r1, hlvl2⟩ :=
+                  hsub2 o1r ho117 ho1op
+                have hx2vbox : x2v ∈ board 6 :=
+                  hbox ▸ planConfined_x2 hconf hx2l
+                have hx2vop : x2v ≠ t.opening := hx2val_ne hx2l
+                refine P1CanWin.step x2v
+                  (mem_empties.mpr ⟨hb6n _ hx2vbox, by simp [hx2vop],
+                    by simp [hx2r1]⟩)
+                  (empties_nonempty hn (hcard3 _ _ _)) ?_ ?_
+                · intro r _
+                  refine no_square_card ?_
+                  have h1 := Finset.card_insert_le r
+                    (insert o1r (∅ : Finset Cell))
+                  have h2 := Finset.card_insert_le o1r (∅ : Finset Cell)
+                  rw [Finset.card_empty] at h2
+                  omega
+                intro o2r ho2E
+                obtain ⟨ho2n, ho2p1, ho2p2⟩ := mem_empties.mp ho2E
+                have ho2op : o2r ≠ t.opening := by
+                  intro he
+                  exact ho2p1 (he ▸ Finset.mem_insert_of_mem
+                    (Finset.mem_insert_self _ _))
+                have ho2x2 : o2r ≠ x2v := by
+                  intro he
+                  exact ho2p1 (he ▸ Finset.mem_insert_self _ _)
+                have ho2o1 : o2r ≠ o1r := by
+                  intro he
+                  exact ho2p2 (he ▸ Finset.mem_insert_self _ _)
+                rw [← hpair12 t.opening x2v, ← hpair12 o1r o2r]
+                by_cases ho217 : o2r ∈ board 17
+                · -- both replies on the base board: the base branch
+                  exact simulate t hbox (B := 17) none hn (by omega)
+                    hop6 hx2vbox (Or.inl ⟨rfl, ho117, ho117⟩)
+                    (Or.inl ⟨rfl, ho217, ho217⟩) fuel1 [] (by simp)
+                    (by simp) (hlvl2 o2r ho217 ho2op ho2o1 ho2x2)
+                    small2 small2
+                    (fun hoff => hoff.elim (fun h => absurd ho117 h)
+                      (fun h => absurd ho217 h))
+                · rcases hfk : farmKey 6 o1r o2r with _ | k
+                  · -- a keyless far second reply: a stand-in branch
+                    have hrep : ∃ rep2 : Cell, rep2 ∈ board 17 ∧
+                        rep2 ∉ board 12 ∧ rep2 ≠ o1r ∧
+                        rep2 ≠ t.opening ∧ rep2 ≠ x2v := by
+                      by_cases h16 : o1r = (16, 16)
+                      · refine ⟨(16, 15), by rw [mem_board]; omega,
+                          by rw [mem_board]; omega,
+                          by rw [h16]; simp [Prod.ext_iff], ?_, ?_⟩
+                        · intro he
+                          rw [mem_board, ← he] at hop6
+                          omega
+                        · intro he
+                          rw [mem_board, ← he] at hx2vbox
+                          omega
+                      · refine ⟨(16, 16), by rw [mem_board]; omega,
+                          by rw [mem_board]; omega,
+                          fun he => h16 he.symm, ?_, ?_⟩
+                        · intro he
+                          rw [mem_board, ← he] at hop6
+                          omega
+                        · intro he
+                          rw [mem_board, ← he] at hx2vbox
+                          omega
+                    obtain ⟨rep2, hr17, hr12, hro1, hrop, hrx2⟩ := hrep
+                    exact simulate t hbox (B := 17) none hn (by omega)
+                      hop6 hx2vbox (Or.inl ⟨rfl, ho117, ho117⟩)
+                      (Or.inr ⟨hr17, hr12, ho2n, hno12 _ ho217, ho217⟩)
+                      fuel1 [] (by simp) (by simp)
+                      (hlvl2 rep2 hr17 hrop hro1 hrx2)
+                      small2 small2 (fun _ => hfk)
+                  · -- a farm pair with the near member first
+                    obtain ⟨hc, rfl⟩ := farmKey_farm hfk
+                    have hhotbox := farmKey_hot_box hfk
+                    have hhc17 : hc ∈ board 17 := by
+                      rw [mem_board]
+                      omega
+                    have hcne : hc ∉ ([o1r, o2r] : List Cell) := by
+                      intro hmem
+                      rw [List.mem_cons, List.mem_cons] at hmem
+                      rcases hmem with he | he | he
+                      · rw [mem_board] at ho117
+                        obtain ⟨hg1, -, -⟩ := farmKey_spec hfk
+                        have h1 : hc.1 = o1r.1 := congrArg Prod.fst he
+                        have h2 : hc.2 = o1r.2 := congrArg Prod.snd he
+                        omega
+                      · exact ho217 (he ▸ hhc17)
+                      · simp at he
+                    rcases farm_near_fst hfk ho117 ho217 with hform | hform
+                    · obtain ⟨ha6, hw12, hw17, hh1, hh2, hh2le, hesc⟩ := hform
+                      have hrun' := (exactFarmSafe_run hexact
+                        (a := o1r.1) (w := o1r.2) (h := hc.2)
+                        (by rw [hbox]; omega) (by omega)
+                        (by rw [hbox]; omega) (by rw [hbox]; omega)
+                        (by omega)).1
+                      rw [show ((o1r.1, o1r.2) : Cell) = o1r from rfl,
+                        show ((o1r.1, hc.2) : Cell) = hc by
+                          rw [← hh1]] at hrun'
+                      obtain ⟨x2a, hx2a, hrun⟩ := anchorRun_spec hrun'
+                      obtain rfl : x2a = x2v :=
+                        Option.some_inj.mp (hx2a.symm.trans hx2l)
+                      exact simulate t hbox (B := 23) (some hc) hn
+                        (by omega) hop6 hx2vbox
+                        (Or.inl ⟨rfl, ho117, hb1223 _ ho117⟩)
+                        (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
+                          by rw [mem_board]; dsimp only; omega,
+                          ho2n, hno12 _ ho217, ho217⟩)
+                        (anchorBoard * anchorBoard + 1) [] (by simp)
+                        (by simp) hrun small2 small2
+                        (fun _ => ⟨hfk, hcne⟩)
+                    · obtain ⟨ha6, hw12, hw17, hh2, hh1, hh1le, hesc⟩ := hform
+                      have hrun' := (exactFarmSafe_run hexact
+                        (a := o1r.2) (w := o1r.1) (h := hc.1)
+                        (by rw [hbox]; omega) (by omega)
+                        (by rw [hbox]; omega) (by rw [hbox]; omega)
+                        (by omega)).2
+                      rw [show ((o1r.1, o1r.2) : Cell) = o1r from rfl,
+                        show ((hc.1, o1r.2) : Cell) = hc by
+                          rw [← hh2]] at hrun'
+                      obtain ⟨x2a, hx2a, hrun⟩ := anchorRun_spec hrun'
+                      obtain rfl : x2a = x2v :=
+                        Option.some_inj.mp (hx2a.symm.trans hx2l)
+                      exact simulate t hbox (B := 23) (some hc) hn
+                        (by omega) hop6 hx2vbox
+                        (Or.inl ⟨rfl, ho117, hb1223 _ ho117⟩)
+                        (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
+                          by rw [mem_board]; dsimp only; omega,
+                          ho2n, hno12 _ ho217, ho217⟩)
+                        (anchorBoard * anchorBoard + 1) [] (by simp)
+                        (by simp) hrun small2 small2
+                        (fun _ => ⟨hfk, hcne⟩)
+              · -- a far first reply: the committed move is the default
+                -- x2 entry
+                have ho112 : o1r ∉ board 12 := hno12 _ ho117
+                have hx2do1 : x2d ≠ o1r := by
+                  intro he
+                  exact ho117 (hb617 _ (he ▸ hx2dbox))
+                refine P1CanWin.step x2d
+                  (mem_empties.mpr ⟨hb6n _ hx2dbox, by simp [hx2dop],
+                    by simp [hx2do1]⟩)
+                  (empties_nonempty hn (hcard3 _ _ _)) ?_ ?_
+                · intro r _
+                  refine no_square_card ?_
+                  have h1 := Finset.card_insert_le r
+                    (insert o1r (∅ : Finset Cell))
+                  have h2 := Finset.card_insert_le o1r (∅ : Finset Cell)
+                  rw [Finset.card_empty] at h2
+                  omega
+                intro o2r ho2E
+                obtain ⟨ho2n, ho2p1, ho2p2⟩ := mem_empties.mp ho2E
+                have ho2op : o2r ≠ t.opening := by
+                  intro he
+                  exact ho2p1 (he ▸ Finset.mem_insert_of_mem
+                    (Finset.mem_insert_self _ _))
+                have ho2x2 : o2r ≠ x2d := by
+                  intro he
+                  exact ho2p1 (he ▸ Finset.mem_insert_self _ _)
+                have ho2o1 : o2r ≠ o1r := by
+                  intro he
+                  exact ho2p2 (he ▸ Finset.mem_insert_self _ _)
+                rw [← hpair12 t.opening x2d, ← hpair12 o1r o2r]
+                rcases hfk : farmKey 6 o1r o2r with _ | k
+                · -- keyless: stand-in branches on the base board
+                  have hrep : ∃ rep1 : Cell, rep1 ∈ board 17 ∧
+                      rep1 ∉ board 12 ∧ rep1 ≠ o2r ∧
+                      rep1 ≠ t.opening ∧ rep1 ≠ x2d ∧
+                      (15 ≤ rep1.1 ∨ 15 ≤ rep1.2) ∧ 6 ≤ rep1.1 ∧
+                      6 ≤ rep1.2 := by
+                    by_cases h16 : o2r = (16, 16)
+                    · refine ⟨(16, 15), by rw [mem_board]; omega,
+                        by rw [mem_board]; omega,
+                        by rw [h16]; simp [Prod.ext_iff], ?_, ?_,
+                        by dsimp only; omega, by dsimp only; omega,
+                        by dsimp only; omega⟩
+                      · intro he
+                        rw [mem_board, ← he] at hop6
+                        omega
+                      · intro he
+                        rw [mem_board, ← he] at hx2dbox
+                        omega
+                    · refine ⟨(16, 16), by rw [mem_board]; omega,
+                        by rw [mem_board]; omega,
+                        fun he => h16 he.symm, ?_, ?_,
+                        by dsimp only; omega, by dsimp only; omega,
+                        by dsimp only; omega⟩
+                      · intro he
+                        rw [mem_board, ← he] at hop6
+                        omega
+                      · intro he
+                        rw [mem_board, ← he] at hx2dbox
+                        omega
+                  obtain ⟨rep1, hr17, hr12, hro2, hrop, hrx2, hrfar,
+                    hr61, hr62⟩ := hrep
+                  obtain ⟨x2v, fuel1, hx2l, hx2r1, hlvl2⟩ :=
+                    hsub2 rep1 hr17 hrop
+                  have hx2vd : x2v = x2d :=
+                    Option.some_inj.mp
+                      (hx2l.symm.trans (hlookdflt hrfar hr61 hr62))
+                  rw [hx2vd] at hlvl2
+                  by_cases ho217 : o2r ∈ board 17
+                  · exact simulate t hbox (B := 17) none hn (by omega)
+                      hop6 hx2dbox
+                      (Or.inr ⟨hr17, hr12, ho1n, ho112, ho117⟩)
+                      (Or.inl ⟨rfl, ho217, ho217⟩) fuel1 [] (by simp)
+                      (by simp)
+                      (hlvl2 o2r ho217 ho2op (fun he => hro2 he.symm)
+                        ho2x2)
+                      small2 small2 (fun _ => hfk)
+                  · have hrep2 : ∃ rep2 : Cell, rep2 ∈ board 17 ∧
+                        rep2 ∉ board 12 ∧ rep2 ≠ rep1 ∧
+                        rep2 ≠ t.opening ∧ rep2 ≠ x2d := by
+                      by_cases h16 : rep1 = (16, 16)
+                      · refine ⟨(16, 15), by rw [mem_board]; omega,
+                          by rw [mem_board]; omega,
+                          by rw [h16]; simp [Prod.ext_iff], ?_, ?_⟩
+                        · intro he
+                          rw [mem_board, ← he] at hop6
+                          omega
+                        · intro he
+                          rw [mem_board, ← he] at hx2dbox
+                          omega
+                      · refine ⟨(16, 16), by rw [mem_board]; omega,
+                          by rw [mem_board]; omega,
+                          fun he => h16 he.symm, ?_, ?_⟩
+                        · intro he
+                          rw [mem_board, ← he] at hop6
+                          omega
+                        · intro he
+                          rw [mem_board, ← he] at hx2dbox
+                          omega
+                    obtain ⟨rep2, hs17, hs12, hsr1, hsop, hsx2⟩ := hrep2
+                    exact simulate t hbox (B := 17) none hn (by omega)
+                      hop6 hx2dbox
+                      (Or.inr ⟨hr17, hr12, ho1n, ho112, ho117⟩)
+                      (Or.inr ⟨hs17, hs12, ho2n, hno12 _ ho217, ho217⟩)
+                      fuel1 [] (by simp) (by simp)
+                      (hlvl2 rep2 hs17 hsop hsr1 hsx2)
+                      small2 small2 (fun _ => hfk)
+                · -- a farm pair with a far first member
+                  obtain ⟨hc, rfl⟩ := farmKey_farm hfk
+                  have hhotbox := farmKey_hot_box hfk
+                  have hhc17 : hc ∈ board 17 := by
+                    rw [mem_board]
+                    omega
+                  have hcne : hc ∉ ([o1r, o2r] : List Cell) := by
+                    intro hmem
+                    rw [List.mem_cons, List.mem_cons] at hmem
+                    rcases hmem with he | he | he
+                    · exact ho117 (he ▸ hhc17)
+                    · obtain ⟨-, hg2, -⟩ := farmKey_spec hfk
+                      by_cases ho217 : o2r ∈ board 17
+                      · rw [mem_board] at ho217
+                        have h1 : hc.1 = o2r.1 := congrArg Prod.fst he
+                        have h2 : hc.2 = o2r.2 := congrArg Prod.snd he
+                        omega
+                      · exact ho217 (he ▸ hhc17)
+                    · simp at he
+                  by_cases ho217 : o2r ∈ board 17
+                  · -- near second member: its anchor plays it second
+                    rcases farm_near_snd hfk ho117 ho217 with hform | hform
+                    · obtain ⟨ha6, hw12, hw17, hh1, hh2, hh2le, hesc⟩ :=
+                        hform
+                      have hrun' := (farNearFarmSafe_run hfarnear
+                        (a := o2r.1) (w := o2r.2) (h := hc.2)
+                        (by rw [hbox]; omega) (by omega)
+                        (by rw [hbox]; omega) (by rw [hbox]; omega)
+                        (by omega)).1
+                      rw [show ((o2r.1, o2r.2) : Cell) = o2r from rfl,
+                        show ((o2r.1, hc.2) : Cell) = hc by
+                          rw [← hh1]] at hrun'
+                      obtain ⟨x2a, hx2a, hrun⟩ := anchorRun_spec hrun'
+                      obtain rfl : x2a = x2d :=
+                        Option.some_inj.mp (hx2a.symm.trans
+                          (hlookdflt (by dsimp only; omega)
+                            (by dsimp only; omega)
+                            (by dsimp only; omega)))
+                      exact simulate t hbox (B := 23) (some hc) hn
+                        (by omega) hop6 hx2dbox
+                        (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
+                          by rw [mem_board]; dsimp only; omega,
+                          ho1n, ho112, ho117⟩)
+                        (Or.inl ⟨rfl, ho217, hb1223 _ ho217⟩)
+                        (anchorBoard * anchorBoard + 1) [] (by simp)
+                        (by simp) hrun small2 small2
+                        (fun _ => ⟨hfk, hcne⟩)
+                    · obtain ⟨ha6, hw12, hw17, hh2, hh1, hh1le, hesc⟩ :=
+                        hform
+                      have hrun' := (farNearFarmSafe_run hfarnear
+                        (a := o2r.2) (w := o2r.1) (h := hc.1)
+                        (by rw [hbox]; omega) (by omega)
+                        (by rw [hbox]; omega) (by rw [hbox]; omega)
+                        (by omega)).2
+                      rw [show ((o2r.1, o2r.2) : Cell) = o2r from rfl,
+                        show ((hc.1, o2r.2) : Cell) = hc by
+                          rw [← hh2]] at hrun'
+                      obtain ⟨x2a, hx2a, hrun⟩ := anchorRun_spec hrun'
+                      obtain rfl : x2a = x2d :=
+                        Option.some_inj.mp (hx2a.symm.trans
+                          (hlookdflt (by dsimp only; omega)
+                            (by dsimp only; omega)
+                            (by dsimp only; omega)))
+                      exact simulate t hbox (B := 23) (some hc) hn
+                        (by omega) hop6 hx2dbox
+                        (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
+                          by rw [mem_board]; dsimp only; omega,
+                          ho1n, ho112, ho117⟩)
+                        (Or.inl ⟨rfl, ho217, hb1223 _ ho217⟩)
+                        (anchorBoard * anchorBoard + 1) [] (by simp)
+                        (by simp) hrun small2 small2
+                        (fun _ => ⟨hfk, hcne⟩)
+                  · -- both members far: the default-class anchor
+                    have hrun' := farFarmSafe_run hfar
+                      (h1 := hc.1) (h2 := hc.2)
+                      (by rw [hbox]; omega) (by rw [hbox]; omega)
+                    rw [show ((hc.1, hc.2) : Cell) = hc from rfl] at hrun'
+                    obtain ⟨x2a, hx2a, hrun⟩ := anchorRun_spec hrun'
+                    obtain rfl : x2a = x2d :=
+                      Option.some_inj.mp (hx2a.symm.trans
+                        (hlookdflt (by dsimp only; omega)
+                          (by dsimp only; omega)
+                          (by dsimp only; omega)))
+                    exact simulate t hbox (B := 23) (some hc) hn
+                      (by omega) hop6 hx2dbox
+                      (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
+                        by rw [mem_board]; dsimp only; omega,
+                        ho1n, ho112, ho117⟩)
+                      (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
+                        by rw [mem_board]; dsimp only; omega,
+                        ho2n, hno12 _ ho217, ho217⟩)
+                      (anchorBoard * anchorBoard + 1) [] (by simp)
+                      (by simp) hrun small2 small2
+                      (fun _ => ⟨hfk, hcne⟩)
           · rename_i hlv0
             exfalso
             simp at hlv0
