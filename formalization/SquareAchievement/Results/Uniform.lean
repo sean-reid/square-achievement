@@ -29,6 +29,13 @@ theorem forcing_six : forcingComplete genTable 6 = true := by native_decide
 
 theorem forcing_seven : forcingComplete genTable 7 = true := by native_decide
 
+/-- The anchor formulas reproduce every farm entry's cell. -/
+theorem gen_anchors_valid : anchorsValid genTable = true := by native_decide
+
+/-- Every farm entry, anchored by a concrete far pair, wins its
+subtree without ever forcing the opponent onto its farm cell. -/
+theorem farm_safe_gen : farmSafe genTable = true := by native_decide
+
 /-- The forcing property at the generation board. The compiled run
 returns true in about two hours, so like the per-size checks this
 stays `sorry` until the final build discharges it by
@@ -41,7 +48,8 @@ generation board up. -/
 theorem check_sound_uniform {t : Table} {n : ℕ} (hn : 15 ≤ n)
     (hcheck : check t 15 = true)
     (hconf : planConfined t = true)
-    (hforce : forcingComplete t 15 = true) :
+    (hforce : forcingComplete t 15 = true)
+    (hfarm : farmSafe t = true) :
     P1CanWin n ∅ ∅ := by
   sorry
 
