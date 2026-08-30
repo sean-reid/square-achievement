@@ -8,6 +8,7 @@ import SquareAchievement.Compute.Refute
 import SquareAchievement.General.Invariance
 import SquareAchievement.Compute.Uniform
 import SquareAchievement.Compute.ForcedSound
+import SquareAchievement.Compute.ExactFarm
 import SquareAchievement.General.Simulation
 import SquareAchievement.Results.Uniform
 import SquareAchievement.Results.Threshold
