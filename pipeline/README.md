@@ -4,6 +4,8 @@ The Python side of the project: it generates the strategy tables that
 the formalization certifies, and independently cross-checks them. The
 verification of record is the Lean checker in `../formalization`; this
 code is where tables come from and where failures get diagnosed.
+Requires Python 3.11 or later, with no third-party dependencies at
+runtime.
 
 ## Modules
 
@@ -35,4 +37,8 @@ python3 -m squares.export_lean      # write Lean data files
 python3 -m squares.instrument 6 7   # measure the strategy's frame
 ```
 
-Tests: `uv run --with pytest python -m pytest squares/tests`.
+## Tests
+
+```sh
+uv run --with pytest python -m pytest squares/tests
+```
