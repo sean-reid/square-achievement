@@ -6,7 +6,8 @@ import SquareAchievement.Compute.Checker
 import SquareAchievement.Compute.CheckerSound
 import SquareAchievement.Compute.Refute
 import SquareAchievement.General.Invariance
-import SquareAchievement.Results.Subsumption
 import SquareAchievement.Compute.Uniform
+import SquareAchievement.Compute.ForcedSound
+import SquareAchievement.General.Simulation
 import SquareAchievement.Results.Uniform
 import SquareAchievement.Results.Threshold

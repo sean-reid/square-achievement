@@ -1,53 +1,29 @@
 import SquareAchievement.Compute.Checker
 
 /-!
-# Executable properties for the uniform theorem
+# The forced-tree checker
 
-The strengthened soundness argument at the generation board needs
-facts about the verification tree beyond winning. First, after the
-opening and the second move, every strategy move either wins or
-creates a threat, so the opponent's only unforced replies are the
-first two; that is what keeps far play down to the two reply stones
-and rules out voluntary grabs of a farm cell mid-plan. Second, branch
-subtrees can be re-verified from preset openings on larger boards,
-which anchors the farm entries that no run at the generation board
-exercises. Both are checker variants, decided by evaluation.
+The game under a forcing table is narrow: past the second reply,
+every strategy move threatens, so the opponent either blocks or loses
+to the threat on the next move. `goForced` verifies exactly that
+shape. The two reply levels are enumerated in full; beyond them each
+node makes two whole-board scans, one to collect the strategy's
+threat cells and one to confirm the opponent can complete nothing,
+and recurses only on the blocks. `goForced_sound` covers every
+non-blocking reply with a single two-move argument, so the checker
+never has to visit them.
+
+The node guards double as the uniform theorem's hypotheses: every
+non-winning move and every threat cell must lie in the corner box,
+which keeps the opponent's forced blocks in the box, and the optional
+`hot` cell must never be the only block, which is the farm-safety
+condition checked from anchored positions.
 -/
 
 namespace SquareAchievement
 
-/-- `go`, additionally demanding that every strategy move past the
-second either wins or creates a threat. -/
-def goForcing (t : Table) (squares : List (List Cell)) (n : ℕ) :
-    ℕ → List Cell → Bool
-  | 0, _ => false
-  | fuel + 1, hist =>
-    let p1 := stonesOf true hist
-    let p2 := stonesOf false hist
-    match strategyMove t squares hist with
-    | none => false
-    | some m =>
-      if !onBoard n m || p1.contains m || p2.contains m then false
-      else if hasSquareL squares (m :: p1) then true
-      else if 2 < hist.length
-          && (minThreat squares (m :: p1) ((m :: p1) ++ p2)).isNone then
-        false
-      else
-        let hist' := hist ++ [m]
-        let replies := (allCells n).filter fun c => !(hist'.contains c)
-        if replies.isEmpty then false
-        else replies.all fun r =>
-          !completesL squares p2 r && goForcing t squares n fuel (hist' ++ [r])
-
-/-- Every strategy move past the second wins or threatens, over the
-whole verification tree of the `n` board. -/
-def forcingComplete (t : Table) (n : ℕ) : Bool :=
-  goForcing t (squaresList n) n (n * n + 1) []
-
-/-- The checker from a preset history, for anchoring branch subtrees
-on boards larger than the generation board. -/
-def checkFrom (t : Table) (n : ℕ) (opening : List Cell) : Bool :=
-  go t (squaresList n) n (n * n + 1) opening
+/-- Both coordinates inside the corner box. -/
+def inBox (box : ℕ) (c : Cell) : Bool := c.1 < box && c.2 < box
 
 /-- Every cell where `mine` would complete a square, unblocked, one
 entry per square. -/
@@ -58,13 +34,12 @@ def threatsL (squares : List (List Cell)) (mine occupied : List Cell) :
     | [m] => if occupied.contains m then none else some m
     | _ => none
 
-/-- `goForcing` that additionally refuses any node where the opponent
-is forced onto `hot`: with `hot` the only available block, the block
-would complete three corners of the pair's farm square. A node where
-`hot` is one block among several is safe, because a second threat
-means the win reflex finishes before the farm matters. -/
-def goFarmSafe (t : Table) (squares : List (List Cell)) (n : ℕ)
-    (hot : Cell) : ℕ → List Cell → Bool
+/-- The forced-tree checker. Full enumeration at the two reply
+levels; past them the strategy must win or threaten from the box,
+the opponent must have no completion, and only the block replies
+recurse. `hot`, when given, must never be the only block. -/
+def goForced (t : Table) (squares : List (List Cell)) (n : ℕ)
+    (hot : Option Cell) : ℕ → List Cell → Bool
   | 0, _ => false
   | fuel + 1, hist =>
     let p1 := stonesOf true hist
@@ -74,17 +49,24 @@ def goFarmSafe (t : Table) (squares : List (List Cell)) (n : ℕ)
     | some m =>
       if !onBoard n m || p1.contains m || p2.contains m then false
       else if hasSquareL squares (m :: p1) then true
+      else if !inBox t.box m then false
+      else if !(threatsL squares p2 ((m :: p1) ++ p2)).isEmpty then false
       else
-        let ths := threatsL squares (m :: p1) ((m :: p1) ++ p2)
-        if 2 < hist.length && ths.isEmpty then false
-        else if !ths.isEmpty && ths.all (· == hot) then false
-        else
-          let hist' := hist ++ [m]
+        let hist' := hist ++ [m]
+        if hist.length ≤ 2 then
           let replies := (allCells n).filter fun c => !(hist'.contains c)
           if replies.isEmpty then false
-          else replies.all fun r =>
-            !completesL squares p2 r &&
-              goFarmSafe t squares n hot fuel (hist' ++ [r])
+          else replies.all fun r => goForced t squares n hot fuel (hist' ++ [r])
+        else
+          let ths := threatsL squares (m :: p1) ((m :: p1) ++ p2)
+          if ths.isEmpty then false
+          else if !ths.all (inBox t.box) then false
+          else if hot.any (fun h => ths.all (· == h)) then false
+          else ths.all fun z => goForced t squares n hot fuel (hist' ++ [z])
+
+/-- The table wins the `n` board through pure forcing. -/
+def checkForced (t : Table) (n : ℕ) : Bool :=
+  goForced t (squaresList n) n none (n * n + 1) []
 
 /-- The board every anchor pair fits on. -/
 def anchorBoard : ℕ := 23
@@ -120,8 +102,8 @@ def anchorsValid (t : Table) : Bool :=
       | _ => true
 
 /-- Every farm entry, anchored by a concrete far pair on the anchor
-board, wins its subtree without ever forcing the opponent onto the
-farm cell. -/
+board, wins its subtree through pure forcing without ever forcing
+the opponent onto the farm cell. -/
 def farmSafe (t : Table) : Bool :=
   let n := anchorBoard
   let squares := squaresList n
@@ -136,8 +118,26 @@ def farmSafe (t : Table) : Bool :=
             (match lookup t.box t.x2 o1 with
              | none => false
              | some x2 =>
-               goFarmSafe t squares n hot (n * n + 1)
+               goForced t squares n (some hot) (n * n + 1)
                  [t.opening, o1, x2, o2])
       | _ => true
+
+mutual
+  /-- Every cell an entry can ever play lies inside the given box. -/
+  def entryConfined (box : ℕ) : Entry → Bool
+    | .plan cells => cells.all (onBoard box)
+    | .quiet move branches => onBoard box move && branchesConfined box branches
+
+  def branchesConfined (box : ℕ) : List (Key × Entry) → Bool
+    | [] => true
+    | (_, e) :: rest => entryConfined box e && branchesConfined box rest
+end
+
+/-- P1's plan never leaves the corner box: the opening, every second
+move, and every cell any entry can play lie inside `board t.box`. -/
+def planConfined (t : Table) : Bool :=
+  onBoard t.box t.opening &&
+  (t.x2.all fun e => onBoard t.box e.2) &&
+  t.scripts.all fun e => e.2.all fun e2 => entryConfined t.box e2.2
 
 end SquareAchievement
