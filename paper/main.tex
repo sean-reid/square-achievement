@@ -45,8 +45,8 @@ rather than a claim about a program. We conjecture that this
 table wins for every $n \ge 6$, which would replace the
 non-constructive argument by a single explicit strategy; the
 confinement geometry behind the conjecture is proved here, and the
-conjecture is verified for $6 \le n \le 15$, with unverified runs of
-a faster replica reaching $n = 17$.
+conjecture is verified for $6 \le n \le 16$, with an unverified run
+of a faster replica reaching $n = 17$.
 \end{abstract}
 
 \maketitle
@@ -301,10 +301,10 @@ square achievement game on $\Board_n$.
 Proposition~\ref{prop:verify} is the soundness of exhaustive search;
 its formal counterpart is the theorem \texttt{check\_sound} of
 Section~\ref{sec:lean}. The strategy of Section~\ref{sec:strategy}
-verifies on $\Board_n$ for every $5 \le n \le 15$; the runs through
+verifies on $\Board_n$ for every $5 \le n \le 16$; the runs through
 $\Board_{14}$, together with Propositions~\ref{prop:small}
-and~\ref{prop:large}, prove Theorem~\ref{thm:main}, and the run at
-$\Board_{15}$ anchors Section~\ref{sec:uniform}. Table~\ref{tab:runs} reports the sizes of the
+and~\ref{prop:large}, prove Theorem~\ref{thm:main}, and the runs at
+$\Board_{15}$ and $\Board_{16}$ anchor Section~\ref{sec:uniform}. Table~\ref{tab:runs} reports the sizes of the
 verification trees and the running times of the compiled formal
 checker.
 
@@ -325,6 +325,7 @@ $n$ & positions & time (s) \\
 13 & --- & 2{,}009 \\
 14 & --- & 4{,}231 \\
 15 & --- & 8{,}348 \\
+16 & --- & 13{,}651 \\
 \bottomrule
 \end{tabular}
 \medskip
@@ -443,9 +444,9 @@ mechanism: the pair of far replies determines the one region cell it
 can farm through, the plan stored for that cell never hands the cell
 over, and farm entries take precedence over exact ones for the pairs
 whose farm sits off the generated geometry. With them the published
-table verifies through $\Board_{15}$ under the certified checker of
-Section~\ref{sec:lean}, and through $\Board_{17}$, two sizes past
-its generation board, under an optimized replica of that checker
+table verifies through $\Board_{16}$ under the certified checker of
+Section~\ref{sec:lean}, one size past its generation board, and
+through $\Board_{17}$ under an optimized replica of that checker
 which carries no soundness proof but returns the same verdict as the
 certified checker on every size where both have run. The replica runs
 are evidence for the conjecture, not part of
