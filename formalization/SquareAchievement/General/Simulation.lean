@@ -1,5 +1,6 @@
 import SquareAchievement.Compute.ForcedSound
 import SquareAchievement.General.Invariance
+import SquareAchievement.General.Coverage
 
 /-!
 # The simulation argument
@@ -132,5 +133,162 @@ theorem mem_threatsL_iff_cross {B n : ℕ} (h6 : 6 ≤ B) (hBn : B ≤ n)
     exact hzocc (by
       rw [List.contains_iff_mem] at hx ⊢
       exact (hocc z hz6).mp hx)
+
+/-! ## The simulation
+
+A base history (checked by a forced run on the base board) and a real
+history on the target board agree everywhere except possibly at the
+two reply slots. A shared slot holds one stone inside the base
+region; a substituted slot pairs a base stand-in with a real stone,
+both outside `board 12`, the real one outside `board 17`. The pair
+mode records what `farmKey` says about the real replies: `none`
+means no square escaping the base can use them (`escape_farm`), and
+`some hot` means every such square runs through `hot`, which the
+opponent never holds in a recursed position. -/
+
+/-- One reply slot of the simulation: shared verbatim, or
+substituted. -/
+def SlotOk (B n : ℕ) (b r : Cell) : Prop :=
+  (b = r ∧ r ∈ board 17 ∧ r ∈ board B) ∨
+  (b ∈ board B ∧ b ∉ board 12 ∧ r ∈ board n ∧ r ∉ board 12 ∧
+    r ∉ board 17)
+
+/-- The pair mode: the real replies farm nothing, or they farm
+exactly through `hot`. -/
+def PairMode (hot : Option Cell) (r1 r2 : Cell) (p2r : List Cell) : Prop :=
+  match hot with
+  | none => farmKey 6 r1 r2 = none
+  | some h => farmKey 6 r1 r2 = some (.farm h) ∧ h ∉ p2r
+
+/-- The safety core: no real reply completes an opponent square. The
+opponent's real stones are the two replies and box cells shared with
+the base run. A hypothetical square with a substituted reply among
+its corners escapes the base region, so `escape_farm` reduces it to
+the pair mode; a square without one lies among cells the base run
+shares, where the base scan and the base square-freeness kill it,
+including a reply landing on a stand-in cell. -/
+theorem simulate_safe {B n : ℕ} (hB : 17 ≤ B) (hot : Option Cell)
+    {o1b o1r o2b o2r : Cell} {P D : List Cell}
+    (hs1 : SlotOk B n o1b o1r) (hs2 : SlotOk B n o2b o2r)
+    (hP : ∀ y ∈ P, y ∈ board 6) (hD : ∀ y ∈ D, y ∈ board 6)
+    (hnoB : ¬ HasSquare (o1b :: o2b :: D).toFinset)
+    (hpair : o1r ∉ board 17 ∨ o2r ∉ board 17 →
+      PairMode hot o1r o2r (o1r :: o2r :: D))
+    (hscanB : threatsL (squaresList B) (o1b :: o2b :: D)
+      (P ++ (o1b :: o2b :: D)) = [])
+    {x : Cell} (hxP : x ∉ P) (hxr : x ∉ o1r :: o2r :: D) :
+    ¬ HasSquare (insert x (o1r :: o2r :: D).toFinset) := by
+  rintro ⟨a, b, s, hs, hsub⟩
+  have hdis : ∀ w ∈ corners a b s,
+      w = x ∨ w = o1r ∨ w = o2r ∨ w ∈ D := by
+    intro w hw
+    have := hsub hw
+    rcases Finset.mem_insert.mp this with rfl | hwp
+    · exact Or.inl rfl
+    · rw [List.mem_toFinset, List.mem_cons, List.mem_cons] at hwp
+      tauto
+  by_cases hesc : a + s < 17 ∧ b + s < 17
+  · -- contained: every corner is on board 17, and substituted reply
+    -- stones are not, so the corners live among base-shared cells
+    have hcor17 : ∀ w ∈ corners a b s, w ∈ board 17 := by
+      intro w hw
+      rw [mem_corners] at hw
+      rw [mem_board]
+      rcases hw with rfl | rfl | rfl | rfl <;> constructor <;> omega
+    have hcorB : ∀ w ∈ corners a b s, w ≠ x →
+        w ∈ (o1b :: o2b :: D).toFinset := by
+      intro w hw hwx
+      rcases hdis w hw with rfl | rfl | rfl | hwD
+      · exact absurd rfl hwx
+      · rw [List.mem_toFinset, List.mem_cons]
+        rcases hs1 with ⟨heq, -, -⟩ | ⟨-, -, -, -, h17⟩
+        · exact Or.inl heq.symm
+        · exact absurd (hcor17 _ hw) h17
+      · rw [List.mem_toFinset, List.mem_cons, List.mem_cons]
+        rcases hs2 with ⟨heq, -, -⟩ | ⟨-, -, -, -, h17⟩
+        · exact Or.inr (Or.inl heq.symm)
+        · exact absurd (hcor17 _ hw) h17
+      · rw [List.mem_toFinset, List.mem_cons, List.mem_cons]
+        exact Or.inr (Or.inr hwD)
+    by_cases hxc : x ∈ corners a b s
+    · -- the reply is a corner; the other corners are base stones
+      by_cases hxbase : x ∈ (o1b :: o2b :: D).toFinset
+      · -- the reply sits on a stand-in: the base already holds the
+        -- whole square
+        apply hnoB
+        refine ⟨a, b, s, hs, fun w hw => ?_⟩
+        by_cases hwx : w = x
+        · exact hwx ▸ hxbase
+        · exact hcorB w hw hwx
+      · -- a genuine base reply: the base scan forbids it
+        have hxB : x ∈ board B := by
+          have := hcor17 x hxc
+          rw [mem_board] at this ⊢
+          omega
+        have hp2B : ∀ y ∈ o1b :: o2b :: D, y ∈ board B := by
+          intro y hy
+          rw [List.mem_cons, List.mem_cons] at hy
+          rcases hy with rfl | rfl | hyD
+          · rcases hs1 with ⟨heq, -, hb⟩ | ⟨hb, -, -, -, -⟩ <;>
+              [exact heq ▸ hb; exact hb]
+          · rcases hs2 with ⟨heq, -, hb⟩ | ⟨hb, -, -, -, -⟩ <;>
+              [exact heq ▸ hb; exact hb]
+          · have := hD y hyD
+            rw [mem_board] at this ⊢
+            omega
+        have hxnb : x ∉ o1b :: o2b :: D := fun hy =>
+          hxbase (List.mem_toFinset.mpr hy)
+        have hocc : ((P ++ (o1b :: o2b :: D)).contains x) = false := by
+          rw [Bool.eq_false_iff]
+          intro hc
+          rw [List.contains_iff_mem, List.mem_append] at hc
+          rcases hc with hc | hc
+          · exact hxP hc
+          · exact hxnb hc
+        have hcf := completesL_eq_false_of_threats_nil hscanB hocc hxnb
+        apply not_hasSquare_insert hxB hp2B hnoB hcf
+        refine ⟨a, b, s, hs, fun w hw => ?_⟩
+        by_cases hwx : w = x
+        · exact hwx ▸ Finset.mem_insert_self _ _
+        · exact Finset.mem_insert_of_mem (hcorB w hw hwx)
+    · -- the reply is not a corner: the base already holds the square
+      apply hnoB
+      refine ⟨a, b, s, hs, fun w hw => ?_⟩
+      exact hcorB w hw (fun he => hxc (he ▸ hw))
+  · -- escaping: the corners are the reply, the two reply stones, and
+    -- one box cell, and the pair mode decides
+    have hesc' : 17 ≤ a + s ∨ 17 ≤ b + s := by omega
+    obtain ⟨d, hdD, hdc, ho1c, ho2c, hdo1, hdo2, ho12⟩ :=
+      escape_pick hs hesc' hD
+        (hdis _ (by rw [mem_corners]; tauto))
+        (hdis _ (by rw [mem_corners]; tauto))
+        (hdis _ (by rw [mem_corners]; tauto))
+        (hdis _ (by rw [mem_corners]; tauto))
+    by_cases h17 : o1r ∈ board 17 ∧ o2r ∈ board 17
+    · -- three corners on board 17 confine the square: no escape
+      have hd17 : d ∈ board 17 := by
+        have := hD d hdD
+        rw [mem_board] at this ⊢
+        omega
+      have := three_corners_confine hdc ho1c ho2c hdo1 hdo2 ho12
+        hd17 h17.1 h17.2
+      omega
+    · have hfk := escape_farm hs hesc' hdc ho1c ho2c hdo1 hdo2 ho12
+        (hD d hdD)
+      have hpair' := hpair (by tauto)
+      cases hot with
+      | none =>
+        rw [PairMode] at hpair'
+        rw [hpair'] at hfk
+        exact absurd hfk (by simp)
+      | some h =>
+        rw [PairMode] at hpair'
+        obtain ⟨hsome, hnotin⟩ := hpair'
+        rw [hsome] at hfk
+        have hdh : h = d := by
+          have := Option.some_inj.mp hfk
+          exact (Key.farm.injEq .. ▸ this : _)
+        exact hnotin (hdh ▸ List.mem_cons_of_mem _
+          (List.mem_cons_of_mem _ hdD))
 
 end SquareAchievement

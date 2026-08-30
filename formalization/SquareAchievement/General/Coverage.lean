@@ -93,6 +93,94 @@ private theorem farmCase_none_bent {box x y x' y' : ℕ}
   · simp only [Bool.and_eq_true, decide_eq_true_eq, beq_iff_eq]
     omega
 
+set_option maxHeartbeats 6400000 in
+/-- In an escaping square whose corners come from a reply, the two
+reply stones, and box cells, the box cell is unique and the reply
+stones are both corners: two box corners would confine the square,
+and a repeated cell cannot fill two corners. -/
+theorem escape_pick {a b s : ℕ} (hs : 0 < s)
+    (hesc : 17 ≤ a + s ∨ 17 ≤ b + s)
+    {x o1r o2r : Cell} {D : List Cell}
+    (hD : ∀ w ∈ D, w ∈ board 6)
+    (hA : (a, b) = x ∨ (a, b) = o1r ∨ (a, b) = o2r ∨ (a, b) ∈ D)
+    (hB : (a, b + s) = x ∨ (a, b + s) = o1r ∨ (a, b + s) = o2r ∨
+      (a, b + s) ∈ D)
+    (hC : (a + s, b) = x ∨ (a + s, b) = o1r ∨ (a + s, b) = o2r ∨
+      (a + s, b) ∈ D)
+    (hE : (a + s, b + s) = x ∨ (a + s, b + s) = o1r ∨
+      (a + s, b + s) = o2r ∨ (a + s, b + s) ∈ D) :
+    ∃ d ∈ D, d ∈ corners a b s ∧ o1r ∈ corners a b s ∧
+      o2r ∈ corners a b s ∧ d ≠ o1r ∧ d ≠ o2r ∧ o1r ≠ o2r := by
+  have hs12 : 12 ≤ s ∨ 17 ≤ a + s ∨ 17 ≤ b + s := by omega
+  have dAB : ((a, b) : Cell) ≠ (a, b + s) := by simp [Prod.ext_iff]; omega
+  have dAC : ((a, b) : Cell) ≠ (a + s, b) := by simp [Prod.ext_iff]; omega
+  have dAE : ((a, b) : Cell) ≠ (a + s, b + s) := by
+    simp [Prod.ext_iff]; omega
+  have dBC : ((a, b + s) : Cell) ≠ (a + s, b) := by
+    simp [Prod.ext_iff]; omega
+  have dBE : ((a, b + s) : Cell) ≠ (a + s, b + s) := by
+    simp [Prod.ext_iff]; omega
+  have dCE : ((a + s, b) : Cell) ≠ (a + s, b + s) := by
+    simp [Prod.ext_iff]; omega
+  have hb := fun {w : Cell} (h : w ∈ D) => mem_board.mp (hD _ h)
+  rcases hA with hA | hA | hA | hA <;>
+    rcases hB with hB | hB | hB | hB <;>
+    rcases hC with hC | hC | hC | hC <;>
+    rcases hE with hE | hE | hE | hE <;>
+    first
+    -- a repeated cell cannot fill two distinct corners
+    | exact absurd (hA.trans hB.symm) dAB
+    | exact absurd (hA.trans hC.symm) dAC
+    | exact absurd (hA.trans hE.symm) dAE
+    | exact absurd (hB.trans hC.symm) dBC
+    | exact absurd (hB.trans hE.symm) dBE
+    | exact absurd (hC.trans hE.symm) dCE
+    -- two box corners confine the square below the escape
+    | (exfalso;
+       first
+       | (obtain ⟨u1, v1⟩ := hb hA; obtain ⟨u2, v2⟩ := hb hB;
+          dsimp only at u1 v1 u2 v2; omega)
+       | (obtain ⟨u1, v1⟩ := hb hA; obtain ⟨u2, v2⟩ := hb hC;
+          dsimp only at u1 v1 u2 v2; omega)
+       | (obtain ⟨u1, v1⟩ := hb hA; obtain ⟨u2, v2⟩ := hb hE;
+          dsimp only at u1 v1 u2 v2; omega)
+       | (obtain ⟨u1, v1⟩ := hb hB; obtain ⟨u2, v2⟩ := hb hC;
+          dsimp only at u1 v1 u2 v2; omega)
+       | (obtain ⟨u1, v1⟩ := hb hB; obtain ⟨u2, v2⟩ := hb hE;
+          dsimp only at u1 v1 u2 v2; omega)
+       | (obtain ⟨u1, v1⟩ := hb hC; obtain ⟨u2, v2⟩ := hb hE;
+          dsimp only at u1 v1 u2 v2; omega))
+    -- a valid assignment: build the witness
+    | (first
+       | refine ⟨(a, b), hA, by rw [mem_corners]; tauto, ?_, ?_, ?_, ?_, ?_⟩
+       | refine ⟨(a, b + s), hB, by rw [mem_corners]; tauto,
+           ?_, ?_, ?_, ?_, ?_⟩
+       | refine ⟨(a + s, b), hC, by rw [mem_corners]; tauto,
+           ?_, ?_, ?_, ?_, ?_⟩
+       | refine ⟨(a + s, b + s), hE, by rw [mem_corners]; tauto,
+           ?_, ?_, ?_, ?_, ?_⟩) <;>
+      first
+      | (rw [← hA, mem_corners]; tauto)
+      | (rw [← hB, mem_corners]; tauto)
+      | (rw [← hC, mem_corners]; tauto)
+      | (rw [← hE, mem_corners]; tauto)
+      | (rw [← hA]; first | exact dAB.symm | exact dAC.symm | exact dAE.symm)
+      | (rw [← hB]; first | exact dAB | exact dBC.symm | exact dBE.symm)
+      | (rw [← hC]; first | exact dAC | exact dBC | exact dCE.symm)
+      | (rw [← hE]; first | exact dAE | exact dBE | exact dCE)
+      | (rw [← hA, ← hB]; first | exact dAB | exact dAB.symm)
+      | (rw [← hA, ← hC]; first | exact dAC | exact dAC.symm)
+      | (rw [← hA, ← hE]; first | exact dAE | exact dAE.symm)
+      | (rw [← hB, ← hC]; first | exact dBC | exact dBC.symm)
+      | (rw [← hB, ← hE]; first | exact dBE | exact dBE.symm)
+      | (rw [← hC, ← hE]; first | exact dCE | exact dCE.symm)
+      | (rw [← hB, ← hA]; first | exact dAB | exact dAB.symm)
+      | (rw [← hC, ← hA]; first | exact dAC | exact dAC.symm)
+      | (rw [← hE, ← hA]; first | exact dAE | exact dAE.symm)
+      | (rw [← hC, ← hB]; first | exact dBC | exact dBC.symm)
+      | (rw [← hE, ← hB]; first | exact dBE | exact dBE.symm)
+      | (rw [← hE, ← hC]; first | exact dCE | exact dCE.symm)
+
 /-- An escaping square whose corners hold a box cell and the two
 reply stones is a farm square keyed by the box cell. -/
 theorem escape_farm {r c s : ℕ} {blk o1 o2 : Cell}

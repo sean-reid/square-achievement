@@ -43,7 +43,7 @@ theorem p1_wins_five : P1CanWin 5 ∅ ∅ :=
 one evaluation. -/
 theorem forced_below_seventeen :
     ((List.range' 6 11).all fun n => checkForced genTable n) = true := by
-  sorry
+  native_decide
 
 theorem p1_wins_of_five_le {n : ℕ} (h : 5 ≤ n) : P1CanWin n ∅ ∅ := by
   rcases eq_or_lt_of_le h with h5 | h6

@@ -31,7 +31,7 @@ theorem farm_safe_gen : farmSafe genTable = true := by native_decide
 
 /-- The forced-tree certificate at the base board. -/
 theorem forced_seventeen : checkForced genTable 17 = true := by
-  sorry
+  native_decide
 
 theorem plan_confined : planConfined genTable = true := by native_decide
 
