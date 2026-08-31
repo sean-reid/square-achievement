@@ -1,0 +1,36 @@
+# Changelog
+
+## 0.1.0 (2026-08-30)
+
+
+### Features
+
+* article page with playable game skeleton ([384bfae](https://github.com/sean-reid/square-achievement/commit/384bfaea1c9fa68f44633eb2f43a1433fe2261ee))
+* bit-exact table bot with exhaustive replay tests ([#10](https://github.com/sean-reid/square-achievement/issues/10)) ([91f2189](https://github.com/sean-reid/square-achievement/commit/91f218907d165ad015619348f5b3d7489328c9d9))
+* farm keys in the checkers ([#42](https://github.com/sean-reid/square-achievement/issues/42)) ([c42ba1f](https://github.com/sean-reid/square-achievement/commit/c42ba1f46fbb41ca6b593feae71ae009706839c1))
+* **lean:** prove the table strategy wins every board ([#54](https://github.com/sean-reid/square-achievement/issues/54)) ([72ce0cb](https://github.com/sean-reid/square-achievement/commit/72ce0cbad4293dd3ec7003c1438521c0fb74bb72))
+* paper skeleton and formalization placeholder ([6c39d4e](https://github.com/sean-reid/square-achievement/commit/6c39d4e15d1d257b6b26460912eba4c699ff35c8))
+* **pipeline:** farm-aware table generation ([#27](https://github.com/sean-reid/square-achievement/issues/27)) ([5fd5488](https://github.com/sean-reid/square-achievement/commit/5fd5488461941682c75c783e1db4e670e9addf9a))
+* **pipeline:** port the table-generation pipeline ([#20](https://github.com/sean-reid/square-achievement/issues/20)) ([d507917](https://github.com/sean-reid/square-achievement/commit/d507917e4f587dd7b14608d0b805690fad905bc6))
+* port the Lean formalization ([#33](https://github.com/sean-reid/square-achievement/issues/33)) ([1f03d1f](https://github.com/sean-reid/square-achievement/commit/1f03d1f8fca235341204183b85a78850df18d01f))
+* prove farm safety at the anchors ([#49](https://github.com/sean-reid/square-achievement/issues/49)) ([5921433](https://github.com/sean-reid/square-achievement/commit/59214331d9a022242f2e736f9c5e9790f1e5d568))
+* record the forcing certificate at the generation board ([#48](https://github.com/sean-reid/square-achievement/issues/48)) ([6fed8d4](https://github.com/sean-reid/square-achievement/commit/6fed8d4a336477351a5590a528c480f84bffbf6a))
+* **site:** downloadable paper and formalization ([#21](https://github.com/sean-reid/square-achievement/issues/21)) ([2cac93f](https://github.com/sean-reid/square-achievement/commit/2cac93f57379b6f4a6e76371860c0e0c0de3ae50))
+* **site:** go-style stones and two figures ([#25](https://github.com/sean-reid/square-achievement/issues/25)) ([2dfccc2](https://github.com/sean-reid/square-achievement/commit/2dfccc2c8c84392745718188d11e3cbe5ccc5b96))
+* **site:** keep large boards playable ([#37](https://github.com/sean-reid/square-achievement/issues/37)) ([68de17c](https://github.com/sean-reid/square-achievement/commit/68de17c86b817d8faa70d7ca210188a571fa623a))
+* **site:** replay the farm entries ([#28](https://github.com/sean-reid/square-achievement/issues/28)) ([36e5f46](https://github.com/sean-reid/square-achievement/commit/36e5f4675e2c0f1304f9b7f1b8953b6377f0cb89))
+* **site:** say when a board is beyond the verified sizes ([#38](https://github.com/sean-reid/square-achievement/issues/38)) ([a245cf0](https://github.com/sean-reid/square-achievement/commit/a245cf0e169ceb9caa651dcdfdb75a81a91ef5dd))
+* **site:** write the article ([#22](https://github.com/sean-reid/square-achievement/issues/22)) ([9bd9eb7](https://github.com/sean-reid/square-achievement/commit/9bd9eb7a709521dd05865515ff35eae08883bdd8))
+* state the uniform theorem and its forcing property ([#47](https://github.com/sean-reid/square-achievement/issues/47)) ([939b060](https://github.com/sean-reid/square-achievement/commit/939b060059384311fe1956b4d55f40522aa34cb4))
+* svg board with calm interactions and gen-15 tables ([#12](https://github.com/sean-reid/square-achievement/issues/12)) ([d96925a](https://github.com/sean-reid/square-achievement/commit/d96925ac05a41b321aaacc11fd2b4cdc226c4baf))
+* write the methods paper body ([#13](https://github.com/sean-reid/square-achievement/issues/13)) ([0a21847](https://github.com/sean-reid/square-achievement/commit/0a218474a6dd9fdacccd7135ae14e2b42fcbe2d5))
+
+
+### Bug Fixes
+
+* **ci:** start releases at 0.1.0 ([#15](https://github.com/sean-reid/square-achievement/issues/15)) ([266c637](https://github.com/sean-reid/square-achievement/commit/266c637f41fff40a5881577fa8a19cb1da5a0422))
+* **pipeline:** export the generation size the tables ship with ([#55](https://github.com/sean-reid/square-achievement/issues/55)) ([e757474](https://github.com/sean-reid/square-achievement/commit/e7574747c8bfe090bc7b7663e2571ba163a75335))
+* **pipeline:** farm keys outrank exact keys for inexact first replies ([#40](https://github.com/sean-reid/square-achievement/issues/40)) ([bad782f](https://github.com/sean-reid/square-achievement/commit/bad782ffe39e54543047f08da43ad6e3ccbfba36))
+* **site:** exact drawing policy for boards below 5 ([#17](https://github.com/sean-reid/square-achievement/issues/17)) ([1f0d58a](https://github.com/sean-reid/square-achievement/commit/1f0d58a1b344b65ebd70f1731d7deb2ac44e633e))
+* **site:** farm keys outrank exact keys for inexact first replies ([#39](https://github.com/sean-reid/square-achievement/issues/39)) ([c8a837a](https://github.com/sean-reid/square-achievement/commit/c8a837adcbdab9d82da67cdb2959c7096ecdba70))
+* **site:** name the players by role, not by stone ([#26](https://github.com/sean-reid/square-achievement/issues/26)) ([1cdf614](https://github.com/sean-reid/square-achievement/commit/1cdf614d8d3160a480b119aade9cf38116ec73c6))
