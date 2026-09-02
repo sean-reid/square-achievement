@@ -5,6 +5,7 @@
   --ink: #1c1a17;
   --rule: #8a8377;
   --accent: #7a2f2f;
+  --muted: #66605a;
   --box: #f1ece1;
   --serif: "STIX Two Text", "Charter", "Georgia", serif;
 }
@@ -15,6 +16,7 @@
     --ink: #e8e4dc;
     --rule: #6b655b;
     --accent: #c98a8a;
+    --muted: #9d978c;
     --box: #221f1c;
   }
 }
@@ -66,6 +68,72 @@ h2 {
   margin: 0 2rem 2rem;
 }
 
+.lead {
+  font-size: 1.08em;
+  margin-bottom: 1.6rem;
+}
+
+.routes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem;
+  margin: 2.5rem 0;
+}
+
+.route {
+  display: block;
+  background: var(--box);
+  border-top: 3px solid var(--accent);
+  padding: 0.9rem 1rem 1rem;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 160ms ease;
+}
+
+.route:hover,
+.route:focus-visible {
+  border-top-color: var(--ink);
+  outline: none;
+}
+
+.route-title {
+  display: block;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.route-body {
+  display: block;
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+
+code {
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.85em;
+}
+
+pre.lean {
+  background: var(--box);
+  padding: 0.9rem 1.1rem;
+  overflow-x: auto;
+  font-size: 0.8em;
+  line-height: 1.5;
+  margin: 1.2rem 0;
+}
+
+pre.lean code {
+  font-size: 1em;
+}
+
+@media (max-width: 480px) {
+  pre.lean {
+    font-size: 0.68em;
+  }
+}
+
 .abstract strong {
   font-variant: small-caps;
 }
@@ -97,16 +165,11 @@ figure.diagram svg {
   height: auto;
 }
 
-figure.diagram figcaption {
-  font-size: 0.85em;
-  margin-top: 0.8rem;
-  color: var(--rule);
-}
-
+figure.diagram figcaption,
 figure.game figcaption {
   font-size: 0.85em;
   margin-top: 0.8rem;
-  color: var(--rule);
+  color: var(--muted);
 }
 
 .sag-controls {
@@ -173,6 +236,26 @@ figure.game figcaption {
   cursor: pointer;
 }
 
+.sag-svg:focus {
+  outline: none;
+}
+
+.sag-svg:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.sag-focus rect {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.5;
+  display: none;
+}
+
+.sag-svg:focus-visible .sag-focus rect {
+  display: block;
+}
+
 @media (hover: hover) {
   .sag-cell:hover {
     fill: var(--accent);
@@ -234,7 +317,7 @@ figure.game figcaption {
   font-size: 0.78em;
   font-variant: small-caps;
   letter-spacing: 0.04em;
-  color: var(--rule);
+  color: var(--muted);
 }
 
 .sag-quiet button {
@@ -274,5 +357,9 @@ footer {
   border-top: 1px solid var(--rule);
   padding-top: 1rem;
   font-size: 0.85em;
-  color: var(--rule);
+  color: var(--muted);
+}
+
+footer a {
+  color: inherit;
 }
