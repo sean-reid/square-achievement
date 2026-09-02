@@ -1,473 +1,104 @@
 ---
-import "../styles/paper.css";
-import "katex/dist/katex.min.css";
+import Base from "../layouts/Base.astro";
 import katex from "katex";
 
 const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
+const base = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>The Square Achievement Game on n × n Boards</title>
-    <meta
-      name="description"
-      content="Two players claim cells of an n by n grid; the first to own four corners of a square wins. The first player wins exactly when n is at least 5, by a machine-checked strategy. Play against it."
-    />
-  </head>
-  <body>
-    <header class="masthead">
-      <h1>The Square Achievement Game on n × n Boards</h1>
-      <p class="byline">Sean Reid · August 2026</p>
-    </header>
+<Base
+  title="The Square Achievement Game on n × n Boards"
+  description="Two players claim cells of an n by n grid; the first to own four corners of a square wins. The first player wins exactly when n is at least 5, by a machine-checked strategy. Play against it."
+>
+  <header class="masthead">
+    <h1>The Square Achievement Game on n × n Boards</h1>
+    <p class="byline">Sean Reid · August 2026</p>
+  </header>
 
-    <p class="abstract">
-      <strong>Abstract.</strong> Two players alternately claim cells of an
-      <span set:html={k("n \\times n")} /> grid; the first to hold all four corners
-      of an axis-aligned square wins. We prove the first player has a winning strategy
-      precisely when <span set:html={k("n \\ge 5")} />, and that all smaller
-      boards are drawn under optimal play. The strategy is explicit, one table
-      serves every board of size at least 6, and the whole argument, including
-      all board sizes at once, is machine-checked in Lean 4.
-    </p>
+  <p class="lead">
+    Two players take turns claiming cells of an
+    <span set:html={k("n \\times n")} /> grid. The first to hold all four corners
+    of an axis-aligned square wins; a full board with no square is a draw. Erickson
+    asked who wins. The answer is the first player, exactly when
+    <span set:html={k("n \\ge 5")} />.
+  </p>
 
-    <figure class="game">
-      <sag-board n="5"></sag-board>
-      <figcaption>
-        Figure 1. Play the game: the bot moves first, replaying the strategy
-        below move for move, and you reply. Change n to explore; below 5 × 5
-        neither side can force a win.
-      </figcaption>
-    </figure>
+  <div class="theorem">
+    <span class="label">Theorem.</span> The first player has a winning strategy in
+    the square achievement game on the
+    <span set:html={k("n \\times n")} /> board if and only if
+    <span set:html={k("n \\ge 5")} />. For <span set:html={k("n \\le 4")} /> the game
+    is a draw under optimal play.
+  </div>
 
-    <h2>The game</h2>
-    <p>
-      Played on the cells of an <span set:html={k("n \\times n")} /> grid, P1 moving
-      first. A winning set is any
-      <span
-        set:html={k("\\{(r,c),\\,(r,c{+}s),\\,(r{+}s,c),\\,(r{+}s,c{+}s)\\}")}
-      /> with <span set:html={k("s \\ge 1")} />: the four corners of an
-      axis-aligned square, from 2 × 2 blocks up. A full board with no completed
-      square is a draw. Tilted squares do not count. Both players are after the
-      same squares, so even a player who cannot win anymore can still block, and
-      on the boards below 5 × 5 blocking is enough: neither player can force a
-      win.
-    </p>
+  <p>
+    Draws at 3 × 3 and 4 × 4 and a first-player win at 5 × 5 were known from
+    computer search; from 15 × 15 up, strategy stealing gave the first player a
+    win but no strategy. Sizes 6 through 14 were open. The proof here is one
+    explicit strategy: two reflexes and a lookup table whose plans stay inside a
+    6 × 6 corner of the board. It wins every board from 6 × 6 up, with a
+    separate table for 5 × 5, and the whole argument, every board size at once,
+    is checked in Lean 4.
+  </p>
 
-    <figure class="diagram">
-      <svg
-        viewBox="-4 -4 152 152"
-        role="img"
-        aria-label="A 6 by 6 grid showing the corners of a 2 by 2 block and of a square of side 3"
-      >
-        <defs>
-          <pattern
-            id="grid6"
-            width="24"
-            height="24"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M24 0H0V24"
-              fill="none"
-              stroke="var(--rule)"
-              stroke-width="0.8"
-              opacity="0.5"></path>
-          </pattern>
-        </defs>
-        <rect width="144" height="144" fill="url(#grid6)"></rect>
-        <rect
-          width="144"
-          height="144"
-          fill="none"
-          stroke="var(--rule)"
-          stroke-width="0.8"
-          opacity="0.5"></rect>
-        <rect
-          x="12"
-          y="108"
-          width="24"
-          height="24"
-          fill="none"
-          stroke="var(--accent)"
-          stroke-width="1.5"
-          stroke-dasharray="4 3"></rect>
-        <rect
-          x="60"
-          y="12"
-          width="72"
-          height="72"
-          fill="none"
-          stroke="var(--accent)"
-          stroke-width="1.5"
-          stroke-dasharray="4 3"></rect>
-        <circle cx="12" cy="108" r="4" fill="var(--ink)"></circle>
-        <circle cx="36" cy="108" r="4" fill="var(--ink)"></circle>
-        <circle cx="12" cy="132" r="4" fill="var(--ink)"></circle>
-        <circle cx="36" cy="132" r="4" fill="var(--ink)"></circle>
-        <circle cx="60" cy="12" r="4" fill="var(--ink)"></circle>
-        <circle cx="132" cy="12" r="4" fill="var(--ink)"></circle>
-        <circle cx="60" cy="84" r="4" fill="var(--ink)"></circle>
-        <circle cx="132" cy="84" r="4" fill="var(--ink)"></circle>
-      </svg>
-      <figcaption>
-        Figure 2. Winning shapes: the corners of a 2 × 2 block and of a square
-        of side 3. Only the corners must be held.
-      </figcaption>
-    </figure>
+  <figure class="game">
+    <sag-board n="5"></sag-board>
+    <figcaption>
+      Play against the strategy. The bot moves first and replays the proof's
+      tables move for move; you reply by clicking a cell, or with the arrow keys
+      and Enter. Change n to explore; below 5 × 5 neither side can force a win.
+    </figcaption>
+  </figure>
 
-    <div class="theorem">
-      <span class="label">Theorem 1.</span> The first player has a winning strategy
-      in the square achievement game on the
-      <span set:html={k("n \\times n")} /> board if and only if
-      <span set:html={k("n \\ge 5")} />.
-    </div>
+  <nav class="routes" aria-label="where to go next">
+    <a class="route" href={`${base}downloads/square-achievement-paper.pdf`}>
+      <span class="route-title">Read the paper</span>
+      <span class="route-body">
+        The definitions, the strategy, the verification runs, and the simulation
+        argument that carries one checked board to all larger ones. PDF, built
+        from this repository.
+      </span>
+    </a>
+    <a class="route" href={`${base}proof/`}>
+      <span class="route-title">See how the proof works</span>
+      <span class="route-body">
+        An illustrated guide: forcing plans, why one table serves every board,
+        what a computer search has to be trusted with, and what the Lean
+        development checks.
+      </span>
+    </a>
+    <a
+      class="route"
+      href={`${base}downloads/square-achievement-formalization.tar.gz`}
+    >
+      <span class="route-title">Check it yourself</span>
+      <span class="route-body">
+        The Lean 4 development with the tables as data. A successful
+        <code>lake build</code> is the proof; the README shows how to print the theorem
+        and its axioms.
+      </span>
+    </a>
+  </nav>
 
-    <h2>History</h2>
-    <p>
-      Harary called games like this achievement games: both players build toward
-      the same target, and the first to finish wins
-      <a class="cite" href="#ref-1">[1]</a>. Erickson asked what happens for the
-      axis-aligned square on an
-      <span set:html={k("n \\times n")} /> grid
-      <a class="cite" href="#ref-2">[2]</a>, and the question is recorded on the
-      Open Problem Garden <a class="cite" href="#ref-3">[3]</a>. Two ends of the
-      answer were known. Jenrich reported computer searches giving draws on 3 ×
-      3 and 4 × 4 and a first-player win on 5 × 5
-      <a class="cite" href="#ref-4">[4]</a>. At the other end, Bacher and
-      Eliahou proved that every two-coloring of a 15 × 15 grid contains a
-      monochromatic square
-      <a class="cite" href="#ref-5">[5]</a>, so no game on a board of size 15 or
-      more can end in a draw; a standard strategy-stealing argument then gives
-      the first player a win, though it produces no strategy. In between, from 6
-      × 6 through 14 × 14, the outcome was open. We close that range, and the
-      proof is a strategy you can watch: the bot in Figure 1 is playing it.
-    </p>
-
-    <h2>The strategy</h2>
-    <p>
-      On every turn the strategy checks two reflexes before anything else:
-      complete one of your own squares if you can; otherwise, if the opponent is
-      one cell from completing theirs, block it. What remains is choosing the
-      quiet moves, and those come from a fixed lookup table. The strategy opens
-      at (2,2), answers the opponent's first reply with a tabled second move,
-      and the first two replies together select a plan: a short list of cells
-      played in order. Against a first reply at (0,0) and a second at (4,4), for
-      instance, the stored plan is (2,1), (1,1), (1,0), (2,3), (0,3), (2,5),
-      (4,3). The demo button under the board plays full lines out.
-    </p>
-    <p>
-      Plans are forcing. Each plan move puts three corners of some square in
-      place, so the opponent must block at once or lose, until one move creates
-      two threats and no single block answers both. The opponent's forced blocks
-      pile up too, and sometimes complete three corners of their own square; the
-      block reflex answers those counter-threats, and the search that generated
-      the table only accepted plans that keep the initiative through such
-      exchanges.
-    </p>
-    <p>
-      One table serves every board from 6 × 6 up, for two reasons. First, its
-      plans never leave the 6 × 6 corner region of the board, so every square
-      the strategy builds exists on every board containing that region. Second,
-      a reply far from the corner region can join a square through two of the
-      strategy's stones only from the region's own rows and columns, so far
-      replies are looked up by geometric class rather than by exact position.
-      And a pair of far replies can combine against a single cell of the corner
-      region, three corners of a square that is invisible until that cell falls;
-      we call such squares latent, and such pairs get entries of their own,
-      keyed by that cell and built to never hand it over. The 5 × 5 board is the
-      odd one out: it is too cramped for pure forcing, and exhaustive analysis
-      shows that no all-forcing table wins there. Its table comes instead from a
-      full solution of the 5 × 5 game and includes quiet moves that fork on the
-      opponent's reply.
-    </p>
-
-    <h2>Why believe a computer search</h2>
-    <p>
-      For each board size the proof is an exhaustive search: the strategy plays
-      against every sequence of replies, which at 9 × 9 means more than three
-      million positions. Searches of this kind have gone wrong before, in this
-      very game. The first published search for 5 × 5 contained an error and had
-      to be corrected <a class="cite" href="#ref-4">[4]</a>.
-    </p>
-    <p>
-      We therefore wrote the search three times with nothing shared between
-      them: once in Python, used while discovering the tables; once in Lean; and
-      once in TypeScript, driving the bot on this page. The three agree on every
-      board size we have tried, which is reassuring but is not the proof. The
-      proof rests on the Lean version alone. It comes with a soundness theorem,
-      itself machine-checked, which says that whenever the checker answers true,
-      a winning strategy tree exists for the game as defined mathematically.
-      That definition, some thirty lines of Lean, is the only part a skeptic has
-      to read; everything else is proved against it. Nothing about how the
-      tables were found has to be taken on faith; they sit in the development as
-      plain data, and a wrong table would fail the check rather than slip
-      through it.
-    </p>
-
-    <h2>Every board at once</h2>
-    <p>
-      Checking boards one at a time can never finish, and the hard part of the
-      theorem is the tail: one argument covering every board from 17 × 17 up.
-      The danger a large board adds is room. Stones placed far from the corner
-      region belong to squares that exist only out there, and if one of those
-      squares ever reaches three corners, the strategy must answer far from its
-      plans. Figure 3 shows the regions the argument lives in, and Figure 4 a
-      latent square realized against an earlier table that lacked the entries
-      for them.
-    </p>
-    <p>
-      The proof is a simulation. A case analysis proved in Lean shows every
-      square the opponent could complete either fits inside the 17 × 17 board,
-      where one exhaustive run has excluded it, or is latent, with its region
-      cell determined by the two reply stones. Anchored runs check that the
-      strategy never offers a latent cell as the unique block of a threat, and a
-      replay argument transports the run at 17 to any board: near replies
-      verbatim, a reply that ignores a threat loses to it, far replies act
-      through stand-ins. The result is the theorem check_sound_uniform, whose
-      hypotheses are finitely many certificates, all evaluated in seconds to
-      minutes. With the runs at 5 through 16, the first player wins on every
-      board of size at least 5, with one explicit strategy for all sizes from 6
-      up.
-    </p>
-    <figure class="diagram">
-      <svg
-        viewBox="-4 -4 328 328"
-        role="img"
-        aria-label="Nested regions on a 16 by 16 board: the 6 by 6 corner region inside the 12 by 12 interaction region"
-      >
-        <defs>
-          <pattern
-            id="gridz"
-            width="20"
-            height="20"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M20 0H0V20"
-              fill="none"
-              stroke="var(--rule)"
-              stroke-width="0.7"
-              opacity="0.45"></path>
-          </pattern>
-        </defs>
-        <rect width="320" height="320" fill="url(#gridz)"></rect>
-        <rect
-          width="320"
-          height="320"
-          fill="none"
-          stroke="var(--rule)"
-          stroke-width="0.7"
-          opacity="0.45"></rect>
-        <rect width="240" height="240" fill="var(--accent)" fill-opacity="0.05"
-        ></rect>
-        <rect width="120" height="120" fill="var(--accent)" fill-opacity="0.1"
-        ></rect>
-        <rect
-          width="120"
-          height="120"
-          fill="none"
-          stroke="var(--ink)"
-          stroke-width="1.5"></rect>
-        <rect
-          x="0"
-          y="0"
-          width="240"
-          height="240"
-          fill="none"
-          stroke="var(--ink)"
-          stroke-width="1.2"
-          stroke-dasharray="6 4"></rect>
-        <text
-          x="60"
-          y="66"
-          text-anchor="middle"
-          font-size="15"
-          fill="var(--ink)">6 × 6</text
-        >
-        <text
-          x="180"
-          y="186"
-          text-anchor="middle"
-          font-size="15"
-          fill="var(--ink)">12 × 12</text
-        >
-      </svg>
-      <figcaption>
-        Figure 3. The regions of the argument. Plans stay in the 6 × 6 corner;
-        every square through two of its cells fits inside the 12 × 12, with a
-        ring to spare; a stone beyond that shares no square with two near stones
-        and matters only through the classes and latent entries.
-      </figcaption>
-    </figure>
-
-    <figure class="diagram">
-      <svg
-        viewBox="-8 -24 356 352"
-        role="img"
-        aria-label="A 16 by 16 board with a farm square through the corner region and three far opponent stones"
-      >
-        <defs>
-          <pattern
-            id="grid16"
-            width="20"
-            height="20"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M20 0H0V20"
-              fill="none"
-              stroke="var(--rule)"
-              stroke-width="0.7"
-              opacity="0.45"></path>
-          </pattern>
-        </defs>
-        <rect width="320" height="320" fill="url(#grid16)"></rect>
-        <rect
-          width="320"
-          height="320"
-          fill="none"
-          stroke="var(--rule)"
-          stroke-width="0.7"
-          opacity="0.45"></rect>
-        <rect width="120" height="120" fill="var(--accent)" fill-opacity="0.09"
-        ></rect>
-        <rect
-          x="70"
-          y="10"
-          width="240"
-          height="240"
-          fill="none"
-          stroke="var(--accent)"
-          stroke-width="1.5"
-          stroke-dasharray="5 4"></rect>
-        <circle
-          cx="70"
-          cy="10"
-          r="6"
-          fill="var(--paper)"
-          stroke="var(--ink)"
-          stroke-width="1.5"></circle>
-        <circle
-          cx="310"
-          cy="10"
-          r="6"
-          fill="var(--paper)"
-          stroke="var(--ink)"
-          stroke-width="1.5"></circle>
-        <circle
-          cx="70"
-          cy="250"
-          r="6"
-          fill="var(--paper)"
-          stroke="var(--ink)"
-          stroke-width="1.5"></circle>
-        <circle
-          cx="310"
-          cy="250"
-          r="8"
-          fill="none"
-          stroke="var(--ink)"
-          stroke-width="1.5"
-          stroke-dasharray="4 3"></circle>
-        <text
-          x="70"
-          y="-8"
-          text-anchor="middle"
-          font-size="14"
-          fill="var(--ink)"
-          font-style="italic">t</text
-        >
-        <text
-          x="310"
-          y="-8"
-          text-anchor="middle"
-          font-size="14"
-          fill="var(--ink)"
-          font-style="italic">o1</text
-        >
-        <text
-          x="52"
-          y="255"
-          text-anchor="end"
-          font-size="14"
-          fill="var(--ink)"
-          font-style="italic">o2</text
-        >
-        <text
-          x="328"
-          y="255"
-          text-anchor="start"
-          font-size="14"
-          fill="var(--ink)"
-          font-style="italic">z</text
-        >
-      </svg>
-      <figcaption>
-        Figure 4. A latent square on the 16 × 16 board, realized against an
-        earlier table without latent entries. The opponent's far replies o1 and
-        o2 align with the corner region (shaded); once a forced block lands on
-        t, the dashed square threatens at the dashed cell z. The square does not
-        fit any smaller board.
-      </figcaption>
-    </figure>
-
-    <h2>Formalization and downloads</h2>
-    <p>
-      The proof is formalized in Lean 4
-      <a class="cite" href="#ref-6">[6]</a>, building on mathlib
-      <a class="cite" href="#ref-7">[7]</a>: the game semantics, an executable
-      verifiers with machine-checked soundness theorems, the strategy tables as
-      certificates, and the simulation theorem covering every board size at
-      once; the development builds with no unproved declarations. Both artifacts
-      are built from this repository on every deploy:
-      <a href="downloads/square-achievement-paper.pdf">the paper (PDF)</a> and
-      <a href="downloads/square-achievement-formalization.tar.gz"
-        >the Lean development (tar.gz)</a
-      >.
-    </p>
-
-    <h2>References</h2>
-    <ol class="refs">
-      <li id="ref-1">
-        F. Harary, Achievement and avoidance games for graphs, Annals of
-        Discrete Mathematics 13 (1982), 111–119.
-      </li>
-      <li id="ref-2">
-        M. Erickson, Pearls of Discrete Mathematics, CRC Press, 2010.
-      </li>
-      <li id="ref-3">
-        M. Erickson, Square achievement game on an n × n grid, Open Problem
-        Garden.
-        <a href="http://www.openproblemgarden.org/op/a_game_on_an_n_x_n_grid"
-          >openproblemgarden.org</a
-        >
-      </li>
-      <li id="ref-4">
-        T. Jenrich, Guaranteed successful strategies for a square achievement
-        game on an n × n grid, 2012.
-        <a href="https://arxiv.org/abs/1109.2341">arXiv:1109.2341</a>
-      </li>
-      <li id="ref-5">
-        R. Bacher and S. Eliahou, Extremal binary matrices without constant
-        2-squares, Journal of Combinatorics 1 (2010), no. 1, 77–100.
-      </li>
-      <li id="ref-6">
-        L. de Moura and S. Ullrich, The Lean 4 theorem prover and programming
-        language, Automated Deduction – CADE 28, Springer, 2021.
-      </li>
-      <li id="ref-7">
-        The mathlib Community, The Lean mathematical library, CPP 2020.
-      </li>
-    </ol>
-
-    <footer>
-      Code MIT · text CC BY 4.0 · built from the square-achievement repository.
-    </footer>
-
-    <script>
-      import "../game/board";
-    </script>
-  </body>
-</html>
+  <h2>What you have to trust</h2>
+  <p>
+    The headline statement in the development reads as follows, with
+    <code>P1CanWin</code> the first player forcing a win and the two draw predicates
+    each player securing at least a draw.
+  </p>
+  <pre
+    class="lean"><code>theorem outcome (n : ℕ) :
+    (P1CanWin n ∅ ∅ ↔ 5 ≤ n) ∧
+      ((P1CanDraw n ∅ ∅ ∧ P2CanDraw n ∅ ∅) ↔ n ≤ 4)</code></pre>
+  <p>
+    The definitions behind it, cells, squares, and the winning predicate as a
+    strategy tree, are a few dozen lines and are the only part a skeptic has to
+    read. Beyond them the trust is Lean's kernel, mathlib, and
+    <code>native_decide</code>, which lets the Lean compiler evaluate the
+    exhaustive checks instead of the kernel. The tables were found by a Python
+    search, but nothing about that search enters the proof: a wrong table fails
+    the check.
+  </p>
+</Base>
