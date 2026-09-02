@@ -21,6 +21,10 @@ runtime.
   `python3 -m squares.solve`).
 - `squares/export_lean.py`: writes the tables as Lean data files into
   the formalization.
+- `squares/export_site.py`: writes the same tables as the site's
+  `tables.json`.
+- `squares/crosscheck.py`: reads the Lean data files back and checks
+  that the Lean, site, and Python copies of the tables agree.
 - `squares/smallboard.py`: exact never-losing policies for the boards
   below 5, exported for the site's bot.
 - `squares/diagnose.py`: replays a failing line and narrates every
@@ -31,11 +35,21 @@ runtime.
 ## Usage
 
 ```
-python3 -m squares.solve            # regenerate the 5 x 5 table
-python3 -m squares.solve general    # general table + verification sweep
-python3 -m squares.export_lean      # write Lean data files
+python3 -m squares.solve            # regenerate the 5 x 5 table; prints the positions solved
+python3 -m squares.solve general    # general table + reference verification at 6, 7, 8
+python3 -m squares.export_lean      # write the Lean data files
+python3 -m squares.export_site      # write the site's tables.json
+python3 -m squares.smallboard       # write the site's small_tables.json
+python3 -m squares.crosscheck       # the three copies of the tables agree
 python3 -m squares.instrument 6 7   # measure the strategy's frame
 ```
+
+The general table is generated on the 15 x 15 board (`GEN_N` in
+`solve.py`), which takes about five minutes; the exporters write
+exactly the committed files, and CI regenerates them on every change
+and fails on any difference. The exported JSON is excluded from the
+site's formatter so that the exporter's output is the committed
+byte sequence.
 
 ## Tests
 
