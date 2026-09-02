@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.1](https://github.com/sean-reid/square-achievement/compare/v0.1.0...v0.1.1) (2026-09-02)
+
+
+### Features
+
+* **lean:** formalize the draw on small boards ([#64](https://github.com/sean-reid/square-achievement/issues/64)) ([e032c50](https://github.com/sean-reid/square-achievement/commit/e032c5003d42ff7e5ece5a757c8db924a0e75fbd))
+* **site:** a landing page, with the article as a proof guide ([#63](https://github.com/sean-reid/square-achievement/issues/63)) ([905f728](https://github.com/sean-reid/square-achievement/commit/905f72847b91fbdbd4cdd7b24b1a32b7177d77d6))
+
+
+### Bug Fixes
+
+* **pipeline:** reproducible table exports and a cross-format check ([#62](https://github.com/sean-reid/square-achievement/issues/62)) ([fef4add](https://github.com/sean-reid/square-achievement/commit/fef4adde8c6be18a2dccc24abedd0ec8069faf7a))
+
 ## 0.1.0 (2026-08-30)
 
 
