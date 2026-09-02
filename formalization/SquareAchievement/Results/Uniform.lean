@@ -10,24 +10,17 @@ properties, wins every larger board at once. The base is
 a stone below the far threshold fits inside the base board, where the
 run has checked it, so every square escaping the base has both reply
 stones at the far threshold or beyond, which is exactly the territory
-the farm entries govern. The intended proof replays the base run:
-near replies verbatim, unforced replies answered by the standing
-threat, the two reply stones abstracted through class representatives
-or, for farming pairs, through the anchored farm subtrees. The
-statement is expected to grow a farm-completeness hypothesis once its
-executable form is fixed.
+the farm entries govern. The proof replays the base run: near
+replies verbatim, unforced replies answered by the standing threat,
+the two reply stones abstracted through class representatives or, for
+farming pairs, through the anchored farm subtrees of `ExactFarm`,
+whose three certificates range over coordinates and so cover every
+farm pair a larger board can produce.
 -/
 
 namespace SquareAchievement
 
 set_option linter.style.nativeDecide false
-
-/-- The anchor formulas reproduce every farm entry's cell. -/
-theorem gen_anchors_valid : anchorsValid genTable = true := by native_decide
-
-/-- Every farm entry, anchored by a concrete far pair, wins its
-subtree without ever forcing the opponent onto its farm cell. -/
-theorem farm_safe_gen : farmSafe genTable = true := by native_decide
 
 /-- Both replies far: one anchored run per farm cell. -/
 theorem far_farm_safe_gen : farFarmSafe genTable = true := by

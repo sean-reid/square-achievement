@@ -12,12 +12,17 @@ the compiler-evaluation axiom that `native_decide` uses.
 
 | Theorem | Statement |
 | --- | --- |
+| `p1_wins_iff` | the first player forces a win exactly on the boards from 5 x 5 up |
+| `outcome` | the same, plus: every board up to 4 x 4 is drawn, each player able to secure at least a draw |
 | `small_board_no_win` | no first-player win on boards up to 4 x 4 |
+| `small_board_drawn` | drawing strategies for both players on boards up to 4 x 4 |
+| `second_player_no_win` | strategy stealing: the second player never forces a win |
+| `P1CanWin.or_p2CanDraw` | determinacy: the player to move forces a win or the opponent can draw |
 | `p1_wins_five` | the first player wins on 5 x 5 |
 | `p1_wins_of_five_le` | the first player wins on every board from 5 x 5 up |
 | `check_sound` | a successful checker run yields a `P1CanWin` tree |
 | `checkForced_sound` | the same for the forced-tree checker |
-| `refute_sound` | a successful refuter run yields a drawing strategy |
+| `refute_sound` | a successful refuter run refutes a first-player win |
 | `escape_farm` | a square escaping the base board is latent: box corner plus the reply pair |
 | `simulate` | a forced base run replays on every larger board |
 | `check_sound_uniform` | the checked run at 17, with the anchored certificates, wins every board from 17 up |
@@ -59,14 +64,19 @@ building:
 
 ```sh
 echo 'import SquareAchievement
-#check @SquareAchievement.p1_wins_of_five_le
-#print axioms SquareAchievement.p1_wins_of_five_le' | lake env lean --stdin
+#check @SquareAchievement.outcome
+#print axioms SquareAchievement.outcome' | lake env lean --stdin
 ```
 
 The axioms are `propext`, `Classical.choice`, `Quot.sound`, and one
 `..._native.native_decide.ax...` entry per evaluated certificate:
 the standard base plus the compiler-evaluation trust behind
-`native_decide`.
+`native_decide`. That last item means trusting the Lean compiler and
+runtime to evaluate the checkers correctly; the kernel checks the
+soundness theorems but not the evaluations themselves. Kernel
+reduction (`decide`) of the same runs is out of reach by orders of
+magnitude, so this is the trust base of every large computer-assisted
+proof in Lean.
 
 ## Running the checker
 
@@ -84,7 +94,6 @@ byte-board checker.
 | `forced` | run the certified forced-tree checker |
 | `trace` | print the first failing line instead of a verdict |
 | `refute` | search for a second-player drawing strategy |
-| `farmsafe` | run the entry-anchored farm-safety certificate |
 | `exactfarm` | run the three coordinate-anchored farm-safety certificates |
 
 To reproduce the runs reported in the paper's Table 1:
@@ -98,7 +107,8 @@ for n in $(seq 6 17); do lake exe checker "$n" forced; done
 
 - `Core/` cells, squares, positions; the quarter-plane model makes
   cross-board-size statements direct.
-- `Game/` the rules and `P1CanWin`.
+- `Game/` the rules and `P1CanWin`; `Outcome` adds the draw
+  predicates, strategy stealing, and determinacy.
 - `Compute/` the strategy table format; the enumerating checker, the
   forced-tree checker, and the refuter with their soundness proofs;
   the anchored farm-safety certificates; and a byte-board checker

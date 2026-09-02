@@ -1,4 +1,5 @@
 import Mathlib.Data.Finset.Basic
+import Mathlib.Data.Finset.Card
 import Mathlib.Data.Finset.Prod
 
 /-!
@@ -55,3 +56,28 @@ theorem HasSquare.mono {A B : Finset Cell} (h : HasSquare A) (hAB : A ⊆ B) :
 theorem not_hasSquare_empty : ¬ HasSquare (∅ : Finset Cell) := by
   rintro ⟨r, c, s, -, hsub⟩
   exact absurd (hsub (by simp [mem_corners])) (Finset.notMem_empty (r, c))
+
+/-- Fewer than four stones hold no square. -/
+theorem not_hasSquare_of_card_lt {S : Finset Cell} (h : S.card < 4) :
+    ¬ HasSquare S := by
+  rintro ⟨a, b, s, hs, hsub⟩
+  have h1 : ((a, b) : Cell) ≠ (a, b + s) := by
+    simp [Prod.ext_iff]; omega
+  have h2 : ((a, b) : Cell) ≠ (a + s, b) := by
+    simp [Prod.ext_iff]; omega
+  have h3 : ((a, b) : Cell) ≠ (a + s, b + s) := by
+    simp [Prod.ext_iff]; omega
+  have h4 : ((a, b + s) : Cell) ≠ (a + s, b) := by
+    simp [Prod.ext_iff]; omega
+  have h5 : ((a, b + s) : Cell) ≠ (a + s, b + s) := by
+    simp [Prod.ext_iff]; omega
+  have h6 : ((a + s, b) : Cell) ≠ (a + s, b + s) := by
+    simp [Prod.ext_iff]; omega
+  have hcard : (corners a b s).card = 4 := by
+    rw [corners]
+    rw [Finset.card_insert_of_notMem (by simp [h1, h2, h3]),
+      Finset.card_insert_of_notMem (by simp [h4, h5]),
+      Finset.card_insert_of_notMem (by simp [h6]),
+      Finset.card_singleton]
+  have := Finset.card_le_card hsub
+  omega
