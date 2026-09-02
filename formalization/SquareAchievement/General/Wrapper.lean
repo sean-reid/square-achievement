@@ -26,31 +26,6 @@ def x2Sane (t : Table) : Bool :=
        | .cell c => c.1 < 15 && c.2 < 15
        | _ => true)
 
-/-- Fewer than four stones hold no square. -/
-theorem no_square_card {S : Finset Cell} (h : S.card < 4) :
-    ¬ HasSquare S := by
-  rintro ⟨a, b, s, hs, hsub⟩
-  have h1 : ((a, b) : Cell) ≠ (a, b + s) := by
-    simp [Prod.ext_iff]; omega
-  have h2 : ((a, b) : Cell) ≠ (a + s, b) := by
-    simp [Prod.ext_iff]; omega
-  have h3 : ((a, b) : Cell) ≠ (a + s, b + s) := by
-    simp [Prod.ext_iff]; omega
-  have h4 : ((a, b + s) : Cell) ≠ (a + s, b) := by
-    simp [Prod.ext_iff]; omega
-  have h5 : ((a, b + s) : Cell) ≠ (a + s, b + s) := by
-    simp [Prod.ext_iff]; omega
-  have h6 : ((a + s, b) : Cell) ≠ (a + s, b + s) := by
-    simp [Prod.ext_iff]; omega
-  have hcard : (corners a b s).card = 4 := by
-    rw [corners]
-    rw [Finset.card_insert_of_notMem (by simp [h1, h2, h3]),
-      Finset.card_insert_of_notMem (by simp [h4, h5]),
-      Finset.card_insert_of_notMem (by simp [h6]),
-      Finset.card_singleton]
-  have := Finset.card_le_card hsub
-  omega
-
 /-- With at most two stones, no square scan finds a one-away
 square. -/
 theorem minThreat_short {k : ℕ} {mine occ : List Cell}
@@ -346,7 +321,7 @@ theorem empties_nonempty {n : ℕ} (hn : 17 ≤ n) {p1 p2 : Finset Cell}
 
 /-- Small positions are square-free. -/
 private theorem small2 {a b : Cell} : ¬ HasSquare (([a, b] : List Cell).toFinset) :=
-  no_square_card (lt_of_le_of_lt (List.toFinset_card_le _) (by simp))
+  not_hasSquare_of_card_lt (lt_of_le_of_lt (List.toFinset_card_le _) (by simp))
 
 set_option maxHeartbeats 3200000 in
 set_option maxRecDepth 4096 in
@@ -382,7 +357,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
     · rename_i hwin0
       exfalso
       have := hasSquareL_sound (n := 17) hwin0
-      exact no_square_card
+      exact not_hasSquare_of_card_lt
         (lt_of_le_of_lt (List.toFinset_card_le _) (by simp [stonesOf])) this
     · split at hforce
       · exact absurd hforce (by simp)
@@ -431,7 +406,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                     · rename_i hwin1
                       exfalso
                       have := hasSquareL_sound (n := 17) hwin1
-                      exact no_square_card (lt_of_le_of_lt
+                      exact not_hasSquare_of_card_lt (lt_of_le_of_lt
                         (List.toFinset_card_le _) (by simp [stonesOf])) this
                     · split at hbr1
                       · exact absurd hbr1 (by simp)
@@ -463,7 +438,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
               refine P1CanWin.step t.opening
                 (mem_empties.mpr ⟨hb6n _ hop6, by simp, by simp⟩)
                 (empties_nonempty hn (by simp))
-                (fun r _ => no_square_card (by
+                (fun r _ => not_hasSquare_of_card_lt (by
                   have := Finset.card_insert_le r (∅ : Finset Cell)
                   simp at this ⊢))
                 ?_
@@ -536,7 +511,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                     by simp [hx2r1]⟩)
                   (empties_nonempty hn (hcard3 _ _ _)) ?_ ?_
                 · intro r _
-                  refine no_square_card ?_
+                  refine not_hasSquare_of_card_lt ?_
                   have h1 := Finset.card_insert_le r
                     (insert o1r (∅ : Finset Cell))
                   have h2 := Finset.card_insert_le o1r (∅ : Finset Cell)
@@ -666,7 +641,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                     by simp [hx2do1]⟩)
                   (empties_nonempty hn (hcard3 _ _ _)) ?_ ?_
                 · intro r _
-                  refine no_square_card ?_
+                  refine not_hasSquare_of_card_lt ?_
                   have h1 := Finset.card_insert_le r
                     (insert o1r (∅ : Finset Cell))
                   have h2 := Finset.card_insert_le o1r (∅ : Finset Cell)

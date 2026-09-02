@@ -1,6 +1,7 @@
 import SquareAchievement.Core.Square
 import SquareAchievement.Core.Position
 import SquareAchievement.Game.Rules
+import SquareAchievement.Game.Outcome
 import SquareAchievement.Compute.Table
 import SquareAchievement.Compute.Checker
 import SquareAchievement.Compute.CheckerSound
