@@ -16,11 +16,7 @@ def main (args : List String) : IO Unit := do
   let n := (args.head?.bind String.toNat?).getD 6
   let table := if args.contains "five" then fiveTable else genTable
   let start ← IO.monoMsNow
-  if args.contains "farmsafe" then
-    let ok ← IO.lazyPure fun _ => anchorsValid table && farmSafe table
-    let ms := (← IO.monoMsNow) - start
-    IO.println s!"farm entries: {if ok then "SAFE" else "UNSAFE"} ({ms}ms)"
-  else if args.contains "exactfarm" then
+  if args.contains "exactfarm" then
     let ok ← IO.lazyPure fun _ =>
       farFarmSafe table && exactFarmSafe table && farNearFarmSafe table
     let ms := (← IO.monoMsNow) - start
