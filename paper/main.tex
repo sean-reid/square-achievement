@@ -32,16 +32,17 @@
 Two players alternately claim cells of an $n \times n$ grid; the
 first to hold all four corners of an axis-aligned square wins, and a
 full board without one is a draw. We prove that the first player has
-a winning strategy if and only if $n \ge 5$, answering a question of
-Erickson. The proof is constructive and uniform in $n$: an explicit
-strategy, two reflexes over a fixed lookup table with plans confined
-to a $6 \times 6$ corner region, wins every board of size at least
-$6$, with a separate table for $5 \times 5$. Boards of size at most
-$17$ are verified by exhaustive search, and a simulation theorem
-with finitely many decidable hypotheses transports the run at $17$
-to every larger board. The game, the strategy, and the whole
-argument are formalized in Lean~4, so the theorem is
-machine-checked for all $n$ at once.
+a winning strategy if and only if $n \ge 5$, and that every smaller
+board is drawn under optimal play, answering a question of Erickson.
+The proof is constructive and uniform in $n$: an explicit strategy,
+two reflexes over a fixed lookup table with plans confined to a
+$6 \times 6$ corner region, wins every board of size at least $6$,
+with a separate table for $5 \times 5$. Boards of size at most $17$
+are verified by exhaustive search, and a simulation theorem with
+finitely many decidable hypotheses transports the run at $17$ to
+every larger board. The game, the strategy, strategy stealing,
+determinacy, and the whole argument are formalized in Lean~4, so the
+theorem is machine-checked for all $n$ at once.
 \end{abstract}
 
 \maketitle
@@ -55,11 +56,15 @@ $(r,c)$, $(r,c+s)$, $(r+s,c)$, $(r+s,c+s)$ for some $s \ge 1$. If the
 board fills with no player holding such a square, the game is a draw.
 
 Erickson posed the game and asked for the outcome under optimal play
-\cite{erickson-pearls, opg}. It belongs to the family of achievement
-games introduced by Harary \cite{harary}, played in the Maker--Maker
-convention: both players pursue the same goal, and a player who loses
-the race may still hold out for a draw. For the general theory of
-positional games see Beck \cite{beck}.
+\cite{erickson-pearls, opg}. It is an achievement game in the sense
+of Harary \cite{harary}, played in the Maker--Maker convention: both
+players pursue the same goal, and a player who loses the race may
+still hold out for a draw. The convention itself is older, going back
+to the positional games of Hales and Jewett \cite{hales-jewett}; a
+recent unified treatment of achievement conventions, with the
+strategy-stealing theory in the generality we use, is
+\cite{galliot-senizergues}. For the general theory of positional
+games see Beck \cite{beck}.
 
 Two boundary results were known. Jenrich \cite{jenrich} reported
 computer searches showing that the second player can secure a draw for
@@ -75,7 +80,9 @@ known \cite{opg}.
 
 \begin{theorem}\label{thm:main}
 In the square achievement game on the $n \times n$ board, the first
-player has a winning strategy if and only if $n \ge 5$.
+player has a winning strategy if and only if $n \ge 5$. For
+$n \le 4$ the game is drawn under optimal play: each player can
+secure at least a draw.
 \end{theorem}
 
 Theorem~\ref{thm:main} is proved in three ranges. For $n \le 4$
@@ -104,9 +111,10 @@ that replay the strategy against every reply sequence, a dual
 checker refuting first-player wins on small boards, soundness
 theorems for each, and the simulation theorem for arbitrary $n$.
 Every search then discharges a statement about the abstract game
-rather than about a program, and Theorem~\ref{thm:main} is a single
-named declaration whose proof the kernel checks. The formal
-development accompanies this paper as supplementary material.
+rather than about a program. Strategy stealing and determinacy are
+formalized as well, so Theorem~\ref{thm:main} is a single named
+declaration, \texttt{outcome}, whose proof the kernel checks. The
+formal development accompanies this paper as supplementary material.
 
 \section{Definitions and conventions}\label{sec:defs}
 
@@ -162,7 +170,10 @@ the extra stone were absent, making a further arbitrary move whenever
 $\tau$ selects an occupied cell. The winning condition is monotone in
 a player's stone set, so surplus stones never hurt, and the first
 player wins; but $\tau$ was assumed to win against all first-player
-play, a contradiction.
+play, a contradiction. The formal statement is
+\texttt{second\_player\_no\_win}; the monotonicity step is the lemma
+\texttt{P1CanWin.insert\_left}, whose one subtlety is that the
+surplus stone may itself complete a square, ending the game early.
 \end{proof}
 
 \begin{proposition}\label{prop:large}
@@ -181,7 +192,8 @@ Lemma~\ref{lem:stealing}, so by finiteness the first player can.
 
 \begin{proposition}\label{prop:small}
 For $n \le 4$ the first player has no winning strategy. With
-Lemma~\ref{lem:stealing}, these games are drawn under optimal play.
+Lemma~\ref{lem:stealing}, these games are drawn under optimal play:
+each player can secure at least a draw.
 \end{proposition}
 
 For $n \le 2$ no square fits the board. For $n = 3, 4$ the claim is a
@@ -194,6 +206,11 @@ small: a player able to complete a square wins immediately, and a
 player facing two distinct completion threats has lost. The
 $4 \times 4$ search runs in about ninety seconds compiled.
 Proposition~\ref{prop:small} confirms the report of \cite{jenrich}.
+The step from ``neither player can force a win'' to ``each player can
+secure a draw'' is determinacy of the finite game, formalized as
+\texttt{P1CanWin.or\_p2CanDraw} by induction on the number of empty
+cells; the drawing strategies of both players on each board are the
+theorem \texttt{small\_board\_drawn}.
 
 \section{The strategy}\label{sec:strategy}
 
@@ -293,6 +310,14 @@ it. When the first reply is not an exact key, the pair's latent
 entry precedes the exact entry for $o_2$: exact entries answer the
 generated board's geometry, which one far stone shifts.
 
+The corner region is as small as a forcing table allows. A plan
+confined to a $5 \times 5$ region has, on any board, exactly the
+moves and squares it has on $\Board_5$, and faces there every reply
+it faces inside the region on a larger board; a purely forcing
+$5$-region table would therefore be a purely forcing strategy on
+$\Board_5$, and the search reported below found none from the opening
+$(2,2)$ over the second moves it considered.
+
 The board of size $5$ is treated separately, and necessarily so: its
 table is not purely forcing. Exhaustive analysis shows that for
 twenty of the $(o_1, o_2)$ openings that arise, no all-forcing
@@ -330,11 +355,16 @@ $o_1$ has no exact key, and after it otherwise.
 \end{algorithm}
 
 The general table holds $237$ branch keys (the $224$ possible first
-replies on the board it was generated on, $\Board_{15}$ of
-Section~\ref{sec:uniform}, twelve alignment classes, and a default)
-with
-$8{,}135$ plan entries and $248$ latent entries in all; the
-$5 \times 5$ table holds $24$ branches. Both are included with the supplementary material in source
+replies on the board it was generated on, $\Board_{15}$, twelve
+alignment classes, and a default) with $8{,}135$ plan entries and
+$248$ latent entries in all; the $5 \times 5$ table holds $24$
+branches. The generation board was raised until the table survived
+the verification ladder: the table generated on $\Board_{13}$ is
+refuted at $n = 14$, and the one generated on $\Board_{15}$ passes
+every size up to $17$. The proof of Section~\ref{sec:uniform}
+consumes the size only through the bound it puts on exact keys, which
+keeps the anchor stones at coordinates $16$ and $17$ clear of them.
+Both tables are included with the supplementary material in source
 and machine-readable form.
 
 \section{Verification}\label{sec:verify}
@@ -426,8 +456,31 @@ complete an opponent square and leads to a position from which the
 first player can win. A derivation of the predicate is precisely a
 strategy tree, one first-player move per node with all replies
 covered, and draws are failures by construction. These definitions,
-some thirty lines, are the whole specification: a reader audits them
+a few dozen lines, are the whole specification: a reader audits them
 by eye, and everything else is proved against them.
+
+\begin{remark}\label{rem:terminal}
+The predicate is read on positions reachable from the empty board,
+where a game ends at its first square. On a position in which a
+player already holds a square it does not say ``the game is over'':
+a mover holding a square with no empty cell left cannot win in the
+predicate's sense, since every constructor demands a move. Encoding
+the end of the game explicitly would cost an extra hypothesis on
+every constructor and every soundness proof, and buy nothing at the
+empty board, so we keep the lean form and prove the outcome theorems
+there. The one place the convention shows is
+Lemma~\ref{lem:stealing}: the monotonicity step returns a disjunction,
+a win or a completed square, exactly because the surplus stone may
+end the game.
+\end{remark}
+
+The second player's win, and each player's ability to secure at least
+a draw, are defined from the same predicate by swapping roles after a
+move; a derivation of the draw predicate is a strategy tree whose
+branches end in a win for its owner or a full board. Strategy
+stealing and determinacy are proved against these definitions with no
+computation, so the outcome theorem inherits its axioms from the
+searches alone.
 
 Three executable checkers are proved sound against this
 semantics: \texttt{check}, which replays a strategy table against
@@ -474,8 +527,15 @@ win on $\Board_5$ is \texttt{check\_sound} applied to one evaluated
 run of \texttt{check}, and each run of Table~\ref{tab:runs} is
 discharged the same way. The axiom footprint of these theorems
 is \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound},
-and Lean's evaluation axiom for compiled reduction, the usual trust
-base for kernel-external computation.
+and one instance of Lean's evaluation axiom for compiled reduction
+per evaluated certificate. That last item is a genuine addition to
+the trust base: the kernel checks the soundness theorems but not the
+evaluations, which are performed by the Lean compiler and runtime.
+Kernel reduction of the same runs is out of reach by orders of
+magnitude, and a proof term recording every node of the search would
+be larger than the tables by a similar factor, so we accept the
+standard trust base of large computer-assisted proofs in Lean, and
+report it.
 
 \section{Every larger board}\label{sec:uniform}
 
@@ -587,6 +647,13 @@ block. The runs range over coordinates rather than table keys,
 finitely many in all, and each passes by evaluation.
 \end{lemma}
 
+The anchor pairs place one stone at coordinate $17$, just past the
+base board, and the default-class anchor for the region cell $(a,b)$
+puts its partner in row $a + 17 - b \le 22$; $\Board_{23}$ is the
+least board holding every anchor. Any larger board would serve, since
+the simulation transports a run from any base of size at least $17$;
+the size only bounds the fuel and the square scan of the runs.
+
 Figure~\ref{fig:farm} shows a latent square realized in play,
 against an earlier table without latent entries.
 
@@ -632,25 +699,31 @@ outside $\Board_{15}$, so no search on that board encounters it.}
 
 The supplementary material contains the Lean development, with the
 tables as data and each theorem above as a named declaration:
-Theorem~\ref{thm:main} is \texttt{p1\_wins\_of\_five\_le} with
-\texttt{small\_board\_no\_win}, Theorem~\ref{thm:uniform} is
-\texttt{check\_sound\_uniform}, and the supporting layer comprises
-\texttt{check\_sound}, \texttt{checkForced\_sound},
-\texttt{refute\_sound}, \texttt{escape\_farm}, \texttt{simulate},
-and the evaluated certificates of Sections~\ref{sec:verify}
-and~\ref{sec:uniform}. The development builds with no unproved
-declarations. Alongside it sit the generation pipeline (strategy
-search, extraction, and export), the reference verifier, and the
-commands that reproduce the runs of Table~\ref{tab:runs}. The
-interactive page accompanying the paper replays the same tables move
-for move.
+Theorem~\ref{thm:main} is \texttt{outcome}, whose first half is
+\texttt{p1\_wins\_iff}; Lemma~\ref{lem:stealing} is
+\texttt{second\_player\_no\_win}; Proposition~\ref{prop:small} is
+\texttt{small\_board\_no\_win} with \texttt{small\_board\_drawn};
+Theorem~\ref{thm:uniform} is \texttt{check\_sound\_uniform}; and the
+supporting layer comprises \texttt{check\_sound},
+\texttt{checkForced\_sound}, \texttt{refute\_sound},
+\texttt{escape\_farm}, \texttt{simulate}, and the evaluated
+certificates of Sections~\ref{sec:verify} and~\ref{sec:uniform}. The
+development builds with no unproved declarations. Alongside it sit
+the generation pipeline (strategy search, extraction, and export),
+the reference verifier, and the commands that reproduce the runs of
+Table~\ref{tab:runs} and the position count of
+Section~\ref{sec:strategy}. The three copies of the tables, Lean
+data, the page's JSON, and the pipeline's own, are regenerated from
+the search and compared byte for byte in continuous integration, so
+the checkers judge one and the same strategy. The interactive page
+accompanying the paper replays the same tables move for move.
 
 \section*{Acknowledgements}
 
 I thank Nicholas Tan for many games and for productive discussions
 that shaped the strategy presented here.
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 
 \bibitem{bacher-eliahou}
 R.~Bacher and S.~Eliahou,
@@ -663,10 +736,20 @@ J.~Beck,
 Encyclopedia of Mathematics and its Applications, vol.~114,
 Cambridge University Press, 2008.
 
+\bibitem{galliot-senizergues}
+F.~Galliot and J.~S\'enizergues,
+\emph{A unified convention for achievement positional games},
+arXiv:2503.18163, 2025, revised 2026.
+
 \bibitem{erickson-pearls}
 M.~Erickson,
 \emph{Pearls of Discrete Mathematics},
 CRC Press, 2010.
+
+\bibitem{hales-jewett}
+A.~W.~Hales and R.~I.~Jewett,
+\emph{Regularity and positional games},
+Trans. Amer. Math. Soc. \textbf{106} (1963), 222--229.
 
 \bibitem{harary}
 F.~Harary,
