@@ -21,6 +21,7 @@ export class SagBoard extends HTMLElement {
   private showThreats = false;
   private demoTimer: ReturnType<typeof setInterval> | null = null;
   private svg!: SVGSVGElement;
+  private focusIdx = 0;
 
   connectedCallback(): void {
     const fromUrl = new URLSearchParams(location.search).get("g");
@@ -130,6 +131,14 @@ export class SagBoard extends HTMLElement {
     this.svg = document.createElementNS(NS, "svg");
     this.svg.setAttribute("viewBox", `-1 -1 ${size + 2} ${size + 2}`);
     this.svg.setAttribute("class", "sag-svg");
+    this.svg.setAttribute("tabindex", "0");
+    this.svg.setAttribute("role", "group");
+    this.svg.setAttribute(
+      "aria-label",
+      `${n} by ${n} board: arrow keys move, Enter or Space plays`,
+    );
+    this.svg.addEventListener("keydown", (e) => this.onKey(e));
+    this.focusIdx = Math.min(this.focusIdx, n * n - 1);
     const stage = this.querySelector<HTMLElement>(".sag-stage")!;
     stage.innerHTML = "";
     stage.appendChild(this.svg);
@@ -139,7 +148,15 @@ export class SagBoard extends HTMLElement {
     const minCell = coarse ? 44 : 26;
     const avail = stage.clientWidth || 416;
     this.svg.style.width = avail / n < minCell ? `${n * minCell}px` : "";
-    for (const name of ["threats", "grid", "stones", "marks", "win", "cells"]) {
+    for (const name of [
+      "threats",
+      "grid",
+      "stones",
+      "marks",
+      "win",
+      "focus",
+      "cells",
+    ]) {
       const g = document.createElementNS(NS, "g");
       g.setAttribute("class", `sag-${name}`);
       this.svg.appendChild(g);
@@ -168,9 +185,56 @@ export class SagBoard extends HTMLElement {
       rect.setAttribute("height", String(U));
       rect.setAttribute("data-i", String(i));
       rect.setAttribute("class", "sag-cell");
-      rect.addEventListener("click", () => this.humanPlay(i));
+      rect.addEventListener("click", () => {
+        this.focusIdx = i;
+        this.paintFocus();
+        this.humanPlay(i);
+      });
       cells.appendChild(rect);
     }
+    this.paintFocus();
+  }
+
+  /** The keyboard cursor: one tab stop for the board, arrows inside. */
+  private onKey(e: KeyboardEvent): void {
+    const n = this.pos.n;
+    const [r, c] = this.pos.cell(this.focusIdx);
+    const moves: Record<string, [number, number]> = {
+      ArrowUp: [r - 1, c],
+      ArrowDown: [r + 1, c],
+      ArrowLeft: [r, c - 1],
+      ArrowRight: [r, c + 1],
+    };
+    const target = moves[e.key];
+    if (target) {
+      e.preventDefault();
+      const [tr, tc] = target;
+      if (tr >= 0 && tc >= 0 && tr < n && tc < n) {
+        this.focusIdx = this.pos.idx([tr, tc]);
+        this.paintFocus();
+      }
+      return;
+    }
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      this.humanPlay(this.focusIdx);
+    }
+  }
+
+  private paintFocus(): void {
+    const layer = this.svg.querySelector(".sag-focus")!;
+    layer.innerHTML = "";
+    const [r, c] = this.pos.cell(this.focusIdx);
+    const rect = document.createElementNS(NS, "rect");
+    rect.setAttribute("x", String(c * U + 0.4));
+    rect.setAttribute("y", String(r * U + 0.4));
+    rect.setAttribute("width", String(U - 0.8));
+    rect.setAttribute("height", String(U - 0.8));
+    layer.appendChild(rect);
+    this.svg.setAttribute(
+      "aria-description",
+      `cursor at row ${r + 1}, column ${c + 1}`,
+    );
   }
 
   private stoneNode(i: number, first: boolean): SVGElement {

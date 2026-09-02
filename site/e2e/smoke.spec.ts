@@ -1,9 +1,24 @@
 import { expect, test } from "@playwright/test";
 
-test("the article and the game load", async ({ page }) => {
+test("the landing page leads with the theorem and the routes", async ({
+  page,
+}) => {
   await page.goto("./");
   await expect(page.locator("h1")).toContainText("Square Achievement Game");
+  await expect(page.locator(".theorem")).toContainText("if and only if");
+  await expect(page.locator("nav.routes a")).toHaveCount(3);
   await expect(page.locator("sag-board .sag-svg")).toBeVisible();
+  await expect(page.locator("sag-board .sag-x")).toHaveCount(1);
+});
+
+test("the proof guide is reachable and carries the figures", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await page.locator('nav.routes a[href$="proof/"]').click();
+  await expect(page.locator("h1")).toContainText("How the proof works");
+  await expect(page.locator("figure.diagram")).toHaveCount(3);
+  await expect(page.locator("ol.refs li")).toHaveCount(8);
   await expect(page.locator("sag-board .sag-x")).toHaveCount(1);
 });
 
@@ -11,6 +26,17 @@ test("placing a stone draws the bot's reply", async ({ page }) => {
   await page.goto("./");
   await page.locator('sag-board rect[data-i="1"]').click();
   await expect(page.locator("sag-board .sag-o")).toHaveCount(1);
+  await expect(page.locator("sag-board .sag-x")).toHaveCount(2);
+});
+
+test("the board plays from the keyboard", async ({ page }) => {
+  await page.goto("./");
+  const svg = page.locator("sag-board .sag-svg");
+  await svg.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("sag-board .sag-o")).toHaveCount(1);
+  await expect(page.locator('sag-board .sag-o[data-stone="1"]')).toHaveCount(1);
   await expect(page.locator("sag-board .sag-x")).toHaveCount(2);
 });
 

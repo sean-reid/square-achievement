@@ -8,9 +8,10 @@ when n >= 5, by a machine-checked strategy.
 
 ## Layout
 
-- `site/` the landing page: a long-form article with the playable
-  game, the strategy, and downloads. Astro, statically built; the
-  deploy also packages the paper PDF and the formalization tarball.
+- `site/` the landing page: the theorem, the playable game, and the
+  routes to the paper, the Lean development, and an illustrated proof
+  guide at `/proof/`. Astro, statically built; the deploy also
+  packages the paper PDF and the formalization tarball.
 - `paper/` the LaTeX source of the paper; CI builds the PDF.
 - `formalization/` the Lean 4 development: game semantics, checkers
   with machine-checked soundness, the simulation theorem covering

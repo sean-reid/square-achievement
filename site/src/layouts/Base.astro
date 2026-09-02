@@ -1,0 +1,33 @@
+---
+import "../styles/paper.css";
+import "katex/dist/katex.min.css";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const base = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+  </head>
+  <body>
+    <slot />
+    <footer>
+      Code MIT · text CC BY 4.0 · <a href={`${base}`}>home</a> ·
+      <a href="https://github.com/sean-reid/square-achievement">source</a>
+    </footer>
+    <script>
+      import "../game/board";
+    </script>
+  </body>
+</html>

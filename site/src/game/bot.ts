@@ -17,9 +17,6 @@ const tables = tablesJson as unknown as {
   five: StrategyTable;
 };
 
-/** True once the tables' verification status is final. */
-export const VERIFIED = false;
-
 export function botDecision(pos: Position): Decision {
   if (pos.n === 5) return strategyDecision(tables.five, pos);
   if (pos.n >= 6) return strategyDecision(tables.general, pos);
