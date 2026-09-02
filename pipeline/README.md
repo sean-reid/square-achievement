@@ -49,7 +49,10 @@ The general table is generated on the 15 x 15 board (`GEN_N` in
 exactly the committed files, and CI regenerates them on every change
 and fails on any difference. The exported JSON is excluded from the
 site's formatter so that the exporter's output is the committed
-byte sequence.
+byte sequence. The 5 x 5 solve takes about twenty minutes and
+several gigabytes of memory, reports 179,173,935 positions solved,
+and writes `strategy5.py` unformatted: run `ruff format` on it
+afterwards to reproduce the committed file byte for byte.
 
 ## Tests
 
