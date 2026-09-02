@@ -9,13 +9,15 @@ visits every second-player reply sequence, so extraction doubles as
 exhaustive verification that the policy never loses.
 
 python3 -m squares.smallboard [path] regenerates the JSON consumed by
-the site's bot, keyed by "p1,p2" stone bitmasks (row-major bits).
+the site's bot, keyed by "p1,p2" stone bitmasks (row-major bits); the
+default path is the site's small_tables.json.
 """
 
 import json
 import pathlib
 import sys
 
+from .paths import SITE_SMALL_TABLES
 from .solve import Solver
 
 
@@ -104,7 +106,7 @@ def main():
         }
         out[str(n)] = cells
         print(f"n={n}: {len(cells)} quiet entries")
-    path = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "small_tables.json")
+    path = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else SITE_SMALL_TABLES
     path.write_text(json.dumps(out, separators=(",", ":")) + "\n")
     print(f"wrote {path}")
 

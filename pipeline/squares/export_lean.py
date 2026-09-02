@@ -3,18 +3,13 @@
 python3 -m squares.export_lean [data-dir] writes Data/TableGen.lean
 (the general table, regenerated) and Data/Table5.lean (the n=5 table
 with quiet forks) into the Lean project's Data directory, by default
-the formalization in the square-achievement repo.
+the formalization next to this pipeline in the repository.
 """
 
 import pathlib
 import sys
 
-LEAN_DATA = pathlib.Path(
-    sys.argv[1]
-    if len(sys.argv) > 1
-    else pathlib.Path.home()
-    / "workshop/square-achievement/formalization/SquareAchievement/Data"
-)
+from .paths import LEAN_DATA
 
 
 def key_lean(k):
@@ -38,7 +33,7 @@ def entry_lean(e):
     return f"Entry.plan [{cells}]"
 
 
-def emit(name, defname, opening, box, x2_map, scripts, chunk=4):
+def emit(name, defname, opening, box, x2_map, scripts, out_dir, chunk=4):
     lines = [
         "import SquareAchievement.Compute.Table",
         "",
@@ -74,7 +69,7 @@ def emit(name, defname, opening, box, x2_map, scripts, chunk=4):
         "",
         "end SquareAchievement",
     ]
-    path = LEAN_DATA / name
+    path = out_dir / name
     path.write_text("\n".join(lines) + "\n")
     print(f"wrote {path} ({len(chunks)} chunks)")
 
@@ -88,9 +83,10 @@ def main():
     from . import strategy5
     from .solve import build_general
 
-    x2_map, scripts = build_general(gen_n=15)
-    emit("TableGen.lean", "gen", (2, 2), 6, x2_map, as_entries(scripts))
-    emit("Table5.lean", "five", (2, 2), 5, strategy5.X2, as_entries(strategy5.SCRIPTS))
+    out_dir = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else LEAN_DATA
+    x2_map, scripts = build_general()
+    emit("TableGen.lean", "gen", (2, 2), 6, x2_map, as_entries(scripts), out_dir)
+    emit("Table5.lean", "five", (2, 2), 5, strategy5.X2, as_entries(strategy5.SCRIPTS), out_dir)
 
 
 if __name__ == "__main__":

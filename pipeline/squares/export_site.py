@@ -5,7 +5,7 @@ the export must be bit-exact: cell keys as "r,c", alignment classes as
 "row:r" and "col:c", farm keys as "farm:a,b", the default as "*", and
 quiet forks as {"q": move, "b": branches}.
 
-python3 -m squares.export_site [path], default tables.json.
+python3 -m squares.export_site [path], default the site's tables.json.
 """
 
 import json
@@ -13,6 +13,7 @@ import pathlib
 import sys
 
 from . import strategy5
+from .paths import SITE_TABLES
 from .solve import build_general
 
 
@@ -50,12 +51,12 @@ def table_json(opening, box, x2, scripts):
 
 
 def main():
-    x2_map, scripts = build_general(gen_n=15)
+    x2_map, scripts = build_general()
     out = {
         "general": table_json((2, 2), 6, x2_map, scripts),
         "five": table_json((2, 2), 5, strategy5.X2, strategy5.SCRIPTS),
     }
-    path = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "tables.json")
+    path = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else SITE_TABLES
     path.write_text(json.dumps(out, separators=(",", ":")) + "\n")
     print(f"wrote {path}")
 
