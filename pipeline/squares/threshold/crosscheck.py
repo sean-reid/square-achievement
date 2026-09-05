@@ -3,7 +3,7 @@
 The Lean development, the site, and the reference verifier each carry
 their own copy of the tables. This module reads the Lean data files
 back into the pipeline's shape and compares them with the site's
-tables.json and the generated Python module, so a stale export fails
+JSON tables and the generated Python module, so a stale export fails
 here rather than letting the verifiers judge different strategies.
 
 python3 -m squares.threshold.crosscheck exits nonzero on any mismatch.
@@ -13,7 +13,7 @@ import json
 import re
 import sys
 
-from ..paths import LEAN_DATA, SITE_TABLES
+from ..paths import LEAN_DATA, SITE_FIVE_TABLE, SITE_GENERAL_TABLE
 from . import strategy5
 from .export_site import table_json
 
@@ -101,7 +101,10 @@ def read_lean_table(path):
 
 
 def main():
-    site = json.loads(SITE_TABLES.read_text())
+    site = {
+        "general": json.loads(SITE_GENERAL_TABLE.read_text()),
+        "five": json.loads(SITE_FIVE_TABLE.read_text()),
+    }
     lean = {
         "general": table_json(*read_lean_table(LEAN_DATA / "TableGen.lean")),
         "five": table_json(*read_lean_table(LEAN_DATA / "Table5.lean")),

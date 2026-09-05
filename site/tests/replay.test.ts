@@ -1,9 +1,9 @@
 /** Exhaustive replay: the TypeScript engine must win every line, making
  * the site a third independent verifier of the strategy tables. */
 
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { botMove } from "../src/game/bot";
+import { botMove, loadAllTables } from "../src/game/bot";
 import { Position, threats, winningSquare } from "../src/game/rules";
 
 /** True if the bot wins against every reply sequence from pos. */
@@ -32,6 +32,8 @@ function verifyAll(pos: Position): boolean {
     pos.undo();
   }
 }
+
+beforeAll(loadAllTables);
 
 describe("exhaustive replay", () => {
   it("wins every line at n = 5", () => {

@@ -2,21 +2,21 @@
 
 import json
 
-from squares.paths import LEAN_DATA, SITE_TABLES
+from squares.paths import LEAN_DATA, SITE_FIVE_TABLE, SITE_GENERAL_TABLE
 from squares.threshold import strategy5
 from squares.threshold.crosscheck import read_lean_table
 from squares.threshold.export_site import table_json
 
 
 def test_lean_general_table_matches_site_json():
-    site = json.loads(SITE_TABLES.read_text())
-    assert table_json(*read_lean_table(LEAN_DATA / "TableGen.lean")) == site["general"]
+    site = json.loads(SITE_GENERAL_TABLE.read_text())
+    assert table_json(*read_lean_table(LEAN_DATA / "TableGen.lean")) == site
 
 
 def test_lean_five_table_matches_site_and_python():
-    site = json.loads(SITE_TABLES.read_text())
+    site = json.loads(SITE_FIVE_TABLE.read_text())
     lean = table_json(*read_lean_table(LEAN_DATA / "Table5.lean"))
-    assert lean == site["five"]
+    assert lean == site
     assert lean == table_json((2, 2), 5, strategy5.X2, strategy5.SCRIPTS)
 
 

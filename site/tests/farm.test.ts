@@ -2,9 +2,9 @@
  * pair (0,15), (12,3) selects a farm entry, and the bot must win every
  * continuation of that branch. */
 
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { botMove } from "../src/game/bot";
+import { botMove, loadAllTables } from "../src/game/bot";
 import { Position, winningSquare } from "../src/game/rules";
 
 function verifyAll(pos: Position): boolean {
@@ -32,6 +32,8 @@ function verifyAll(pos: Position): boolean {
     pos.undo();
   }
 }
+
+beforeAll(loadAllTables);
 
 describe("farm branches at n = 16", () => {
   for (const [o1, o2] of [

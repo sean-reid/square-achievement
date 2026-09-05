@@ -30,7 +30,7 @@ result gets its own subpackage beside it.
 - `squares/threshold/export_lean.py`: writes the tables as Lean data
   files into the formalization.
 - `squares/threshold/export_site.py`: writes the same tables as the
-  site's `tables.json`.
+  site's `five.json` and `general.json`.
 - `squares/threshold/crosscheck.py`: reads the Lean data files back and
   checks that the Lean, site, and Python copies of the tables agree.
 - `squares/threshold/diagnose.py`: replays a failing line and narrates
@@ -44,7 +44,7 @@ result gets its own subpackage beside it.
 python3 -m squares.threshold.tables           # regenerate the 5 x 5 table; prints the positions solved
 python3 -m squares.threshold.tables general   # general table + reference verification at 6, 7, 8
 python3 -m squares.threshold.export_lean      # write the Lean data files
-python3 -m squares.threshold.export_site      # write the site's tables.json
+python3 -m squares.threshold.export_site      # write the site's five.json and general.json
 python3 -m squares.smallboard                 # write the site's small_tables.json
 python3 -m squares.threshold.crosscheck       # the three copies of the tables agree
 python3 -m squares.threshold.instrument 6 7   # measure the strategy's frame

@@ -10,12 +10,15 @@
 
 import { Position, threats } from "./rules";
 import type { Decision } from "./table";
-import smallJson from "./small_tables.json";
 
-const tables = smallJson as unknown as Record<
-  string,
-  Record<string, [number, number]>
->;
+type SmallTables = Record<string, Record<string, [number, number]>>;
+
+let tables: SmallTables | null = null;
+
+export async function loadSmallTables(): Promise<void> {
+  tables = (await import("./small_tables.json"))
+    .default as unknown as SmallTables;
+}
 
 function mask(stones: Set<number>): number {
   let m = 0;
@@ -34,6 +37,7 @@ export function smallBotDecision(pos: Position): Decision {
     const [r, c] = pos.cell(theirs[0]!);
     return { move: [r, c], source: "block" };
   }
+  if (tables === null) throw new Error("small tables not loaded");
   const key = `${mask(pos.p1)},${mask(pos.p2)}`;
   const entry = tables[String(pos.n)]?.[key];
   if (entry !== undefined) {
