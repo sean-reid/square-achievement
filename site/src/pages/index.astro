@@ -21,8 +21,9 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     Two players take turns claiming cells of an
     <span set:html={k("n \\times n")} /> grid. The first to hold all four corners
     of an axis-aligned square wins; a full board with no square is a draw. Erickson
-    asked who wins. The answer is the first player, exactly when
-    <span set:html={k("n \\ge 5")} />.
+    asked who wins. One explicit strategy wins for the first player on every board
+    from 6 × 6 up, and a machine-checked proof covers all sizes at once: the first
+    player wins exactly when <span set:html={k("n \\ge 5")} />.
   </p>
 
   <div class="theorem">
@@ -36,11 +37,12 @@ const base = import.meta.env.BASE_URL.endsWith("/")
   <p>
     Draws at 3 × 3 and 4 × 4 and a first-player win at 5 × 5 were known from
     computer search; from 15 × 15 up, strategy stealing gave the first player a
-    win but no strategy. Sizes 6 through 14 were open. The proof here is one
-    explicit strategy: two reflexes and a lookup table whose plans stay inside a
-    6 × 6 corner of the board. It wins every board from 6 × 6 up, with a
-    separate table for 5 × 5, and the whole argument, every board size at once,
-    is checked in Lean 4.
+    win but no strategy. Sizes 6 through 14 resisted until August 2026, when
+    first-player wins there were announced by computer search, one size at a
+    time. The proof here is different in kind: one explicit strategy, two
+    reflexes and a lookup table whose plans stay inside a 6 × 6 corner of the
+    board, wins every board from 6 × 6 up, with a separate table for 5 × 5, and
+    the whole argument, every board size at once, is checked in Lean 4.
   </p>
 
   <figure class="game">

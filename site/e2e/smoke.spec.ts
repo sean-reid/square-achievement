@@ -18,7 +18,7 @@ test("the proof guide is reachable and carries the figures", async ({
   await page.locator('nav.routes a[href$="proof/"]').click();
   await expect(page.locator("h1")).toContainText("How the proof works");
   await expect(page.locator("figure.diagram")).toHaveCount(3);
-  await expect(page.locator("ol.refs li")).toHaveCount(8);
+  await expect(page.locator("ol.refs li")).toHaveCount(9);
   await expect(page.locator("sag-board .sag-x")).toHaveCount(1);
 });
 

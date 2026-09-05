@@ -20,11 +20,12 @@ const base = import.meta.env.BASE_URL.endsWith("/")
   <p class="abstract">
     <strong>Summary.</strong> Two players alternately claim cells of an
     <span set:html={k("n \\times n")} /> grid; the first to hold all four corners
-    of an axis-aligned square wins. The first player has a winning strategy precisely
-    when <span set:html={k("n \\ge 5")} />, and all smaller boards are drawn
-    under optimal play. The strategy is explicit, one table serves every board
-    of size at least 6, and the whole argument, draws and all board sizes
-    included, is machine-checked in Lean 4.
+    of an axis-aligned square wins. One explicit strategy, a fixed table whose plans
+    stay in a 6 × 6 corner, wins every board of size at least 6, and the whole argument,
+    all board sizes at once and the draws included, is machine-checked in Lean 4.
+    The first player therefore has a winning strategy precisely when <span
+      set:html={k("n \\ge 5")}
+    />, and all smaller boards are drawn under optimal play.
   </p>
 
   <figure class="game">
@@ -138,8 +139,16 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     <a class="cite" href="#ref-5">[5]</a>, so no game on a board of size 15 or
     more can end in a draw; a standard strategy-stealing argument then gives the
     first player a win, though it produces no strategy. In between, from 6 × 6
-    through 14 × 14, the outcome was open. We close that range, and the proof is
-    a strategy you can watch: the bot in Figure 1 is playing it.
+    through 14 × 14, nothing was published until August 2026, when Keith Adler
+    announced computer searches for those nine sizes
+    <a class="cite" href="#ref-9">[9]</a>: a depth-limited search reports a
+    first-player win within 13 plies for each of them, with full strategy trees
+    certified for 6 × 6 and 7 × 7 and search verdicts for the rest, one search
+    per size and no strategy shared between sizes; the results are unrefereed by
+    his own account. Independently and at the same time, this work took a
+    different route: one strategy for every board, machine-checked for all sizes
+    at once. It is also a strategy you can watch: the bot in Figure 1 is playing
+    it.
   </p>
 
   <h2>The strategy</h2>
@@ -443,6 +452,29 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     >.
   </p>
 
+  <h2>Open questions</h2>
+  <p>
+    The strategy is explicit but not small: 237 branches and some eight thousand
+    plans. Is there a description of a winning strategy for every board from 6 ×
+    6 up that fits in a reader's head, with no lookup table, the way Jenrich's
+    argument does for 5 × 5? Everything in the proof says the winning mechanism
+    is local, but nobody has written it down that way.
+  </p>
+  <p>
+    The strategy is not the fastest. Its longest verified lines run 26 plies on
+    the 6 × 6, 7 × 7, and 8 × 8 boards, while Adler's searches report a forced
+    win within 13 plies on each board from 6 to 14, one search per size. Is
+    there one strategy that wins within 13 plies on every board from 6 × 6 up?
+    More generally, how quickly can the first player force a win on the n × n
+    board, and can a single strategy be fastest for every n?
+  </p>
+  <p>
+    Are the constants least? The plans cannot fit a smaller corner than 6 × 6
+    for a purely forcing table of this shape, and 17 is the smallest base board
+    for the case analysis used here; whether a finer treatment of far replies
+    lowers it is open.
+  </p>
+
   <h2>References</h2>
   <ol class="refs">
     <li id="ref-1">
@@ -478,6 +510,15 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     <li id="ref-8">
       A. W. Hales and R. I. Jewett, Regularity and positional games,
       Transactions of the American Mathematical Society 106 (1963), 222–229.
+    </li>
+    <li id="ref-9">
+      K. Adler, Is the square achievement game on the n × n grid resolved for 6
+      ≤ n ≤ 14?, MathOverflow question 514742, August 2026.
+      <a href="https://mathoverflow.net/q/514742">mathoverflow.net</a>; code,
+      logs, and certificates at
+      <a href="https://github.com/keithadler/square-achievement-game"
+        >github.com/keithadler/square-achievement-game</a
+      >
     </li>
   </ol>
 </Base>
