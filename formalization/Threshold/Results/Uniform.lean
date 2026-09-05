@@ -1,5 +1,5 @@
-import SquareAchievement.General.Wrapper
-import SquareAchievement.Data.TableGen
+import Threshold.General.Wrapper
+import Threshold.Data.TableGen
 
 /-!
 # The uniform theorem

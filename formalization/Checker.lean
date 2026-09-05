@@ -1,10 +1,10 @@
 import SquareAchievement.Compute.Checker
 import SquareAchievement.Compute.Refute
 import SquareAchievement.Compute.Uniform
-import SquareAchievement.Compute.ExactFarm
+import Threshold.ExactFarm
 import SquareAchievement.Compute.Fast
-import SquareAchievement.Data.TableGen
-import SquareAchievement.Data.Table5
+import Threshold.Data.TableGen
+import Threshold.Data.Table5
 
 /-! Command-line entry: `lake exe checker <n> [five] [trace]` runs the
 exhaustive verification of a generated table on the `n` board, or

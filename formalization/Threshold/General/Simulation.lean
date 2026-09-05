@@ -1,6 +1,6 @@
 import SquareAchievement.Compute.ForcedSound
-import SquareAchievement.General.Invariance
-import SquareAchievement.General.Coverage
+import Threshold.General.Invariance
+import Threshold.General.Coverage
 
 /-!
 # The simulation argument
