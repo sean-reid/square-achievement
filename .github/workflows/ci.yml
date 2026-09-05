@@ -4,8 +4,30 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      tables: ${{ steps.filter.outputs.tables }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            tables:
+              - pipeline/**
+              - formalization/**/Data/**
+              - site/src/game/*.json
+              - .github/workflows/ci.yml
+
   site:
     runs-on: ubuntu-latest
     defaults:
@@ -42,7 +64,11 @@ jobs:
       - run: uvx ruff format --check squares
       - run: uv run --with pytest python -m pytest squares -q
 
+  # regenerating the tables takes six minutes, so it runs only when
+  # something that feeds them changed, and on the weekly full run
   tables:
+    needs: changes
+    if: github.event_name != 'pull_request' && github.event_name != 'push' || needs.changes.outputs.tables == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
