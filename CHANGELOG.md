@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/sean-reid/square-achievement/compare/v0.1.1...v0.1.2) (2026-09-05)
+
+
+### Features
+
+* **site:** the concurrent result, the lead claim, and open questions ([#71](https://github.com/sean-reid/square-achievement/issues/71)) ([daa3175](https://github.com/sean-reid/square-achievement/commit/daa31759c4252cc667971d7b2db948f74678549e))
+
 ## [0.1.1](https://github.com/sean-reid/square-achievement/compare/v0.1.0...v0.1.1) (2026-09-02)
 
 
