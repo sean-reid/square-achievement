@@ -2,7 +2,7 @@
 draw_policy raises unless every reachable line avoids a loss."""
 
 from squares.smallboard import draw_policy, safe
-from squares.solve import Solver
+from squares.solver import Solver
 
 
 def test_empty_boards_are_safe():

@@ -10,7 +10,7 @@ construction proves the fatal pattern is realizable against the table,
 not merely possible in principle.
 """
 
-from .game import P1, P2, Game
+from ..game import P1, P2, Game
 
 
 def replay(strategy, n, history, subs):

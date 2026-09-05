@@ -8,7 +8,7 @@ block is quiet, two opposing threats lose. Scripts list only P1's free
 moves; forced blocks are the block reflex's job at replay.
 """
 
-from .game import P1, P2
+from ..game import P1, P2
 
 
 def _candidates(g):

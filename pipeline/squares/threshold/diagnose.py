@@ -1,11 +1,11 @@
 """Replay a failing line against the general table and narrate it.
 
-python3 -m squares.diagnose n r,c r,c ...   (the move list, P1 first)
+python3 -m squares.threshold.diagnose n r,c r,c ...   (the move list, P1 first)
 """
 
 import sys
 
-from . import P1, P2, Game
+from .. import P1, P2, Game
 from .forcing import box_class
 
 

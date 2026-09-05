@@ -8,15 +8,15 @@ exhaustive verifier with a metering strategy and prints the maxima per
 board size; a constant frame across growing n is the empirical footing
 for choosing N0.
 
-Usage: python3 -m squares.instrument [sizes...], default 6 7 8 9.
+Usage: python3 -m squares.threshold.instrument [sizes...], default 6 7 8 9.
 """
 
 import sys
 
+from ..game import P1, P2, all_squares
+from ..verify import verify
 from .forcing import box_class, table_strategy
-from .game import P1, P2, all_squares
-from .solve import build_general
-from .verify import verify
+from .tables import build_general
 
 BOX = 6
 

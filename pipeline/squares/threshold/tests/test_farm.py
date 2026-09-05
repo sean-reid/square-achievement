@@ -1,7 +1,8 @@
 """The far-pair farm geometry and its generation-time constraints."""
 
-from squares.forcing import farm_relation
-from squares.solve import Solver, _farm_hot_cells, forcing_bits
+from squares.solver import Solver, forcing_bits
+from squares.threshold.forcing import farm_relation
+from squares.threshold.tables import _farm_hot_cells
 
 
 def test_refutation_pair_is_the_p3_farm():

@@ -1,6 +1,6 @@
 """Export strategy tables as Lean data files.
 
-python3 -m squares.export_lean [data-dir] writes Data/TableGen.lean
+python3 -m squares.threshold.export_lean [data-dir] writes Data/TableGen.lean
 (the general table, regenerated) and Data/Table5.lean (the n=5 table
 with quiet forks) into the Lean project's Data directory, by default
 the formalization next to this pipeline in the repository.
@@ -9,7 +9,7 @@ the formalization next to this pipeline in the repository.
 import pathlib
 import sys
 
-from .paths import LEAN_DATA
+from ..paths import LEAN_DATA
 
 
 def key_lean(k):
@@ -81,7 +81,7 @@ def as_entries(scripts):
 
 def main():
     from . import strategy5
-    from .solve import build_general
+    from .tables import build_general
 
     out_dir = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else LEAN_DATA
     x2_map, scripts = build_general()
