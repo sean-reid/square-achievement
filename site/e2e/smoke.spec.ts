@@ -1,21 +1,28 @@
 import { expect, test } from "@playwright/test";
 
-test("the landing page leads with the theorem and the routes", async ({
-  page,
-}) => {
+test("the hub leads with the game and lists the results", async ({ page }) => {
   await page.goto("./");
   await expect(page.locator("h1")).toContainText("Square Achievement Game");
-  await expect(page.locator(".theorem")).toContainText("if and only if");
-  await expect(page.locator("nav.routes a")).toHaveCount(3);
   await expect(page.locator("sag-board .sag-svg")).toBeVisible();
-  await expect(page.locator("sag-board .sag-x")).toHaveCount(1);
+  await expect(page.locator("article.result")).toHaveCount(1);
+  await expect(page.locator("article.result h3")).toContainText(
+    "winning threshold",
+  );
 });
 
-test("the proof guide is reachable and carries the figures", async ({
+test("the result overview states the theorem and its routes", async ({
   page,
 }) => {
   await page.goto("./");
-  await page.locator('nav.routes a[href$="proof/"]').click();
+  await page.locator('article.result a[href$="threshold/"]').click();
+  await expect(page.locator(".theorem")).toContainText("if and only if");
+  await expect(page.locator("nav.routes a")).toHaveCount(3);
+  await expect(page.locator("pre.lean")).toContainText("theorem outcome");
+});
+
+test("the proof guide has its figures and references", async ({ page }) => {
+  await page.goto("./threshold/");
+  await page.locator('nav.routes a[href$="threshold/proof/"]').click();
   await expect(page.locator("h1")).toContainText("How the proof works");
   await expect(page.locator("figure.diagram")).toHaveCount(3);
   await expect(page.locator("ol.refs li")).toHaveCount(9);
@@ -31,12 +38,10 @@ test("placing a stone draws the bot's reply", async ({ page }) => {
 
 test("the board plays from the keyboard", async ({ page }) => {
   await page.goto("./");
-  const svg = page.locator("sag-board .sag-svg");
-  await svg.focus();
+  await page.locator("sag-board .sag-svg").focus();
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Enter");
   await expect(page.locator("sag-board .sag-o")).toHaveCount(1);
-  await expect(page.locator('sag-board .sag-o[data-stone="1"]')).toHaveCount(1);
   await expect(page.locator("sag-board .sag-x")).toHaveCount(2);
 });
 

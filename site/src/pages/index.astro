@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import katex from "katex";
+import { results } from "../results";
 
 const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
 const base = import.meta.env.BASE_URL.endsWith("/")
@@ -9,98 +10,59 @@ const base = import.meta.env.BASE_URL.endsWith("/")
 ---
 
 <Base
-  title="The Square Achievement Game on n × n Boards"
-  description="Two players claim cells of an n by n grid; the first to own four corners of a square wins. The first player wins exactly when n is at least 5, by a machine-checked strategy. Play against it."
+  title="The Square Achievement Game"
+  description="Results on the square achievement game: two players claim cells of an n by n grid, and the first to own four corners of an axis-aligned square wins. Papers, machine-checked proofs in Lean, and a playable strategy."
 >
   <header class="masthead">
-    <h1>The Square Achievement Game on n × n Boards</h1>
-    <p class="byline">Sean Reid · August 2026</p>
+    <h1>The Square Achievement Game</h1>
+    <p class="byline">Sean Reid</p>
   </header>
 
   <p class="lead">
     Two players take turns claiming cells of an
     <span set:html={k("n \\times n")} /> grid. The first to hold all four corners
     of an axis-aligned square wins; a full board with no square is a draw. Erickson
-    asked who wins. One explicit strategy wins for the first player on every board
-    from 6 × 6 up, and a machine-checked proof covers all sizes at once: the first
-    player wins exactly when <span set:html={k("n \\ge 5")} />.
-  </p>
-
-  <div class="theorem">
-    <span class="label">Theorem.</span> The first player has a winning strategy in
-    the square achievement game on the
-    <span set:html={k("n \\times n")} /> board if and only if
-    <span set:html={k("n \\ge 5")} />. For <span set:html={k("n \\le 4")} /> the game
-    is a draw under optimal play.
-  </div>
-
-  <p>
-    Draws at 3 × 3 and 4 × 4 and a first-player win at 5 × 5 were known from
-    computer search; from 15 × 15 up, strategy stealing gave the first player a
-    win but no strategy. Sizes 6 through 14 resisted until August 2026, when
-    first-player wins there were announced by computer search, one size at a
-    time. The proof here is different in kind: one explicit strategy, two
-    reflexes and a lookup table whose plans stay inside a 6 × 6 corner of the
-    board, wins every board from 6 × 6 up, with a separate table for 5 × 5, and
-    the whole argument, every board size at once, is checked in Lean 4.
+    asked who wins. This site collects results on the game, each with a paper, an
+    illustrated proof guide, and a proof checked in Lean 4 on one shared formal model
+    of the game.
   </p>
 
   <figure class="game">
     <sag-board n="5"></sag-board>
     <figcaption>
-      Play against the strategy. The bot moves first and replays the proof's
-      tables move for move; you reply by clicking a cell, or with the arrow keys
-      and Enter. Change n to explore; below 5 × 5 neither side can force a win.
+      Play against the winning strategy. The bot moves first and replays the
+      proof's tables move for move; you reply by clicking a cell, or with the
+      arrow keys and Enter. Change n to explore; below 5 × 5 neither side can
+      force a win.
     </figcaption>
   </figure>
 
-  <nav class="routes" aria-label="where to go next">
-    <a class="route" href={`${base}downloads/threshold.pdf`}>
-      <span class="route-title">Read the paper</span>
-      <span class="route-body">
-        The definitions, the strategy, the verification runs, and the simulation
-        argument that carries one checked board to all larger ones. PDF, built
-        from this repository.
-      </span>
-    </a>
-    <a class="route" href={`${base}proof/`}>
-      <span class="route-title">See how the proof works</span>
-      <span class="route-body">
-        An illustrated guide: forcing plans, why one table serves every board,
-        what a computer search has to be trusted with, and what the Lean
-        development checks.
-      </span>
-    </a>
-    <a
-      class="route"
-      href={`${base}downloads/square-achievement-formalization.tar.gz`}
-    >
-      <span class="route-title">Check it yourself</span>
-      <span class="route-body">
-        The Lean 4 development with the tables as data. A successful
-        <code>lake build</code> is the proof; the README shows how to print the theorem
-        and its axioms.
-      </span>
-    </a>
-  </nav>
+  <h2>Results</h2>
+  {
+    results.map((r) => (
+      <article class="result">
+        <h3>{r.title}</h3>
+        <p>{r.statement}</p>
+        <nav class="result-links" aria-label={`${r.title}: where to go`}>
+          <a href={`${base}${r.slug}/`}>overview</a>
+          <a href={`${base}downloads/${r.slug}.pdf`}>paper (PDF)</a>
+          <a href={`${base}${r.slug}/proof/`}>proof guide</a>
+          <a href={`${base}downloads/square-achievement-formalization.tar.gz`}>
+            Lean ({r.lean})
+          </a>
+        </nav>
+      </article>
+    ))
+  }
 
-  <h2>What you have to trust</h2>
+  <h2>Open questions</h2>
   <p>
-    The headline statement in the development reads as follows, with
-    <code>P1CanWin</code> the first player forcing a win and the two draw predicates
-    each player securing at least a draw.
-  </p>
-  <pre
-    class="lean"><code>theorem outcome (n : ℕ) :
-    (P1CanWin n ∅ ∅ ↔ 5 ≤ n) ∧
-      ((P1CanDraw n ∅ ∅ ∧ P2CanDraw n ∅ ∅) ↔ n ≤ 4)</code></pre>
-  <p>
-    The definitions behind it, cells, squares, and the winning predicate as a
-    strategy tree, are a few dozen lines and are the only part a skeptic has to
-    read. Beyond them the trust is Lean's kernel, mathlib, and
-    <code>native_decide</code>, which lets the Lean compiler evaluate the
-    exhaustive checks instead of the kernel. The tables were found by a Python
-    search, but nothing about that search enters the proof: a wrong table fails
-    the check.
+    The winning strategy is explicit but large: is there a description of a
+    strategy for every board that fits in a reader's head, with no lookup table?
+    It is not the fastest either: its longest lines run 26 plies, while per-size
+    searches find wins within 13, so how quickly can the first player force a
+    win on the <span set:html={k("n \\times n")} /> board, and can one strategy be
+    fastest for every <span set:html={k("n")} />? And are the constants of the
+    proof, the 6 × 6 plan region and the 17 × 17 base board, least?
   </p>
 </Base>
