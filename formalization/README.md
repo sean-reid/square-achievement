@@ -8,6 +8,12 @@ everything below builds or refutes such trees. The development has no
 unproved declarations, and its axiom footprint is Lean's kernel plus
 the compiler-evaluation axiom that `native_decide` uses.
 
+The package holds two libraries. `SquareAchievement` is the shared
+core: the game, its outcomes, the strategy-table format, the checkers,
+and their soundness theorems. `Threshold` is the first result built on
+it: the tables, the uniform argument, the certificates, and the
+theorems below. Further results get libraries of their own beside it.
+
 ## Results
 
 | Theorem | Statement |
@@ -53,8 +59,8 @@ silicon) and Linux x86-64.
 
 ## Checking the theorem
 
-The build is the proof. `lake build` elaborates every file and the
-kernel checks every theorem, evaluating the certificates along the
+The build is the proof. `lake build` builds both libraries: it
+elaborates every file and the kernel checks every theorem, evaluating the certificates along the
 way, so a successful build verifies everything in the results table,
 the boards from 17 up included through `check_sound_uniform`. The
 checker executable below demonstrates the same runs interactively but
@@ -63,7 +69,7 @@ To display the headline theorem and the axioms behind it, after
 building:
 
 ```sh
-echo 'import SquareAchievement
+echo 'import Threshold
 #check @SquareAchievement.outcome
 #print axioms SquareAchievement.outcome' | lake env lean --stdin
 ```
@@ -105,14 +111,20 @@ for n in $(seq 6 17); do lake exe checker "$n" forced; done
 
 ## Layout
 
+`SquareAchievement/`, the core library:
+
 - `Core/` cells, squares, positions; the quarter-plane model makes
   cross-board-size statements direct.
 - `Game/` the rules and `P1CanWin`; `Outcome` adds the draw
   predicates, strategy stealing, and determinacy.
 - `Compute/` the strategy table format; the enumerating checker, the
   forced-tree checker, and the refuter with their soundness proofs;
-  the anchored farm-safety certificates; and a byte-board checker
-  used only by the executable, never cited in proofs.
+  and a byte-board checker used only by the executable, never cited
+  in proofs.
+
+`Threshold/`, the threshold result:
+
+- `ExactFarm.lean` the anchored farm-safety certificates.
 - `Data/` machine-generated strategy tables: the n = 5 table and the
   general corner-box table.
 - `General/` the uniform proof: span and invariance geometry
@@ -120,3 +132,5 @@ for n in $(seq 6 17); do lake exe checker "$n" forced; done
   (`Simulation`), and the wrapper assembling `check_sound_uniform`
   (`Wrapper`).
 - `Results/` the evaluated certificates and the threshold theorems.
+
+`Checker.lean` is the executable, built from both libraries.

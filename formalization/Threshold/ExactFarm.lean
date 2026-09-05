@@ -23,6 +23,13 @@ checks are complete by construction.
 
 namespace SquareAchievement
 
+/-- The board every anchored run is played on. The anchors of
+`ExactFarm` place a stone at coordinate `17`, and a default-class
+anchor reaches row `hot.1 + 17 - hot.2 ≤ 22`, so `23` is the least
+board holding every anchor pair. The runs would prove the same on any
+larger board; the size only bounds the fuel and the square scan. -/
+def anchorBoard : ℕ := 23
+
 /-- One anchored hot-guarded run. -/
 def anchorRun (t : Table) (o1 o2 hot : Cell) : Bool :=
   farmKey t.box o1 o2 == some (.farm hot) &&

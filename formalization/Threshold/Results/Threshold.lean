@@ -1,7 +1,7 @@
 import SquareAchievement.Compute.Refute
 import SquareAchievement.Game.Outcome
-import SquareAchievement.Results.Uniform
-import SquareAchievement.Data.Table5
+import Threshold.Results.Uniform
+import Threshold.Data.Table5
 
 /-!
 # The threshold theorems

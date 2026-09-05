@@ -1,5 +1,5 @@
-import SquareAchievement.Compute.ExactFarm
-import SquareAchievement.General.Simulation
+import Threshold.ExactFarm
+import Threshold.General.Simulation
 
 /-!
 # The wrapper

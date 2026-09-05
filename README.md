@@ -16,9 +16,10 @@ when n >= 5, by a machine-checked strategy.
 - `papers/` the LaTeX sources, one directory per paper, with the
   shared bibliography and macros in `papers/shared/`; CI builds every
   PDF. `papers/threshold/` is the paper on the winning threshold.
-- `formalization/` the Lean 4 development: game semantics, checkers
-  with machine-checked soundness, the simulation theorem covering
-  every board size, and the strategy tables as data. See
+- `formalization/` the Lean 4 development: a core library with the
+  game semantics and the checkers with machine-checked soundness, and
+  a library per result, the first holding the strategy tables as
+  data and the simulation theorem covering every board size. See
   [formalization/README.md](formalization/README.md).
 - `pipeline/` the Python side: table generation, the exhaustive
   reference verifier, exporters, and analysis tools. See
