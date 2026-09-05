@@ -1,4 +1,4 @@
-from squares.solve import Solver, forcing_bits
+from squares.solver import Solver, forcing_bits
 
 
 def test_small_boards_are_not_p1_wins():

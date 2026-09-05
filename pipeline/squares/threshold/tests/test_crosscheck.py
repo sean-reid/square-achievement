@@ -2,10 +2,10 @@
 
 import json
 
-from squares import strategy5
-from squares.crosscheck import read_lean_table
-from squares.export_site import table_json
 from squares.paths import LEAN_DATA, SITE_TABLES
+from squares.threshold import strategy5
+from squares.threshold.crosscheck import read_lean_table
+from squares.threshold.export_site import table_json
 
 
 def test_lean_general_table_matches_site_json():

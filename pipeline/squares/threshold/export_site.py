@@ -5,16 +5,16 @@ the export must be bit-exact: cell keys as "r,c", alignment classes as
 "row:r" and "col:c", farm keys as "farm:a,b", the default as "*", and
 quiet forks as {"q": move, "b": branches}.
 
-python3 -m squares.export_site [path], default the site's tables.json.
+python3 -m squares.threshold.export_site [path], default the site's tables.json.
 """
 
 import json
 import pathlib
 import sys
 
+from ..paths import SITE_TABLES
 from . import strategy5
-from .paths import SITE_TABLES
-from .solve import build_general
+from .tables import build_general
 
 
 def key_str(k):

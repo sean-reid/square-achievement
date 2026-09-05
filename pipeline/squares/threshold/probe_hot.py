@@ -6,12 +6,12 @@ probes the row-a representative branches on the generation board: with
 the whole box row a marked hot (the strict union over refined
 branches), does every (o1, o2) pair still get an all-forcing script?
 
-python3 -m squares.probe_hot [gen_n], default 15.
+python3 -m squares.threshold.probe_hot [gen_n], default 15.
 """
 
 import sys
 
-from .solve import Solver, forcing_bits
+from ..solver import Solver, forcing_bits
 
 OPENING = (2, 2)
 X2_CANDIDATES = [(3, 2), (2, 3), (1, 2), (2, 1), (3, 3), (1, 1), (3, 1), (1, 3)]

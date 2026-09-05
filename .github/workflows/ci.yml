@@ -40,7 +40,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
       - run: uvx ruff check squares
       - run: uvx ruff format --check squares
-      - run: uv run --with pytest python -m pytest squares/tests -q
+      - run: uv run --with pytest python -m pytest squares -q
 
   tables:
     runs-on: ubuntu-latest
@@ -50,9 +50,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
-      - run: uv run python -m squares.crosscheck
-      - run: uv run python -m squares.export_lean
-      - run: uv run python -m squares.export_site
+      - run: uv run python -m squares.threshold.crosscheck
+      - run: uv run python -m squares.threshold.export_lean
+      - run: uv run python -m squares.threshold.export_site
       - run: uv run python -m squares.smallboard
       - run: git diff --exit-code --stat
 

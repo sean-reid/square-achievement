@@ -8,8 +8,8 @@ the verification and reports every counter-threat block event with the
 cell it happened at, grouped by (o1, o2) branch, plus the alignment
 families a far pair would need to hit it.
 
-python3 -m squares.audit_farms [sizes...], default 6 7; or
-python3 -m squares.audit_farms <n> --o1 r,c to audit the single branch
+python3 -m squares.threshold.audit_farms [sizes...], default 6 7; or
+python3 -m squares.threshold.audit_farms <n> --o1 r,c to audit the single branch
 entered through the first reply (r, c), which makes the class
 representatives on the generation board affordable to replay.
 """
@@ -18,10 +18,10 @@ import pathlib
 import sys
 from collections import defaultdict
 
+from ..game import P2, all_squares
+from ..verify import verify
 from .forcing import box_class, table_strategy
-from .game import P2, all_squares
-from .solve import build_general
-from .verify import verify
+from .tables import build_general
 
 
 class FarmAudit:

@@ -75,7 +75,7 @@ runtime.
 
 ```sh
 cd pipeline
-uv run --with pytest python -m pytest squares/tests
+uv run --with pytest python -m pytest squares
 ```
 
 ## License

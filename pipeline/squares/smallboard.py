@@ -18,7 +18,7 @@ import pathlib
 import sys
 
 from .paths import SITE_SMALL_TABLES
-from .solve import Solver
+from .solver import Solver
 
 
 def safe(solver, p1, p2, p1_to_move, memo):
