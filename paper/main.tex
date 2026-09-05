@@ -31,16 +31,16 @@
 \begin{abstract}
 Two players alternately claim cells of an $n \times n$ grid; the
 first to hold all four corners of an axis-aligned square wins, and a
-full board without one is a draw. We prove that the first player has
-a winning strategy if and only if $n \ge 5$, and that every smaller
-board is drawn under optimal play, answering a question of Erickson.
-The proof is constructive and uniform in $n$: an explicit strategy,
-two reflexes over a fixed lookup table with plans confined to a
-$6 \times 6$ corner region, wins every board of size at least $6$,
-with a separate table for $5 \times 5$. Boards of size at most $17$
-are verified by exhaustive search, and a simulation theorem with
-finitely many decidable hypotheses transports the run at $17$ to
-every larger board. The game, the strategy, strategy stealing,
+full board without one is a draw. We give one explicit strategy, two
+reflexes over a fixed lookup table with plans confined to a
+$6 \times 6$ corner region, that wins every board of size at least
+$6$, and with a separate table for $5 \times 5$ we prove that the
+first player has a winning strategy if and only if $n \ge 5$, every
+smaller board being drawn under optimal play; this answers a question
+of Erickson. Boards of size at most $17$ are verified by exhaustive
+search, and a simulation theorem with finitely many decidable
+hypotheses transports the run at $17$ to every larger board, so the
+same strategy is proved to win on every board. The game, the strategy, strategy stealing,
 determinacy, and the whole argument are formalized in Lean~4, so the
 theorem is machine-checked for all $n$ at once.
 \end{abstract}
@@ -74,9 +74,18 @@ two-coloring of the $15 \times 15$ grid contains four equal-colored
 cells at the corners of an axis-aligned square, and that $15$ is least
 with this property. Since no completed game on a board of size $15$ or
 more is square-free, strategy stealing gives the first player a win
-there. Between these results the problem was open: for
+there. Between these results nothing was published: for
 $6 \le n \le 14$ neither a winning strategy nor a drawing strategy was
-known \cite{opg}.
+known \cite{opg}, and no coloring argument can reach this range, since
+Bacher and Eliahou also exhibit square-free two-colorings of the
+$14 \times 14$ board. Independently and concurrently with the present
+work, Adler \cite{adler} announced computer searches for these nine
+sizes: a depth-limited negamax with the horizon scored as a draw
+returns a first-player win within $13$ plies for each $n$ from $6$ to
+$14$; full strategy trees are extracted and certified for $n = 6$ and
+$7$, and the remaining sizes are search verdicts under sound pruning
+rules. The author notes that the results are unrefereed, and names a
+conceptual proof with an explicit strategy as the open direction.
 
 \begin{theorem}\label{thm:main}
 In the square achievement game on the $n \times n$ board, the first
@@ -84,6 +93,21 @@ player has a winning strategy if and only if $n \ge 5$. For
 $n \le 4$ the game is drawn under optimal play: each player can
 secure at least a draw.
 \end{theorem}
+
+Three things are new here. First, the winning strategy is explicit
+and uniform: one lookup table, every plan confined to the
+$6 \times 6$ corner region, wins every board of size at least $6$, so
+the winning trees for different $n$ are instances of one object
+rather than the outputs of separate searches. Second, the proof
+covers every $n$ at once: exhaustive verification stops at $17$, and
+a simulation theorem carries the checked run to all larger boards, so
+the range $n \ge 15$, previously reached only by strategy stealing
+from the theorem of Bacher and Eliahou, is covered by the explicit
+strategy. Third, the whole argument is machine-checked: the game, the
+strategy, the checkers with their soundness theorems, strategy
+stealing, determinacy, and the simulation theorem are formalized in
+Lean~4, so Theorem~\ref{thm:main} is a single kernel-checked
+declaration rather than the output of a program.
 
 Theorem~\ref{thm:main} is proved in three ranges. For $n \le 4$
 an exhaustive refutation shows the first player cannot win. For
@@ -96,11 +120,8 @@ to the $6 \times 6$ corner region of the board serves every larger
 size. For $n \ge 17$ a simulation theorem transports the checked run
 on $\Board_{17}$ to every board at once; its hypotheses are finitely
 many decidable properties of the table, each discharged by
-evaluation. The proof is therefore constructive on every board, and
-in particular independent of Proposition~\ref{prop:large}: the range
-$n \ge 15$, previously known only by strategy stealing from the
-Ramsey-type theorem of Bacher and Eliahou, is covered by the
-explicit strategy.
+evaluation. The proof is therefore constructive on every board and
+independent of Proposition~\ref{prop:large}.
 
 Exhaustive searches are only as trustworthy as the programs running
 them, and this game is a case in point: the first version of the
@@ -111,9 +132,8 @@ that replay the strategy against every reply sequence, a dual
 checker refuting first-player wins on small boards, soundness
 theorems for each, and the simulation theorem for arbitrary $n$.
 Every search then discharges a statement about the abstract game
-rather than about a program. Strategy stealing and determinacy are
-formalized as well, so Theorem~\ref{thm:main} is a single named
-declaration, \texttt{outcome}, whose proof the kernel checks. The
+rather than about a program. Theorem~\ref{thm:main} is the
+declaration \texttt{outcome}, whose proof the kernel checks. The
 formal development accompanies this paper as supplementary material.
 
 \section{Definitions and conventions}\label{sec:defs}
@@ -720,12 +740,49 @@ the search and compared byte for byte in continuous integration, so
 the checkers judge one and the same strategy. The interactive page
 accompanying the paper replays the same tables move for move.
 
+\section{Open questions}\label{sec:open}
+
+The strategy is explicit but not short: $237$ branches and some eight
+thousand plans. Is there a description of a winning strategy for all
+$n \ge 6$ that a reader can carry in their head, in the style of
+Jenrich's argument for $n = 5$ \cite{jenrich}, with no lookup table?
+The confinement of the plans to a $6 \times 6$ region and the handful
+of geometric cases in Section~\ref{sec:uniform} say that the winning
+mechanism is local, but no such description is known.
+
+The strategy is not optimal in length. The longest line in its
+verified trees has $26$ plies on $\Board_6$, $\Board_7$, and
+$\Board_8$, and $24$ plies for the separate table on $\Board_5$,
+while the searches of \cite{adler} report a forced win within $13$
+plies on every board from $6$ to $14$, one search per size. Is there
+a single strategy winning within $13$ plies on every board from $6$
+up? More generally, what is the least number of moves in which the
+first player can force a win on $\Board_n$, and is there one strategy
+that attains it for every $n$?
+
+Are the constants least? The plan region cannot shrink below
+$6 \times 6$ for a purely forcing table of this shape
+(Section~\ref{sec:strategy}), and the base $17$ is least for the
+dichotomy of Definition~\ref{def:latent}; the generation board $15$
+is the smallest we found to work. Whether a finer abstraction of the
+far replies lowers the base, or a different plan shape lowers the
+region, is open.
+
 \section*{Acknowledgements}
 
 I thank Nicholas Tan for many games and for productive discussions
 that shaped the strategy presented here.
 
 \begin{thebibliography}{99}
+
+\bibitem{adler}
+K.~Adler,
+\emph{Is the square achievement game on the $n \times n$ grid
+resolved for $6 \le n \le 14$?},
+MathOverflow question 514742, August 2026,
+\url{https://mathoverflow.net/q/514742}; solvers, logs, and strategy
+certificates at
+\url{https://github.com/keithadler/square-achievement-game}.
 
 \bibitem{bacher-eliahou}
 R.~Bacher and S.~Eliahou,
