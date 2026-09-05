@@ -30,6 +30,10 @@ when n >= 5, by a machine-checked strategy.
 The components are independent; none is needed to build the others.
 Commands assume a POSIX shell; on Windows, work inside WSL.
 
+While the repository is private, the checks below run on the author's
+machine before a change merges; the `ci` and `lean` workflows repeat
+them weekly and on demand rather than on every pull request.
+
 ### Site
 
 Requires Node 22, from [nodejs.org](https://nodejs.org) or a version
