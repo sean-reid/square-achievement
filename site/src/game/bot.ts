@@ -4,22 +4,56 @@
  * proof pipeline bit-for-bit (see table.ts): the n=5 table with its
  * quiet forks, the general corner-box table for n >= 6. Below 5 the
  * game is a draw under best play, and the bot replays an exact
- * never-losing policy (see smallbot.ts).
+ * never-losing policy (see smallbot.ts). Each table is loaded on
+ * demand, so the page ships only the one a board size needs.
  */
 
 import { Position } from "./rules";
-import { smallBotDecision } from "./smallbot";
+import { loadSmallTables, smallBotDecision } from "./smallbot";
 import { strategyDecision, type Decision, type StrategyTable } from "./table";
-import tablesJson from "./tables.json";
 
-const tables = tablesJson as unknown as {
-  general: StrategyTable;
-  five: StrategyTable;
-};
+let five: StrategyTable | null = null;
+let general: StrategyTable | null = null;
+const loads = new Map<string, Promise<void>>();
+
+function once(key: string, load: () => Promise<void>): Promise<void> {
+  let p = loads.get(key);
+  if (!p) {
+    p = load();
+    loads.set(key, p);
+  }
+  return p;
+}
+
+/** Load the table the n board needs; botDecision answers once it resolves. */
+export function loadTables(n: number): Promise<void> {
+  if (n === 5) {
+    return once("five", async () => {
+      five = (await import("./five.json")).default as unknown as StrategyTable;
+    });
+  }
+  if (n >= 6) {
+    return once("general", async () => {
+      general = (await import("./general.json"))
+        .default as unknown as StrategyTable;
+    });
+  }
+  return once("small", loadSmallTables);
+}
+
+/** Every table at once, for tests that replay many board sizes. */
+export async function loadAllTables(): Promise<void> {
+  await Promise.all([loadTables(2), loadTables(5), loadTables(6)]);
+}
+
+function loaded<T>(table: T | null, name: string): T {
+  if (table === null) throw new Error(`${name} table not loaded`);
+  return table;
+}
 
 export function botDecision(pos: Position): Decision {
-  if (pos.n === 5) return strategyDecision(tables.five, pos);
-  if (pos.n >= 6) return strategyDecision(tables.general, pos);
+  if (pos.n === 5) return strategyDecision(loaded(five, "five"), pos);
+  if (pos.n >= 6) return strategyDecision(loaded(general, "general"), pos);
   return smallBotDecision(pos);
 }
 

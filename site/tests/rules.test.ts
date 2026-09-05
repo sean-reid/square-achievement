@@ -1,11 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import { Position, threats, winningSquare } from "../src/game/rules";
-import { botMove } from "../src/game/bot";
+import { botMove, loadAllTables } from "../src/game/bot";
 
 function place(pos: Position, moves: [number, number][]): void {
   for (const m of moves) pos.play(m);
 }
+
+beforeAll(loadAllTables);
 
 describe("rules", () => {
   it("detects a 2x2 block win", () => {

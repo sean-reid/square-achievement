@@ -9,7 +9,7 @@
  */
 
 import { Position, threats, winningSquare } from "./rules";
-import { botDecision } from "./bot";
+import { botDecision, loadTables } from "./bot";
 import { decodeGame, encodeGame } from "./url";
 
 const U = 10; // svg units per cell
@@ -22,6 +22,8 @@ export class SagBoard extends HTMLElement {
   private demoTimer: ReturnType<typeof setInterval> | null = null;
   private svg!: SVGSVGElement;
   private focusIdx = 0;
+  private generation = 0;
+  private thinking = false;
 
   connectedCallback(): void {
     const fromUrl = new URLSearchParams(location.search).get("g");
@@ -108,6 +110,8 @@ export class SagBoard extends HTMLElement {
   }
 
   private newGame(n: number, replay?: number[]): void {
+    this.generation++;
+    this.thinking = false;
     this.pos = new Position(n);
     this.over = false;
     this.querySelector(".sag-size")!.textContent = `${n} × ${n}`;
@@ -120,7 +124,7 @@ export class SagBoard extends HTMLElement {
         this.commit([r, c]);
       }
     } else {
-      this.botTurn();
+      void this.botTurn();
     }
     this.afterMoves();
   }
@@ -299,8 +303,18 @@ export class SagBoard extends HTMLElement {
     }
   }
 
-  private botTurn(): void {
-    if (this.over || this.pos.full()) return;
+  /** The bot's move, after its table has loaded; a game started in
+   * the meantime discards the pending turn. */
+  private async botTurn(): Promise<void> {
+    if (this.over || this.pos.full() || this.thinking) return;
+    const gen = this.generation;
+    this.thinking = true;
+    try {
+      await loadTables(this.pos.n);
+    } finally {
+      this.thinking = false;
+    }
+    if (gen !== this.generation || this.over) return;
     const d = botDecision(this.pos);
     if (d.move === null) {
       this.over = true;
@@ -308,6 +322,7 @@ export class SagBoard extends HTMLElement {
       return;
     }
     this.commit(d.move);
+    this.afterMoves();
   }
 
   private humanPlay(i: number): void {
@@ -315,8 +330,8 @@ export class SagBoard extends HTMLElement {
     if (this.pos.occupied(i)) return;
     const [r, c] = this.pos.cell(i);
     this.commit([r, c]);
-    if (!this.over) this.botTurn();
     this.afterMoves();
+    if (!this.over) void this.botTurn();
   }
 
   private undoPair(): void {
@@ -344,9 +359,11 @@ export class SagBoard extends HTMLElement {
         this.stopDemo();
         return;
       }
-      if (this.pos.p1ToMove()) this.botTurn();
-      else this.commit(this.demoReply());
-      this.afterMoves();
+      if (this.pos.p1ToMove()) void this.botTurn();
+      else {
+        this.commit(this.demoReply());
+        this.afterMoves();
+      }
     }, 700);
   }
 

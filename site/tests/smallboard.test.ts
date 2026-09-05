@@ -1,9 +1,9 @@
 /** Exhaustive replay of the small-board drawing policy: the bot must
  * never lose on the boards below n = 5, where no win exists. */
 
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { botMove } from "../src/game/bot";
+import { botMove, loadAllTables } from "../src/game/bot";
 import { Position, winningSquare } from "../src/game/rules";
 
 /** True if the bot never loses against any reply sequence from pos. */
@@ -30,6 +30,8 @@ function neverLoses(pos: Position): boolean {
     pos.undo();
   }
 }
+
+beforeAll(loadAllTables);
 
 describe("small boards", () => {
   it("never loses at n = 2", () => {

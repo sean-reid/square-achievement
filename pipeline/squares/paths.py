@@ -3,6 +3,8 @@
 import pathlib
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-SITE_TABLES = REPO / "site/src/game/tables.json"
-SITE_SMALL_TABLES = REPO / "site/src/game/small_tables.json"
+SITE_GAME = REPO / "site/src/game"
+SITE_FIVE_TABLE = SITE_GAME / "five.json"
+SITE_GENERAL_TABLE = SITE_GAME / "general.json"
+SITE_SMALL_TABLES = SITE_GAME / "small_tables.json"
 LEAN_DATA = REPO / "formalization/Threshold/Data"
