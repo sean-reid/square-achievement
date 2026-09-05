@@ -19,8 +19,7 @@
 \theoremstyle{remark}
 \newtheorem{remark}[theorem]{Remark}
 
-\newcommand{\Board}{B}
-\newcommand{\Sq}{Q}
+\input{../shared/macros}
 
 \title{The square achievement game on $n \times n$ boards}
 \author{Sean Reid}
@@ -773,72 +772,7 @@ region, is open.
 I thank Nicholas Tan for many games and for productive discussions
 that shaped the strategy presented here.
 
-\begin{thebibliography}{99}
-
-\bibitem{adler}
-K.~Adler,
-\emph{Is the square achievement game on the $n \times n$ grid
-resolved for $6 \le n \le 14$?},
-MathOverflow question 514742, August 2026,
-\url{https://mathoverflow.net/q/514742}; solvers, logs, and strategy
-certificates at
-\url{https://github.com/keithadler/square-achievement-game}.
-
-\bibitem{bacher-eliahou}
-R.~Bacher and S.~Eliahou,
-\emph{Extremal binary matrices without constant 2-squares},
-J. Combinatorics \textbf{1} (2010), no.~1, 77--100.
-
-\bibitem{beck}
-J.~Beck,
-\emph{Combinatorial Games: Tic-Tac-Toe Theory},
-Encyclopedia of Mathematics and its Applications, vol.~114,
-Cambridge University Press, 2008.
-
-\bibitem{galliot-senizergues}
-F.~Galliot and J.~S\'enizergues,
-\emph{A unified convention for achievement positional games},
-arXiv:2503.18163, 2025, revised 2026.
-
-\bibitem{erickson-pearls}
-M.~Erickson,
-\emph{Pearls of Discrete Mathematics},
-CRC Press, 2010.
-
-\bibitem{hales-jewett}
-A.~W.~Hales and R.~I.~Jewett,
-\emph{Regularity and positional games},
-Trans. Amer. Math. Soc. \textbf{106} (1963), 222--229.
-
-\bibitem{harary}
-F.~Harary,
-\emph{Achievement and avoidance games for graphs},
-Ann. Discrete Math. \textbf{13} (1982), 111--119.
-
-\bibitem{jenrich}
-T.~Jenrich,
-\emph{Guaranteed successful strategies for a square achievement game
-on an $n \times n$ grid},
-arXiv:1109.2341, 2012.
-
-\bibitem{lean4}
-L.~de~Moura and S.~Ullrich,
-\emph{The Lean 4 theorem prover and programming language},
-Automated Deduction -- CADE 28, Lecture Notes in Computer Science,
-vol.~12699, Springer, 2021, pp.~625--635.
-
-\bibitem{mathlib}
-The mathlib Community,
-\emph{The Lean mathematical library},
-Proceedings of the 9th ACM SIGPLAN International Conference on
-Certified Programs and Proofs (CPP 2020), 2020, pp.~367--381.
-
-\bibitem{opg}
-M.~Erickson,
-\emph{Square achievement game on an $n \times n$ grid},
-Open Problem Garden,
-\url{http://www.openproblemgarden.org/op/a_game_on_an_n_x_n_grid}.
-
-\end{thebibliography}
+\bibliographystyle{amsplain}
+\bibliography{../shared/refs}
 
 \end{document}

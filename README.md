@@ -12,7 +12,9 @@ when n >= 5, by a machine-checked strategy.
   routes to the paper, the Lean development, and an illustrated proof
   guide at `/proof/`. Astro, statically built; the deploy also
   packages the paper PDF and the formalization tarball.
-- `paper/` the LaTeX source of the paper; CI builds the PDF.
+- `papers/` the LaTeX sources, one directory per paper, with the
+  shared bibliography and macros in `papers/shared/`; CI builds every
+  PDF. `papers/threshold/` is the paper on the winning threshold.
 - `formalization/` the Lean 4 development: game semantics, checkers
   with machine-checked soundness, the simulation theorem covering
   every board size, and the strategy tables as data. See
@@ -46,7 +48,7 @@ Requires a TeX Live installation with `amsart`, `tikz`, and
 `algorithm`.
 
 ```sh
-cd paper
+cd papers/threshold
 latexmk -pdf main.tex
 ```
 

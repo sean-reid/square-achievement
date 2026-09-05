@@ -58,13 +58,16 @@ jobs:
 
   paper:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        paper: [threshold]
     steps:
       - uses: actions/checkout@v7
       - uses: xu-cheng/latex-action@v4
         with:
-          root_file: paper/main.tex
+          root_file: papers/${{ matrix.paper }}/main.tex
           work_in_root_file_dir: true
       - uses: actions/upload-artifact@v7
         with:
-          name: paper
-          path: paper/main.pdf
+          name: paper-${{ matrix.paper }}
+          path: papers/${{ matrix.paper }}/main.pdf
