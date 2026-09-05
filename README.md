@@ -80,6 +80,21 @@ cd pipeline
 uv run --with pytest python -m pytest squares
 ```
 
+## Adding a result
+
+Each result is one slug used everywhere, `threshold` being the first.
+A new one needs:
+
+- `papers/<slug>/main.tex`, citing from `papers/shared/refs.bib`, and
+  the slug added to the paper matrix in `.github/workflows/ci.yml`.
+- A Lean library `formalization/<Slug>/` with a root `<Slug>.lean`,
+  importing the `SquareAchievement` core, listed as a `lean_lib` in
+  `formalization/lakefile.toml` and among its default targets.
+- A pipeline subpackage `pipeline/squares/<slug>/` with its tests
+  beside it, if the result has generated data.
+- An entry in `site/src/results.ts`, with `site/src/pages/<slug>/index.astro`
+  and `site/src/pages/<slug>/proof.astro`.
+
 ## License
 
 Code is MIT. The paper's text and figures are CC BY 4.0.
