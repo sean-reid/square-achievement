@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.3](https://github.com/sean-reid/square-achievement/compare/v0.1.2...v0.1.3) (2026-09-05)
+
+
+### Features
+
+* **site:** a hub for several results ([#74](https://github.com/sean-reid/square-achievement/issues/74)) ([e734cd0](https://github.com/sean-reid/square-achievement/commit/e734cd0adad5d8b8c6b7b82cdf512c58057d717f))
+
+
+### Performance Improvements
+
+* **site:** load each strategy table on demand ([#80](https://github.com/sean-reid/square-achievement/issues/80)) ([c6178eb](https://github.com/sean-reid/square-achievement/commit/c6178ebb816ebb139dcb47e49ca051f671d69ca5))
+
 ## [0.1.2](https://github.com/sean-reid/square-achievement/compare/v0.1.1...v0.1.2) (2026-09-05)
 
 
