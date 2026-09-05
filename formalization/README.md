@@ -59,8 +59,12 @@ silicon) and Linux x86-64.
 
 ## Checking the theorem
 
-The build is the proof. `lake build` builds both libraries: it
-elaborates every file and the kernel checks every theorem, evaluating the certificates along the
+The build is the proof, and it runs on the author's machine before a
+change to the formalization merges; the `lean` workflow rebuilds it
+weekly and on demand rather than per pull request, since a full build
+costs most of an hour of runner time. `lake build` builds both
+libraries: it elaborates every file and the kernel checks every
+theorem, evaluating the certificates along the
 way, so a successful build verifies everything in the results table,
 the boards from 17 up included through `check_sound_uniform`. The
 checker executable below demonstrates the same runs interactively but

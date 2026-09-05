@@ -1,15 +1,18 @@
 name: lean
 
+# The Lean build is the proof, and it runs locally before a
+# formalization change merges: `lake build` in formalization/. Actions
+# builds it on a weekly schedule and on demand, never per pull request,
+# because a full build costs most of an hour of runner time.
 on:
-  push:
-    branches: [main]
-    paths:
-      - formalization/**
-      - "!formalization/**.md"
-  pull_request:
-    paths:
-      - formalization/**
-      - "!formalization/**.md"
+  schedule:
+    - cron: "41 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      libraries:
+        description: "Space-separated Lean libraries to build; empty builds every library"
+        required: false
+        default: ""
 
 jobs:
   build:
@@ -28,6 +31,14 @@ jobs:
       # precompiled modules dlopen the toolchain's shared libraries,
       # which the Linux loader only finds through LD_LIBRARY_PATH
       - run: echo "LD_LIBRARY_PATH=$(lean --print-libdir)" >> "$GITHUB_ENV"
-      - run: lake build SquareAchievement Threshold checker
+      # every <Name>.lean at the package root is a library; the core
+      # always builds first, then the requested or all result libraries
+      - id: libs
+        run: |
+          all=$(ls *.lean | sed 's/\.lean$//' | grep -v '^Checker$' | grep -v '^SquareAchievement$' | tr '\n' ' ')
+          echo "libraries=${{ inputs.libraries }}" | sed "s/libraries=$/libraries=$all/" >> "$GITHUB_OUTPUT"
+      - run: lake build SquareAchievement
+      - run: lake build ${{ steps.libs.outputs.libraries }}
+      - run: lake build checker
       - run: lake exe checker 6
       - run: lake exe checker 5 five
