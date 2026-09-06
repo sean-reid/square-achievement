@@ -1,16 +1,26 @@
 /** The first-player bot.
  *
- * On boards of size 5 and up it replays the strategy tables from the
- * proof pipeline bit-for-bit (see table.ts): the n=5 table with its
- * quiet forks, the general corner-box table for n >= 6. Below 5 the
- * game is a draw under best play, and the bot replays an exact
- * never-losing policy (see smallbot.ts). Each table is loaded on
- * demand, so the page ships only the one a board size needs.
+ * Two strategies are available from 6 x 6 up: the plus rule (plus.ts),
+ * a strategy stated without a table, and the general corner-box table
+ * of the threshold paper (table.ts), replayed bit-for-bit. On 5 x 5 the
+ * n=5 table with its quiet forks plays. Below 5 the game is a draw
+ * under best play, and the bot replays an exact never-losing policy
+ * (smallbot.ts). Each table is loaded on demand, so the page ships
+ * only what a board size and strategy need; the rule needs no data.
  */
 
+import { plusDecision } from "./plus";
 import { Position } from "./rules";
 import { loadSmallTables, smallBotDecision } from "./smallbot";
 import { strategyDecision, type Decision, type StrategyTable } from "./table";
+
+export type Strategy = "plus" | "table";
+
+/** The strategy that actually plays on the n board: the rule applies
+ * from 6 x 6 up, the tables below. */
+export function effectiveStrategy(n: number, wanted: Strategy): Strategy {
+  return n >= 6 ? wanted : "table";
+}
 
 let five: StrategyTable | null = null;
 let general: StrategyTable | null = null;
@@ -25,8 +35,13 @@ function once(key: string, load: () => Promise<void>): Promise<void> {
   return p;
 }
 
-/** Load the table the n board needs; botDecision answers once it resolves. */
-export function loadTables(n: number): Promise<void> {
+/** Load what the n board needs under the strategy; botDecision answers
+ * once it resolves. The rule needs nothing. */
+export function loadTables(
+  n: number,
+  strategy: Strategy = "table",
+): Promise<void> {
+  if (n >= 6 && strategy === "plus") return Promise.resolve();
   if (n === 5) {
     return once("five", async () => {
       five = (await import("./five.json")).default as unknown as StrategyTable;
@@ -51,14 +66,21 @@ function loaded<T>(table: T | null, name: string): T {
   return table;
 }
 
-export function botDecision(pos: Position): Decision {
+export function botDecision(
+  pos: Position,
+  strategy: Strategy = "table",
+): Decision {
+  if (pos.n >= 6 && strategy === "plus") return plusDecision(pos);
   if (pos.n === 5) return strategyDecision(loaded(five, "five"), pos);
   if (pos.n >= 6) return strategyDecision(loaded(general, "general"), pos);
   return smallBotDecision(pos);
 }
 
-export function botMove(pos: Position): [number, number] {
-  const d = botDecision(pos);
+export function botMove(
+  pos: Position,
+  strategy: Strategy = "table",
+): [number, number] {
+  const d = botDecision(pos, strategy);
   if (d.move === null) throw new Error("strategy exhausted");
   return d.move;
 }
