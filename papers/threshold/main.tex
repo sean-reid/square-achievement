@@ -80,8 +80,9 @@ Bacher and Eliahou also exhibit square-free two-colorings of the
 $14 \times 14$ board. Independently and concurrently with the present
 work, Adler \cite{adler} announced computer searches for these nine
 sizes: a depth-limited negamax with the horizon scored as a draw
-returns a first-player win within $13$ plies for each $n$ from $6$ to
-$14$; full strategy trees are extracted and certified for $n = 6$ and
+returns a first-player win for each $n$ from $6$ to $14$, forced
+within $15$ plies (reported there as $13$: the search scores a double
+threat at the horizon as a loss, two plies before the completion); full strategy trees are extracted and certified for $n = 6$ and
 $7$, and the remaining sizes are search verdicts under sound pruning
 rules. The author notes that the results are unrefereed, and names a
 conceptual proof with an explicit strategy as the open direction.
@@ -756,10 +757,10 @@ same method as here.
 The strategy is not optimal in length. The longest line in its
 verified trees has $26$ plies on $\Board_6$, $\Board_7$, and
 $\Board_8$, and $24$ plies for the separate table on $\Board_5$,
-while the searches of \cite{adler} report a forced win within $13$
+while the searches of \cite{adler} give a forced win within $15$
 plies on every board from $6$ to $14$, one search per size, and the
 rule of \cite{reid-plus} wins by the seventeenth ply on every board.
-Is there a single strategy winning within $13$ plies on every board
+Is there a single strategy winning within $15$ plies on every board
 from $6$ up? More generally, what is the least number of moves in which the
 first player can force a win on $\Board_n$, and is there one strategy
 that attains it for every $n$?
