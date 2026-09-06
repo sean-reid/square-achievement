@@ -37,6 +37,10 @@ result gets its own subpackage beside it.
   every decision the strategy made.
 - `squares/threshold/instrument.py`: runs the verifier with a metering
   strategy and reports the geometric frame the strategy touches.
+- `squares/plus/rule.py`: the plus rule, a strategy with no lookup
+  table, stated to mirror `formalization/Plus/Rule.lean` move for
+  move; `squares/plus/sweep.py` runs it over every opening of a board
+  and over the anchored far-pair positions of the uniform argument.
 
 ## Usage
 
@@ -48,6 +52,7 @@ python3 -m squares.threshold.export_site      # write the site's five.json and g
 python3 -m squares.smallboard                 # write the site's small_tables.json
 python3 -m squares.threshold.crosscheck       # the three copies of the tables agree
 python3 -m squares.threshold.instrument 6 7   # measure the strategy's frame
+python3 -m squares.plus.sweep 15              # the plus rule over every opening of the 15 board
 ```
 
 The general table is generated on the 15 x 15 board (`GEN_N` in
