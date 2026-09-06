@@ -1,7 +1,7 @@
 name = "square_achievement"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["SquareAchievement", "Threshold", "Plus"]
+defaultTargets = ["SquareAchievement"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
@@ -18,14 +18,6 @@ rev = "v4.33.1"
 name = "SquareAchievement"
 precompileModules = true
 
-[[lean_lib]]
-name = "Threshold"
-precompileModules = true
-
 [[lean_exe]]
 name = "checker"
 root = "Checker"
-
-[[lean_lib]]
-name = "Plus"
-precompileModules = true

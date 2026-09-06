@@ -1,19 +1,19 @@
 import SquareAchievement.Compute.Refute
 import SquareAchievement.Game.Outcome
-import Threshold.Results.Uniform
-import Threshold.Data.Table5
+import SquareAchievement.Five.Table5
+import SquareAchievement.Plus.Results
 
 /-!
-# The threshold theorems
+# The outcome theorems
 
 The headline results. `small_board_no_win` rests on the refutation
-certificates. `p1_wins_of_five_le` assembles from three ingredients:
+certificates. `p1_wins_of_five_le` assembles from two ingredients:
 
-* `n = 5`: its own certificate (the exact-solver table with quiet
-  forks, replayed by the enumerating checker);
-* `6 ≤ n < 17`: one forced-tree run per size;
-* `17 ≤ n`: the run at the base board, lifted by
-  `check_sound_uniform`.
+* `n = 5`: its own certificate, the exact-solver table with quiet
+  forks, replayed exhaustively by the enumerating checker;
+* `6 ≤ n`: the plus rule, `plus_wins_with`, whose certificates are
+  the forced-tree runs at sizes 6 to 17 and the anchored runs on the
+  board of size 23 lifted by the simulation theorem.
 
 `p1_wins_iff` states the theorem as an equivalence, and `outcome`
 adds the draws: strategy stealing rules out a second-player win on
@@ -45,24 +45,12 @@ with quiet forks, replayed exhaustively inside Lean. -/
 theorem p1_wins_five : P1CanWin 5 ∅ ∅ :=
   check_sound (t := fiveTable) (by native_decide)
 
-/-- The forced-tree runs at every size from 6 below the base board,
-one evaluation. -/
-theorem forced_below_seventeen :
-    ((List.range' 6 11).all fun n => checkForced genTable n) = true := by
-  native_decide
-
+/-- The first player wins on every board of size at least five: the
+`5 × 5` table below six, the plus rule from six up. -/
 theorem p1_wins_of_five_le {n : ℕ} (h : 5 ≤ n) : P1CanWin n ∅ ∅ := by
   rcases eq_or_lt_of_le h with h5 | h6
   · exact h5 ▸ p1_wins_five
-  · rcases Nat.lt_or_ge n 17 with hlt | hge
-    · refine checkForced_sound (t := genTable) ?_
-      have hmem : n ∈ List.range' 6 11 := by
-        rw [List.mem_range']
-        exact ⟨n - 6, by omega, by omega⟩
-      exact (List.all_eq_true.mp forced_below_seventeen) n hmem
-    · exact check_sound_uniform hge rfl plan_confined forced_seventeen
-        far_farm_safe_gen exact_farm_safe_gen far_near_farm_safe_gen
-        x2_sane_gen
+  · exact Plus.plus_wins h6
 
 /-- Strategy stealing: the second player never forces a win. -/
 theorem second_player_no_win (n : ℕ) : ¬ P2CanWin n ∅ ∅ :=

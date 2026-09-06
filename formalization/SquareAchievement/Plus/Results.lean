@@ -1,7 +1,7 @@
 import SquareAchievement.Compute.ForcedSound
-import Plus.Rule
-import Plus.Anchors
-import Plus.Uniform
+import SquareAchievement.Plus.Rule
+import SquareAchievement.Plus.Anchors
+import SquareAchievement.Plus.Uniform
 
 /-!
 # The plus rule's certificates
