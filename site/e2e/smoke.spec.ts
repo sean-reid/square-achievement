@@ -67,8 +67,40 @@ test("games are shareable through the URL", async ({ page }) => {
   await page.goto("./");
   await page.locator('sag-board rect[data-i="1"]').click();
   const url = page.url();
-  expect(url).toContain("?g=5:");
+  expect(url).toContain("?g=6:");
   await page.goto(url);
   await expect(page.locator("sag-board .sag-o")).toHaveCount(1);
   await expect(page.locator("sag-board .sag-x")).toHaveCount(2);
+});
+
+test("the bot explains its moves and shows its line", async ({ page }) => {
+  await page.goto("./");
+  await expect(page.locator("sag-board .sag-moves li")).toHaveCount(1);
+  await expect(page.locator("sag-board .sag-moves li").first()).toContainText(
+    "the opening",
+  );
+  await page.locator('sag-board rect[data-i="0"]').click();
+  await page.locator('sag-board rect[data-i="5"]').click();
+  await expect(page.locator("sag-board .sag-moves li")).toHaveCount(5);
+  await expect(page.locator("sag-board .sag-line")).toContainText("plus at");
+  await expect
+    .poll(async () => page.locator("sag-board .sag-mark").count())
+    .toBeGreaterThan(0);
+});
+
+test("the strategy selector switches to the table", async ({ page }) => {
+  await page.goto("./");
+  await page.locator("sag-board .sag-strategy").selectOption("table");
+  await expect(page.locator("sag-board .sag-x")).toHaveCount(1);
+  await expect(page.locator("sag-board .sag-moves li").first()).toContainText(
+    "the opening",
+  );
+  await expect(page.locator("sag-board .sag-line")).toHaveText("");
+  expect(page.url()).toContain("s=table");
+});
+
+test("the threshold page defaults to the table strategy", async ({ page }) => {
+  await page.goto("./threshold/");
+  await expect(page.locator("sag-board .sag-strategy")).toHaveValue("table");
+  await expect(page.locator("sag-board .sag-strategy")).toBeDisabled();
 });

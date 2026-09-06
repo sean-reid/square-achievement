@@ -404,3 +404,59 @@ footer a {
   border-bottom-color: var(--accent);
   outline: none;
 }
+
+.sag-pick {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: var(--muted, #555);
+}
+
+.sag-pick select {
+  font: inherit;
+  margin-left: 0.3em;
+}
+
+.sag-mark {
+  fill: none;
+  stroke-width: 0.5;
+}
+
+.sag-mark-tempo {
+  stroke: #777;
+  stroke-dasharray: 1 1;
+}
+
+.sag-mark-arm {
+  stroke: #333;
+  stroke-dasharray: 1.2 0.8;
+}
+
+.sag-mark-centre {
+  stroke: #333;
+  stroke-dasharray: 0.4 0.6;
+}
+
+.sag-mark-hot {
+  stroke: #a33;
+  stroke-dasharray: 0.6 0.6;
+}
+
+.sag-line {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted, #555);
+  min-height: 1.2em;
+}
+
+.sag-moves {
+  margin: 0.4rem 0 0;
+  padding-left: 1.6em;
+  font-size: 0.85rem;
+  color: var(--muted, #555);
+  max-height: 12em;
+  overflow-y: auto;
+}
+
+.sag-moves li {
+  margin: 0;
+}
