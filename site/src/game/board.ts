@@ -3,8 +3,8 @@
  * The visitor plays white against the bot's black stones, under the
  * plus rule or the table strategy; the `strategy` attribute picks the
  * page's default. Hairline rules, drawn stones, threat washes, a
- * winning square that draws itself in, a move list with the bot's
- * stated reasons, the rule's committed line drawn on the board, undo,
+ * winning square that draws itself in, the bot's latest move with its
+ * stated reason, the rule's committed line drawn on the board, undo,
  * a shareable link, and a self-playing demonstration. Motion is subtle
  * and respects prefers-reduced-motion.
  */
@@ -83,7 +83,7 @@ export class SagBoard extends HTMLElement {
       </p>
       <aside class="sag-explain" aria-label="what the bot is thinking">
         <p class="sag-now">
-          <span class="sag-explain-label">last move</span>
+          <span class="sag-explain-label">bot's move</span>
           <span class="sag-now-text"></span>
         </p>
         <p class="sag-plan" hidden>
@@ -91,10 +91,6 @@ export class SagBoard extends HTMLElement {
           <span class="sag-chips"></span>
           <span class="sag-plan-note"></span>
         </p>
-        <details class="sag-log">
-          <summary>move log</summary>
-          <ol class="sag-moves" aria-label="moves and reasons"></ol>
-        </details>
       </aside>`;
     for (const b of this.querySelectorAll<HTMLButtonElement>(
       ".sag-strategy button",
@@ -558,48 +554,31 @@ export class SagBoard extends HTMLElement {
       : null;
   }
 
-  /** The move log with the bot's reasons, rebuilt from the history so
-   * that undo and shared links show the same text as live play; the
-   * latest bot move also heads the explainer. */
+  /** The bot's latest move with its reason, recomputed from the history
+   * so that undo and shared links show the same text as live play. */
   private renderMoves(): void {
-    const list = this.querySelector<HTMLOListElement>(".sag-moves")!;
-    list.innerHTML = "";
+    const out = this.querySelector<HTMLElement>(".sag-now-text")!;
+    const last =
+      this.pos.history.length - (this.pos.history.length % 2 === 0 ? 2 : 1);
+    if (last < 0) {
+      out.textContent = "";
+      return;
+    }
     const replay = new Position(this.pos.n);
-    const strategy = this.strategy();
-    let latest = "";
-    this.pos.history.forEach((i) => {
+    for (const i of this.pos.history.slice(0, last)) {
       const [r, c] = replay.cell(i);
-      const item = document.createElement("li");
-      const who = document.createElement("span");
-      who.className = "sag-who";
-      const text = document.createElement("span");
-      if (replay.p1ToMove()) {
-        let reason = "";
-        try {
-          const d = botDecision(replay, strategy);
-          if (d.move && d.move[0] === r && d.move[1] === c)
-            reason = d.reason ?? d.source;
-        } catch {
-          reason = "";
-        }
-        who.textContent = "bot";
-        text.textContent = reason ? `${fmt([r, c])}: ${reason}` : fmt([r, c]);
-        latest = `bot ${text.textContent}`;
-        item.className = "sag-move-bot";
-      } else {
-        who.textContent = "you";
-        text.textContent = fmt([r, c]);
-        item.className = "sag-move-you";
-      }
-      item.append(who, text);
-      list.appendChild(item);
       replay.play([r, c]);
-    });
-    if (list.lastElementChild)
-      list.lastElementChild.classList.add("sag-move-last");
-    this.querySelector<HTMLElement>(".sag-now-text")!.textContent = latest;
-    this.querySelector<HTMLElement>(".sag-log summary")!.textContent =
-      `move log (${this.pos.history.length})`;
+    }
+    const [r, c] = this.pos.cell(this.pos.history[last]!);
+    let reason = "";
+    try {
+      const d = botDecision(replay, this.strategy());
+      if (d.move && d.move[0] === r && d.move[1] === c)
+        reason = d.reason ?? d.source;
+    } catch {
+      reason = "";
+    }
+    out.textContent = reason ? `${fmt([r, c])}: ${reason}` : fmt([r, c]);
   }
 
   private status(text: string): void {

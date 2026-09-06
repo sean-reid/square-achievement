@@ -509,6 +509,10 @@ footer a {
   text-align: left;
 }
 
+.sag-explain p[hidden] {
+  display: none;
+}
+
 .sag-explain p {
   display: grid;
   grid-template-columns: 5.2em 1fr;
@@ -566,41 +570,4 @@ footer a {
 .sag-plan-note {
   grid-column: 2;
   color: var(--muted);
-}
-
-.sag-log summary {
-  cursor: pointer;
-  font-variant: small-caps;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-
-.sag-moves {
-  margin: 0.3rem 0 0;
-  padding-left: 0;
-  list-style: none;
-  max-height: 14em;
-  overflow-y: auto;
-}
-
-.sag-moves li {
-  display: grid;
-  grid-template-columns: 2.6em 1fr;
-  gap: 0.4em;
-  padding: 0.1rem 0.3rem;
-  counter-increment: sag-ply;
-}
-
-.sag-moves li::before {
-  content: none;
-}
-
-.sag-who {
-  font-variant: small-caps;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-
-.sag-move-last {
-  background: var(--box);
 }
