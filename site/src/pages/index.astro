@@ -59,12 +59,12 @@ const base = import.meta.env.BASE_URL.endsWith("/")
 
   <h2>Open questions</h2>
   <p>
-    The winning strategy is explicit but large: is there a description of a
-    strategy for every board that fits in a reader's head, with no lookup table?
-    It is not the fastest either: its longest lines run 26 plies, while per-size
-    searches find wins within 13, so how quickly can the first player force a
-    win on the <span set:html={k("n \\times n")} /> board, and can one strategy be
-    fastest for every <span set:html={k("n")} />? And are the constants of the
-    proof, the 6 × 6 plan region and the 17 × 17 base board, least?
+    The plus rule wins by ply 17 on every board, while per-size searches find
+    wins within 13 plies: how quickly can the first player force a win on the
+    <span set:html={k("n \\times n")} /> board, and can one strategy be fastest for
+    every <span set:html={k("n")} />? The rule's second move has seven
+    exceptions; is there an opening that needs none? Are the constants of the
+    proofs, the 6 × 6 plan region and the 17 × 17 base board, least? And 5 × 5,
+    where no purely forcing strategy exists, still has no short rule.
   </p>
 </Base>
