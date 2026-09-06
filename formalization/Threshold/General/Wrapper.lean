@@ -1,5 +1,5 @@
 import Threshold.ExactFarm
-import Threshold.General.Simulation
+import SquareAchievement.General.Dispatch
 
 /-!
 # The wrapper
@@ -125,40 +125,6 @@ theorem lookup_val {α : Type _} {box : ℕ} {entries : List (Key × α)}
     · rename_i heq
       exact lookup_raw_val (heq.trans (by rw [h]))
     · exact lookup_raw_val h
-
-/-- A fired farm key names a farm cell. -/
-theorem farmKey_farm {box : ℕ} {o1 o2 : Cell} {k : Key}
-    (h : farmKey box o1 o2 = some k) : ∃ hc, k = Key.farm hc := by
-  unfold farmKey at h
-  split at h
-  · exact absurd h (by simp)
-  · have hcase : ∀ p q : Cell, ∀ k' : Key,
-        farmCase box p q = some k' → ∃ hc, k' = Key.farm hc := by
-      intro p q k' hc
-      unfold farmCase at hc
-      split at hc
-      · exact ⟨_, (Option.some_inj.mp hc).symm⟩
-      · split at hc
-        · exact ⟨_, (Option.some_inj.mp hc).symm⟩
-        · split at hc
-          · exact ⟨_, (Option.some_inj.mp hc).symm⟩
-          · exact absurd hc (by simp)
-    split at h
-    · rename_i k' hk'
-      obtain ⟨hc, rfl⟩ := hcase _ _ _ hk'
-      exact ⟨hc, (Option.some_inj.mp h).symm⟩
-    · exact hcase _ _ _ h
-
-/-- A farm cell lies in the box. -/
-theorem farmKey_hot_box {box : ℕ} {o1 o2 hc : Cell}
-    (h : farmKey box o1 o2 = some (.farm hc)) :
-    hc.1 < box ∧ hc.2 < box := by
-  obtain ⟨-, -, hcase⟩ := farmKey_spec h
-  rcases hcase with hcase | hcase <;>
-    rcases farmCase_spec hcase with
-      ⟨c1, c2, c3, c4, c5, e1, e2⟩ | ⟨c1, c2, c3, c4, c5, e1, e2⟩ |
-      ⟨c1, c2, c3, c4, e1, e2⟩ <;>
-    omega
 
 /-- Extract one anchored run from `farFarmSafe`. -/
 theorem farFarmSafe_run {t : Table} (hf : farFarmSafe t = true)
@@ -290,34 +256,6 @@ theorem strategyMove_two {t : Table} {k : ℕ} {o1 : Cell}
     rw [Bool.and_eq_true] at this
     have hne : v ≠ t.opening := by simpa using this.1
     simp [stonesOf, hl, hne]
-
-/-- Positions with at most three stones always have an empty cell. -/
-theorem empties_nonempty {n : ℕ} (hn : 17 ≤ n) {p1 p2 : Finset Cell}
-    (h : (p1 ∪ p2).card ≤ 3) : (empties n p1 p2).Nonempty := by
-  by_contra hne
-  rw [Finset.not_nonempty_iff_eq_empty] at hne
-  have hmem : ∀ w : Cell, w ∈ board n → w ∈ p1 ∪ p2 := by
-    intro w hw
-    by_contra hwn
-    rw [Finset.mem_union] at hwn
-    push_neg at hwn
-    have : w ∈ empties n p1 p2 := mem_empties.mpr ⟨hw, hwn.1, hwn.2⟩
-    rw [hne] at this
-    exact absurd this (Finset.notMem_empty w)
-  have hsub : ({(0, 0), (0, 1), (1, 0), (1, 1)} : Finset Cell) ⊆
-      p1 ∪ p2 := by
-    intro w hw
-    apply hmem
-    rw [mem_board]
-    simp only [Finset.mem_insert, Finset.mem_singleton] at hw
-    rcases hw with rfl | rfl | rfl | rfl <;> constructor <;> omega
-  have : ({(0, 0), (0, 1), (1, 0), (1, 1)} : Finset Cell).card = 4 := by
-    rw [Finset.card_insert_of_notMem (by simp [Prod.ext_iff]),
-      Finset.card_insert_of_notMem (by simp [Prod.ext_iff]),
-      Finset.card_insert_of_notMem (by simp [Prod.ext_iff]),
-      Finset.card_singleton]
-  have := Finset.card_le_card hsub
-  omega
 
 /-- Small positions are square-free. -/
 private theorem small2 {a b : Cell} : ¬ HasSquare (([a, b] : List Cell).toFinset) :=
@@ -532,7 +470,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                 rw [← hpair12 t.opening x2v, ← hpair12 o1r o2r]
                 by_cases ho217 : o2r ∈ board 17
                 · -- both replies on the base board: the base branch
-                  exact simulate t hbox (B := 17) none hn (by omega)
+                  exact simulate_table t hbox (B := 17) none hn (by omega)
                     hop6 hx2vbox (Or.inl ⟨rfl, ho117, ho117⟩)
                     (Or.inl ⟨rfl, ho217, ho217⟩) fuel1 [] (by simp)
                     (by simp) (hlvl2 o2r ho217 ho2op ho2o1 ho2x2)
@@ -564,7 +502,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                           rw [mem_board, ← he] at hx2vbox
                           omega
                     obtain ⟨rep2, hr17, hr12, hro1, hrop, hrx2⟩ := hrep
-                    exact simulate t hbox (B := 17) none hn (by omega)
+                    exact simulate_table t hbox (B := 17) none hn (by omega)
                       hop6 hx2vbox (Or.inl ⟨rfl, ho117, ho117⟩)
                       (Or.inr ⟨hr17, hr12, ho2n, hno12 _ ho217, ho217⟩)
                       fuel1 [] (by simp) (by simp)
@@ -600,7 +538,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                       obtain ⟨x2a, hx2a, hrun⟩ := anchorRun_spec hrun'
                       obtain rfl : x2a = x2v :=
                         Option.some_inj.mp (hx2a.symm.trans hx2l)
-                      exact simulate t hbox (B := 23) (some hc) hn
+                      exact simulate_table t hbox (B := 23) (some hc) hn
                         (by omega) hop6 hx2vbox
                         (Or.inl ⟨rfl, ho117, hb1223 _ ho117⟩)
                         (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
@@ -621,7 +559,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                       obtain ⟨x2a, hx2a, hrun⟩ := anchorRun_spec hrun'
                       obtain rfl : x2a = x2v :=
                         Option.some_inj.mp (hx2a.symm.trans hx2l)
-                      exact simulate t hbox (B := 23) (some hc) hn
+                      exact simulate_table t hbox (B := 23) (some hc) hn
                         (by omega) hop6 hx2vbox
                         (Or.inl ⟨rfl, ho117, hb1223 _ ho117⟩)
                         (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
@@ -699,7 +637,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                       (hx2l.symm.trans (hlookdflt hrfar hr61 hr62))
                   rw [hx2vd] at hlvl2
                   by_cases ho217 : o2r ∈ board 17
-                  · exact simulate t hbox (B := 17) none hn (by omega)
+                  · exact simulate_table t hbox (B := 17) none hn (by omega)
                       hop6 hx2dbox
                       (Or.inr ⟨hr17, hr12, ho1n, ho112, ho117⟩)
                       (Or.inl ⟨rfl, ho217, ho217⟩) fuel1 [] (by simp)
@@ -730,7 +668,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                           rw [mem_board, ← he] at hx2dbox
                           omega
                     obtain ⟨rep2, hs17, hs12, hsr1, hsop, hsx2⟩ := hrep2
-                    exact simulate t hbox (B := 17) none hn (by omega)
+                    exact simulate_table t hbox (B := 17) none hn (by omega)
                       hop6 hx2dbox
                       (Or.inr ⟨hr17, hr12, ho1n, ho112, ho117⟩)
                       (Or.inr ⟨hs17, hs12, ho2n, hno12 _ ho217, ho217⟩)
@@ -775,7 +713,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                           (hlookdflt (by dsimp only; omega)
                             (by dsimp only; omega)
                             (by dsimp only; omega)))
-                      exact simulate t hbox (B := 23) (some hc) hn
+                      exact simulate_table t hbox (B := 23) (some hc) hn
                         (by omega) hop6 hx2dbox
                         (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
                           by rw [mem_board]; dsimp only; omega,
@@ -800,7 +738,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                           (hlookdflt (by dsimp only; omega)
                             (by dsimp only; omega)
                             (by dsimp only; omega)))
-                      exact simulate t hbox (B := 23) (some hc) hn
+                      exact simulate_table t hbox (B := 23) (some hc) hn
                         (by omega) hop6 hx2dbox
                         (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
                           by rw [mem_board]; dsimp only; omega,
@@ -820,7 +758,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                         (hlookdflt (by dsimp only; omega)
                           (by dsimp only; omega)
                           (by dsimp only; omega)))
-                    exact simulate t hbox (B := 23) (some hc) hn
+                    exact simulate_table t hbox (B := 23) (some hc) hn
                       (by omega) hop6 hx2dbox
                       (Or.inr ⟨by rw [mem_board]; dsimp only; omega,
                         by rw [mem_board]; dsimp only; omega,
