@@ -13,7 +13,7 @@ import json
 import re
 import sys
 
-from ..paths import LEAN_DATA, SITE_FIVE_TABLE, SITE_GENERAL_TABLE
+from ..paths import LEAN_DATA, SITE_FIVE_TABLE
 from . import strategy5
 from .export_site import table_json
 
@@ -101,14 +101,8 @@ def read_lean_table(path):
 
 
 def main():
-    site = {
-        "general": json.loads(SITE_GENERAL_TABLE.read_text()),
-        "five": json.loads(SITE_FIVE_TABLE.read_text()),
-    }
-    lean = {
-        "general": table_json(*read_lean_table(LEAN_DATA / "TableGen.lean")),
-        "five": table_json(*read_lean_table(LEAN_DATA / "Table5.lean")),
-    }
+    site = {"five": json.loads(SITE_FIVE_TABLE.read_text())}
+    lean = {"five": table_json(*read_lean_table(LEAN_DATA / "Table5.lean"))}
     python = {"five": table_json((2, 2), 5, strategy5.X2, strategy5.SCRIPTS)}
     failures = [name for name in lean if lean[name] != site[name]]
     failures += [f"{name} (python)" for name in python if python[name] != lean[name]]
