@@ -1,5 +1,7 @@
 import SquareAchievement.General.Dispatch
 import Plus.Anchors
+import Plus.Agreement
+import Plus.Threats
 
 /-!
 # The plus rule wins every board from the base up
@@ -131,7 +133,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
     (hfar : farAnchorsSafe = true)
     (hexact : exactAnchorsSafe = true)
     (hfarnear : farNearAnchorsSafe = true) :
-    P1CanWin n ∅ ∅ := by
+    WinsWith plusMove n [] := by
   have hab : anchorBoard = 23 := rfl
   have hbox : box = 6 := rfl
   have hop6 : opening ∈ board 6 := opening_box
@@ -229,14 +231,15 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                         · rename_i hlv1
                           exfalso
                           simp at hlv1
-              -- assemble the root step
-              refine P1CanWin.step opening
-                (mem_empties.mpr ⟨hb6n _ hop6, by simp, by simp⟩)
-                (empties_nonempty hn (by simp))
-                (fun r _ => not_hasSquare_of_card_lt (by
+              -- assemble the root step: the rule opens at `opening`
+              have e0t : (stonesOf true []).toFinset = (∅ : Finset Cell) := by simp [stonesOf]
+              have e0f : (stonesOf false []).toFinset = (∅ : Finset Cell) := by simp [stonesOf]
+              refine WinsWith.step opening plusMove_nil ?_ ?_ ?_ ?_ <;> rw [e0t, e0f]
+              · exact mem_empties.mpr ⟨hb6n _ hop6, by simp, by simp⟩
+              · exact empties_nonempty hn (by simp)
+              · exact fun r _ => not_hasSquare_of_card_lt (by
                   have := Finset.card_insert_le r (∅ : Finset Cell)
-                  simp at this ⊢))
-                ?_
+                  simp at this ⊢)
               intro o1r ho1E
               obtain ⟨ho1n, ho1p1, -⟩ := mem_empties.mp ho1E
               have ho1op : o1r ≠ opening := by
@@ -262,9 +265,16 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
               have hx2o1 : x2 ≠ o1r := secondMove_ne_self o1r
               obtain ⟨fuel1, hlvl2⟩ := hsub2 o1b ho1b23 ho1bop
               rw [hx2eq] at hlvl2
-              refine P1CanWin.step x2
-                (mem_empties.mpr ⟨hb6n _ hx2box, by simp [hx2op], by simp [hx2o1]⟩)
-                (empties_nonempty hn (card_union_three _ _ _)) ?_ ?_
+              -- the second step: the rule answers with the second move
+              have hl2 : (([] : List Cell) ++ [opening]) ++ [o1r] = [opening, o1r] := rfl
+              rw [hl2]
+              have e1t : (stonesOf true [opening, o1r]).toFinset =
+                  insert opening (∅ : Finset Cell) := by simp [stonesOf]
+              have e1f : (stonesOf false [opening, o1r]).toFinset =
+                  insert o1r (∅ : Finset Cell) := by simp [stonesOf]
+              refine WinsWith.step x2 (plusMove_two o1r) ?_ ?_ ?_ ?_ <;> rw [e1t, e1f]
+              · exact mem_empties.mpr ⟨hb6n _ hx2box, by simp [hx2op], by simp [hx2o1]⟩
+              · exact empties_nonempty hn (card_union_three _ _ _)
               · intro r _
                 refine not_hasSquare_of_card_lt ?_
                 have h1 := Finset.card_insert_le r (insert o1r (∅ : Finset Cell))
@@ -282,7 +292,12 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
               have ho2o1 : o2r ≠ o1r := by
                 intro he
                 exact ho2p2 (he ▸ Finset.mem_insert_self _ _)
-              rw [← pair_toFinset opening x2, ← pair_toFinset o1r o2r]
+              have hl4 : ([opening, o1r] ++ [x2]) ++ [o2r] =
+                  opening :: o1r :: x2 :: o2r :: [] := rfl
+              rw [hl4]
+              -- the rule takes its wins along every real history from here
+              have htake : TakesWinsOn plusMove 6 n [opening, o1r, x2, o2r] :=
+                (plusMove_takesWins (by omega)).extend _
               -- the base run's second-level subtree for a base pair
               have hbranch : ∀ o2b : Cell, o2b ∈ board anchorBoard → o2b ≠ opening →
                   o2b ≠ o1b → o2b ≠ x2 →
@@ -326,6 +341,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                 · -- both replies on the base board: the base branch
                   exact simulate plusMove (B := anchorBoard) none hn (by decide)
                     hop6 hx2box hslot1 (Or.inl ⟨rfl, ho217, hb1723 _ ho217⟩)
+                    (plusMove_agree (Or.inl rfl) (Or.inl rfl) rfl rfl _ _) htake
                     fuel1 [] (by simp) (by simp)
                     (hbranch o2r (hb1723 _ ho217) ho2op ho2o1 ho2x2)
                     not_hasSquare_pair not_hasSquare_pair
@@ -344,6 +360,11 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                       hop6 hx2box hslot1
                       (Or.inr ⟨by rw [mem_board, hab]; omega, by rw [mem_board]; omega,
                         ho2n, hno12 _ ho217, ho217⟩)
+                      (plusMove_agree (Or.inl rfl) (slotSame_far (by rw [mem_board]; decide) ho217)
+                        (by
+                          show farmKey 6 _ _ = farmKey 6 _ _
+                          rw [hfk]; exact farmKey_standin_snd ho117) rfl _ _)
+                      htake
                       fuel1 [] (by simp) (by simp)
                       (hbranch (22, 21) (by rw [mem_board, hab]; omega) (by decide) hro1 hrx2)
                       not_hasSquare_pair not_hasSquare_pair (fun _ => hfk)
@@ -359,12 +380,15 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                         (by (try rw [hbox]); omega) (by omega)).1
                       rw [show ((o1r.1, o1r.2) : Cell) = o1r from rfl,
                         show ((o1r.1, hc.2) : Cell) = hc by rw [← hh1]] at hrun'
-                      obtain ⟨-, hrun⟩ := anchorRun_spec hrun'
+                      obtain ⟨hkeyb, hrun⟩ := anchorRun_spec hrun'
                       exact simulate plusMove (B := anchorBoard) (some hc) hn (by decide)
                         hop6 hx2box hslot1
                         (Or.inr ⟨by rw [mem_board]; (try rw [hab]); dsimp only; omega,
                           by rw [mem_board]; dsimp only; omega,
                           ho2n, hno12 _ ho217, ho217⟩)
+                        (plusMove_agree (Or.inl rfl)
+                          (slotSame_far (by rw [mem_board]; dsimp only; omega) ho217)
+                          (hkeyb.trans hfk.symm) rfl _ _) htake
                         (anchorBoard * anchorBoard + 1) [] (by simp) (by simp)
                         hrun not_hasSquare_pair not_hasSquare_pair hmode
                     · obtain ⟨ha6, hw12, hw17, hh2, hh1, hh1le, hesc⟩ := hform
@@ -374,12 +398,15 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                         (by (try rw [hbox]); omega) (by omega)).2
                       rw [show ((o1r.1, o1r.2) : Cell) = o1r from rfl,
                         show ((hc.1, o1r.2) : Cell) = hc by rw [← hh2]] at hrun'
-                      obtain ⟨-, hrun⟩ := anchorRun_spec hrun'
+                      obtain ⟨hkeyb, hrun⟩ := anchorRun_spec hrun'
                       exact simulate plusMove (B := anchorBoard) (some hc) hn (by decide)
                         hop6 hx2box hslot1
                         (Or.inr ⟨by rw [mem_board]; (try rw [hab]); dsimp only; omega,
                           by rw [mem_board]; dsimp only; omega,
                           ho2n, hno12 _ ho217, ho217⟩)
+                        (plusMove_agree (Or.inl rfl)
+                          (slotSame_far (by rw [mem_board]; dsimp only; omega) ho217)
+                          (hkeyb.trans hfk.symm) rfl _ _) htake
                         (anchorBoard * anchorBoard + 1) [] (by simp) (by simp)
                         hrun not_hasSquare_pair not_hasSquare_pair hmode
               · -- a far first reply: the stand-in `(22, 22)` and the default second move
@@ -395,6 +422,12 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                       omega
                     exact simulate plusMove (B := anchorBoard) none hn (by decide)
                       hop6 hx2box hslot1 (Or.inl ⟨rfl, ho217, hb1723 _ ho217⟩)
+                      (plusMove_agree
+                        (slotSame_far (by rw [ho1b22, mem_board]; decide) ho117) (Or.inl rfl)
+                        (by
+                          show farmKey 6 _ _ = farmKey 6 _ _
+                          rw [hfk, ho1b22]; exact farmKey_standin_fst ho217)
+                        hx2eq _ _) htake
                       fuel1 [] (by simp) (by simp)
                       (hbranch o2r (hb1723 _ ho217) ho2op ho2o1b ho2x2)
                       not_hasSquare_pair not_hasSquare_pair (fun _ => hfk)
@@ -407,6 +440,12 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                       hop6 hx2box hslot1
                       (Or.inr ⟨by rw [mem_board, hab]; omega, by rw [mem_board]; omega,
                         ho2n, hno12 _ ho217, ho217⟩)
+                      (plusMove_agree (slotSame_far (by rw [ho1b22, mem_board]; decide) ho117)
+                        (slotSame_far (by rw [mem_board]; decide) ho217)
+                        (by
+                          show farmKey 6 _ _ = farmKey 6 _ _
+                          rw [hfk, ho1b22]; exact farmKey_standins)
+                        hx2eq _ _) htake
                       fuel1 [] (by simp) (by simp)
                       (hbranch (22, 21) (by rw [mem_board, hab]; omega) (by decide) hro1 hrx2)
                       not_hasSquare_pair not_hasSquare_pair (fun _ => hfk)
@@ -425,7 +464,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                         (by (try rw [hbox]); omega) (by omega)).1
                       rw [show ((o2r.1, o2r.2) : Cell) = o2r from rfl,
                         show ((o2r.1, hc.2) : Cell) = hc by rw [← hh1]] at hrun'
-                      obtain ⟨-, hrun⟩ := anchorRun_spec hrun'
+                      obtain ⟨hkeyb, hrun⟩ := anchorRun_spec hrun'
                       rw [secondMove_far (by rw [mem_board]; dsimp only; omega), ← hx2d] at hrun
                       exact simulate plusMove (B := anchorBoard) (some hc) hn (by decide)
                         hop6 hx2box
@@ -433,6 +472,12 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                           by rw [mem_board]; dsimp only; omega,
                           ho1n, hno12 _ ho117, ho117⟩)
                         (Or.inl ⟨rfl, ho217, hb1723 _ ho217⟩)
+                        (plusMove_agree
+                          (slotSame_far (by rw [mem_board]; dsimp only; omega) ho117) (Or.inl rfl)
+                          (hkeyb.trans hfk.symm)
+                          (by
+                            rw [secondMove_far (by rw [mem_board]; dsimp only; omega)]
+                            exact hx2d.symm) _ _) htake
                         (anchorBoard * anchorBoard + 1) [] (by simp) (by simp)
                         hrun not_hasSquare_pair not_hasSquare_pair hmode
                     · obtain ⟨ha6, hw12, hw17, hh2, hh1, hh1le, hesc⟩ := hform
@@ -442,7 +487,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                         (by (try rw [hbox]); omega) (by omega)).2
                       rw [show ((o2r.1, o2r.2) : Cell) = o2r from rfl,
                         show ((hc.1, o2r.2) : Cell) = hc by rw [← hh2]] at hrun'
-                      obtain ⟨-, hrun⟩ := anchorRun_spec hrun'
+                      obtain ⟨hkeyb, hrun⟩ := anchorRun_spec hrun'
                       rw [secondMove_far (by rw [mem_board]; dsimp only; omega), ← hx2d] at hrun
                       exact simulate plusMove (B := anchorBoard) (some hc) hn (by decide)
                         hop6 hx2box
@@ -450,13 +495,19 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                           by rw [mem_board]; dsimp only; omega,
                           ho1n, hno12 _ ho117, ho117⟩)
                         (Or.inl ⟨rfl, ho217, hb1723 _ ho217⟩)
+                        (plusMove_agree
+                          (slotSame_far (by rw [mem_board]; dsimp only; omega) ho117) (Or.inl rfl)
+                          (hkeyb.trans hfk.symm)
+                          (by
+                            rw [secondMove_far (by rw [mem_board]; dsimp only; omega)]
+                            exact hx2d.symm) _ _) htake
                         (anchorBoard * anchorBoard + 1) [] (by simp) (by simp)
                         hrun not_hasSquare_pair not_hasSquare_pair hmode
                   · -- both members far: the far anchor
                     have hrun' := farAnchors_run hfar (h1 := hc.1) (h2 := hc.2)
                       (by (try rw [hbox]); omega) (by (try rw [hbox]); omega)
                     rw [show ((hc.1, hc.2) : Cell) = hc from rfl] at hrun'
-                    obtain ⟨-, hrun⟩ := anchorRun_spec hrun'
+                    obtain ⟨hkeyb, hrun⟩ := anchorRun_spec hrun'
                     rw [secondMove_far (by rw [mem_board]; dsimp only; omega), ← hx2d] at hrun
                     exact simulate plusMove (B := anchorBoard) (some hc) hn (by decide)
                       hop6 hx2box
@@ -466,6 +517,12 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                       (Or.inr ⟨by rw [mem_board]; (try rw [hab]); dsimp only; omega,
                         by rw [mem_board]; dsimp only; omega,
                         ho2n, hno12 _ ho217, ho217⟩)
+                      (plusMove_agree (slotSame_far (by rw [mem_board]; dsimp only; omega) ho117)
+                        (slotSame_far (by rw [mem_board]; dsimp only; omega) ho217)
+                        (hkeyb.trans hfk.symm)
+                        (by
+                          rw [secondMove_far (by rw [mem_board]; dsimp only; omega)]
+                          exact hx2d.symm) _ _) htake
                       (anchorBoard * anchorBoard + 1) [] (by simp) (by simp)
                       hrun not_hasSquare_pair not_hasSquare_pair hmode
           · rename_i hlv0
