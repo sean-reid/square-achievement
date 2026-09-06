@@ -540,7 +540,7 @@ export class SagBoard extends HTMLElement {
     list.innerHTML = "";
     const replay = new Position(this.pos.n);
     const strategy = this.strategy();
-    this.pos.history.forEach((i, ply) => {
+    this.pos.history.forEach((i) => {
       const [r, c] = replay.cell(i);
       const item = document.createElement("li");
       if (replay.p1ToMove()) {
@@ -552,9 +552,9 @@ export class SagBoard extends HTMLElement {
         } catch {
           reason = "";
         }
-        item.textContent = `${ply + 1}. bot ${fmt([r, c])}${reason ? `: ${reason}` : ""}`;
+        item.textContent = `bot ${fmt([r, c])}${reason ? `: ${reason}` : ""}`;
       } else {
-        item.textContent = `${ply + 1}. you ${fmt([r, c])}`;
+        item.textContent = `you ${fmt([r, c])}`;
       }
       list.appendChild(item);
       replay.play([r, c]);
