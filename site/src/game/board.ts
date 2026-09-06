@@ -66,12 +66,12 @@ export class SagBoard extends HTMLElement {
         <span class="sag-size">${n} × ${n}</span>
         <button class="sag-inc" aria-label="larger board">+</button>
         <button class="sag-new">new game</button>
-        <label class="sag-pick">strategy
-          <select class="sag-strategy">
-            <option value="plus">plus rule</option>
-            <option value="table">table</option>
-          </select>
-        </label>
+      </div>
+      <div class="sag-strategy" role="group" aria-label="strategy">
+        <span class="sag-strategy-label">strategy</span>
+        <button data-strategy="plus" aria-pressed="false">plus rule</button>
+        <button data-strategy="table" aria-pressed="false">table</button>
+        <span class="sag-strategy-hint"></span>
       </div>
       <div class="sag-stage"></div>
       <p class="sag-status" role="status"></p>
@@ -81,15 +81,31 @@ export class SagBoard extends HTMLElement {
         <button class="sag-share">share</button> ·
         <button class="sag-demo">demo</button>
       </p>
-      <p class="sag-line"></p>
-      <ol class="sag-moves" aria-label="moves and reasons"></ol>`;
-    const pick = this.querySelector<HTMLSelectElement>(".sag-strategy")!;
-    pick.value = this.wanted;
-    pick.addEventListener("change", () => {
-      this.stopDemo();
-      this.wanted = pick.value === "table" ? "table" : "plus";
-      this.newGame(this.pos.n);
-    });
+      <aside class="sag-explain" aria-label="what the bot is thinking">
+        <p class="sag-now">
+          <span class="sag-explain-label">last move</span>
+          <span class="sag-now-text"></span>
+        </p>
+        <p class="sag-plan" hidden>
+          <span class="sag-explain-label">line</span>
+          <span class="sag-chips"></span>
+          <span class="sag-plan-note"></span>
+        </p>
+        <details class="sag-log">
+          <summary>move log</summary>
+          <ol class="sag-moves" aria-label="moves and reasons"></ol>
+        </details>
+      </aside>`;
+    for (const b of this.querySelectorAll<HTMLButtonElement>(
+      ".sag-strategy button",
+    )) {
+      b.addEventListener("click", () => {
+        if (b.disabled || b.dataset["strategy"] === this.wanted) return;
+        this.stopDemo();
+        this.wanted = b.dataset["strategy"] === "table" ? "table" : "plus";
+        this.newGame(this.pos.n);
+      });
+    }
     this.querySelector<HTMLButtonElement>(".sag-new")!.addEventListener(
       "click",
       () => {
@@ -152,14 +168,9 @@ export class SagBoard extends HTMLElement {
     this.pos = new Position(n);
     this.over = false;
     this.querySelector(".sag-size")!.textContent = `${n} × ${n}`;
-    const pick = this.querySelector<HTMLSelectElement>(".sag-strategy")!;
-    pick.disabled = n < 6;
-    pick.value = this.strategy();
+    this.paintStrategy();
     this.buildSvg();
     if (n < 5) this.status("boards below 5 x 5 are drawn with best play");
-    else if (n === 5 && this.wanted === "plus") {
-      this.status("the plus rule applies from 6 x 6; the table plays here");
-    }
     if (replay && replay.length > 0) {
       for (const i of replay) {
         if (this.over) break;
@@ -458,6 +469,24 @@ export class SagBoard extends HTMLElement {
     );
   }
 
+  /** The segmented control: the playing strategy pressed, both disabled
+   * below 6 x 6 with a hint saying why. */
+  private paintStrategy(): void {
+    const playing = this.strategy();
+    const small = this.pos.n < 6;
+    for (const b of this.querySelectorAll<HTMLButtonElement>(
+      ".sag-strategy button",
+    )) {
+      b.setAttribute("aria-pressed", String(b.dataset["strategy"] === playing));
+      b.disabled = small;
+    }
+    this.querySelector<HTMLElement>(".sag-strategy-hint")!.textContent = small
+      ? this.pos.n === 5
+        ? "the rule applies from 6 × 6; the 5 × 5 table plays here"
+        : "below 5 × 5 the game is drawn; a never-losing policy plays"
+      : "";
+  }
+
   /** The rule's committed line, if the rule is playing and has one. */
   private currentLine(): Line | null {
     if (this.strategy() !== "plus") return null;
@@ -465,20 +494,23 @@ export class SagBoard extends HTMLElement {
   }
 
   /** Mark the line's cells on the board: pending tempo moves and arms,
-   * the plus's centre, and the latent corner the rule never surrenders. */
+   * the plus's centre, and the latent corner the rule never surrenders;
+   * and lay the line out as chips in the explainer. */
   private paintLine(): void {
     const layer = this.svg.querySelector(".sag-marks")!;
     layer.innerHTML = "";
+    const plan = this.querySelector<HTMLElement>(".sag-plan")!;
     const line = this.currentLine();
-    const panel = this.querySelector<HTMLElement>(".sag-line")!;
     if (line === null || this.over) {
-      panel.textContent = "";
+      plan.hidden = true;
       return;
     }
+    const held = (cell: [number, number]) =>
+      this.pos.p1.has(this.pos.idx(cell));
+    const nextIdx = line.cells.findIndex((c) => !held(c));
     const mark = (cell: [number, number], kind: string) => {
       const [r, c] = cell;
-      const i = this.pos.idx(cell);
-      if (this.pos.occupied(i) && kind !== "hot") return;
+      if (this.pos.occupied(this.pos.idx(cell)) && kind !== "hot") return;
       const rect = document.createElementNS(NS, "rect");
       rect.setAttribute("x", String(c * U + 2.5));
       rect.setAttribute("y", String(r * U + 2.5));
@@ -487,43 +519,36 @@ export class SagBoard extends HTMLElement {
       rect.setAttribute("class", `sag-mark sag-mark-${kind}`);
       layer.appendChild(rect);
     };
-    line.cells.forEach((cell, k) =>
-      mark(cell, k < line.tempo ? "tempo" : "arm"),
-    );
-    mark(line.centre, "centre");
-    const o1 = this.pos.cell(this.pos.history[1]!);
-    const o2 = this.pos.cell(this.pos.history[3]!);
-    const hot = lineOf(this.pos) ? this.hotCell() : null;
-    if (hot) mark(hot, "hot");
-    panel.innerHTML = "";
-    const add = (text: string, held?: boolean) => {
-      const node = held
-        ? document.createElement("b")
-        : document.createTextNode("");
-      node.textContent = text;
-      panel.appendChild(node);
-    };
-    add("line: ");
-    const tempo = line.cells.slice(0, line.tempo);
-    const arms = line.cells.slice(line.tempo);
-    if (tempo.length > 0) {
-      add(`tempo ${tempo.length === 1 ? "move" : "moves"} `);
-      tempo.forEach((c, k) => {
-        add(fmt(c), this.pos.p1.has(this.pos.idx(c)));
-        add(k < tempo.length - 1 ? ", " : "; ");
-      });
-    }
-    add(`side-${line.side} plus at ${fmt(line.centre)}, arms `);
-    arms.forEach((c, k) => {
-      add(fmt(c), this.pos.p1.has(this.pos.idx(c)));
-      add(k < arms.length - 1 ? ", " : "");
+    line.cells.forEach((cell, k) => {
+      mark(cell, k === nextIdx ? "next" : k < line.tempo ? "tempo" : "arm");
     });
-    add(
-      hot
-        ? `; latent corner ${fmt(hot)} of your stones ${fmt([o1[0], o1[1]])} and ${fmt([o2[0], o2[1]])}`
-        : "",
-    );
-    add(". Held cells in bold.");
+    mark(line.centre, "centre");
+    const hot = this.hotCell();
+    if (hot) mark(hot, "hot");
+
+    plan.hidden = false;
+    const chips = this.querySelector<HTMLElement>(".sag-chips")!;
+    chips.innerHTML = "";
+    line.cells.forEach((cell, k) => {
+      const chip = document.createElement("span");
+      const kind = k < line.tempo ? "tempo" : "arm";
+      const state = held(cell) ? "held" : k === nextIdx ? "next" : "pending";
+      chip.className = `sag-chip sag-chip-${kind} sag-chip-${state}`;
+      chip.textContent = fmt(cell);
+      chip.title = `${kind === "tempo" ? "tempo move" : "arm"}, ${state}`;
+      chips.appendChild(chip);
+    });
+    const tempo = line.tempo;
+    const parts = [
+      tempo > 0
+        ? `${tempo} tempo ${tempo === 1 ? "move" : "moves"}, then the`
+        : "the",
+      `side-${line.side} plus at ${fmt(line.centre)}`,
+    ];
+    if (hot)
+      parts.push(`· latent corner ${fmt(hot)}, never offered as a block`);
+    this.querySelector<HTMLElement>(".sag-plan-note")!.textContent =
+      parts.join(" ");
   }
 
   private hotCell(): [number, number] | null {
@@ -533,16 +558,21 @@ export class SagBoard extends HTMLElement {
       : null;
   }
 
-  /** The move list with the bot's reasons, rebuilt from the history so
-   * that undo and shared links show the same text as live play. */
+  /** The move log with the bot's reasons, rebuilt from the history so
+   * that undo and shared links show the same text as live play; the
+   * latest bot move also heads the explainer. */
   private renderMoves(): void {
     const list = this.querySelector<HTMLOListElement>(".sag-moves")!;
     list.innerHTML = "";
     const replay = new Position(this.pos.n);
     const strategy = this.strategy();
+    let latest = "";
     this.pos.history.forEach((i) => {
       const [r, c] = replay.cell(i);
       const item = document.createElement("li");
+      const who = document.createElement("span");
+      who.className = "sag-who";
+      const text = document.createElement("span");
       if (replay.p1ToMove()) {
         let reason = "";
         try {
@@ -552,13 +582,24 @@ export class SagBoard extends HTMLElement {
         } catch {
           reason = "";
         }
-        item.textContent = `bot ${fmt([r, c])}${reason ? `: ${reason}` : ""}`;
+        who.textContent = "bot";
+        text.textContent = reason ? `${fmt([r, c])}: ${reason}` : fmt([r, c]);
+        latest = `bot ${text.textContent}`;
+        item.className = "sag-move-bot";
       } else {
-        item.textContent = `you ${fmt([r, c])}`;
+        who.textContent = "you";
+        text.textContent = fmt([r, c]);
+        item.className = "sag-move-you";
       }
+      item.append(who, text);
       list.appendChild(item);
       replay.play([r, c]);
     });
+    if (list.lastElementChild)
+      list.lastElementChild.classList.add("sag-move-last");
+    this.querySelector<HTMLElement>(".sag-now-text")!.textContent = latest;
+    this.querySelector<HTMLElement>(".sag-log summary")!.textContent =
+      `move log (${this.pos.history.length})`;
   }
 
   private status(text: string): void {

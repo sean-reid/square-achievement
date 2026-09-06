@@ -82,7 +82,13 @@ test("the bot explains its moves and shows its line", async ({ page }) => {
   await page.locator('sag-board rect[data-i="0"]').click();
   await page.locator('sag-board rect[data-i="5"]').click();
   await expect(page.locator("sag-board .sag-moves li")).toHaveCount(5);
-  await expect(page.locator("sag-board .sag-line")).toContainText("plus at");
+  await expect(page.locator("sag-board .sag-now-text")).toContainText("bot");
+  await expect(page.locator("sag-board .sag-plan-note")).toContainText(
+    "plus at",
+  );
+  await expect
+    .poll(async () => page.locator("sag-board .sag-chip").count())
+    .toBeGreaterThan(2);
   await expect
     .poll(async () => page.locator("sag-board .sag-mark").count())
     .toBeGreaterThan(0);
@@ -90,17 +96,27 @@ test("the bot explains its moves and shows its line", async ({ page }) => {
 
 test("the strategy selector switches to the table", async ({ page }) => {
   await page.goto("./");
-  await page.locator("sag-board .sag-strategy").selectOption("table");
+  await page.locator('sag-board .sag-strategy [data-strategy="table"]').click();
   await expect(page.locator("sag-board .sag-x")).toHaveCount(1);
   await expect(page.locator("sag-board .sag-moves li").first()).toContainText(
     "the opening",
   );
-  await expect(page.locator("sag-board .sag-line")).toHaveText("");
+  await expect(page.locator("sag-board .sag-plan")).toBeHidden();
+  await expect(
+    page.locator('sag-board .sag-strategy [data-strategy="table"]'),
+  ).toHaveAttribute("aria-pressed", "true");
   expect(page.url()).toContain("s=table");
 });
 
 test("the threshold page defaults to the table strategy", async ({ page }) => {
   await page.goto("./threshold/");
-  await expect(page.locator("sag-board .sag-strategy")).toHaveValue("table");
-  await expect(page.locator("sag-board .sag-strategy")).toBeDisabled();
+  await expect(
+    page.locator('sag-board .sag-strategy [data-strategy="table"]'),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.locator('sag-board .sag-strategy [data-strategy="plus"]'),
+  ).toBeDisabled();
+  await expect(page.locator("sag-board .sag-strategy-hint")).toContainText(
+    "from 6 × 6",
+  );
 });
