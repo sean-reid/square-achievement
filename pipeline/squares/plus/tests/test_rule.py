@@ -58,3 +58,12 @@ def test_measure_agrees_with_the_rule_on_six():
     assert (m["roots"], m["lines"], m["max_plies"]) == (1155, 79, 17)
     assert m["tempo"] == {0: 985, 1: 91, 2: 54, 3: 25}
     assert m["sides"] == {1: 985, 2: 170}
+
+
+def test_site_fixture_is_current():
+    import json
+
+    from squares.paths import SITE_PLUS_FIXTURE
+    from squares.plus.export_site import build_fixture
+
+    assert json.loads(SITE_PLUS_FIXTURE.read_text()) == build_fixture()
