@@ -1,4 +1,5 @@
 import SquareAchievement.Compute.ForcedSound
+import SquareAchievement.Compute.WinsWith
 import SquareAchievement.General.Invariance
 import SquareAchievement.General.Coverage
 
@@ -102,7 +103,7 @@ distinct corners in the box, so the whole square sits inside any
 board of size at least the box; threat sets therefore agree between
 any two such boards whenever occupancy agrees on the box. -/
 
-theorem mem_threatsL_iff_cross {B n : ℕ} (h6 : 6 ≤ B) (hBn : B ≤ n)
+theorem mem_threatsL_iff_cross {B n : ℕ} (h6 : 6 ≤ B) (h6n : 6 ≤ n)
     {mine occ occ' : List Cell} (hmine : ∀ x ∈ mine, x ∈ board 6)
     (hocc : ∀ x ∈ board 6, (x ∈ occ ↔ x ∈ occ')) {z : Cell} :
     z ∈ threatsL (squaresList B) mine occ ↔
@@ -115,7 +116,7 @@ theorem mem_threatsL_iff_cross {B n : ℕ} (h6 : 6 ≤ B) (hBn : B ≤ n)
     have hzsq : z ∈ sq :=
       List.mem_of_mem_filter (hfil ▸ List.mem_cons_self ..)
     have hz6 : z ∈ board 6 := squaresList_on_board hsq6 z hzsq
-    refine threatsL_of_filter (squaresList_mono (by omega) hsq6) hfil ?_
+    refine threatsL_of_filter (squaresList_mono h6n hsq6) hfil ?_
     rw [Bool.eq_false_iff] at hzocc ⊢
     intro hx
     exact hzocc (by
@@ -380,7 +381,11 @@ theorem simulate (σ : Strategy) {B n : ℕ}
     (hot : Option Cell) (hn17 : 17 ≤ n) (hB17 : 17 ≤ B)
     {opc x2c o1b o1r o2b o2r : Cell}
     (hop : opc ∈ board 6) (hx2 : x2c ∈ board 6)
-    (hs1 : SlotOk B n o1b o1r) (hs2 : SlotOk B n o2b o2r) :
+    (hs1 : SlotOk B n o1b o1r) (hs2 : SlotOk B n o2b o2r)
+    (hagree : ∀ tail : List Cell,
+      σ (squaresList n) (opc :: o1r :: x2c :: o2r :: tail) =
+        σ (squaresList B) (opc :: o1b :: x2c :: o2b :: tail))
+    (htake : TakesWinsOn σ 6 n [opc, o1r, x2c, o2r]) :
     ∀ (fuel : ℕ) (tail : List Cell),
       tail.length % 2 = 0 →
       (∀ y ∈ tail, y ∈ board 6) →
@@ -390,8 +395,7 @@ theorem simulate (σ : Strategy) {B n : ℕ}
       ¬ HasSquare (opc :: x2c :: stonesOf true tail).toFinset →
       (o1r ∉ board 17 ∨ o2r ∉ board 17 →
         PairMode hot o1r o2r (o1r :: o2r :: stonesOf false tail)) →
-      P1CanWin n (opc :: x2c :: stonesOf true tail).toFinset
-        (o1r :: o2r :: stonesOf false tail).toFinset := by
+      WinsWith σ n (opc :: o1r :: x2c :: o2r :: tail) := by
   have hb6B : ∀ w : Cell, w ∈ board 6 → w ∈ board B := by
     intro w hw
     rw [mem_board] at hw ⊢
@@ -465,6 +469,10 @@ theorem simulate (σ : Strategy) {B n : ℕ}
     split at h
     · exact absurd h (by simp)
     · rename_i m hsm
+      have hσr : σ (squaresList n) (opc :: o1r :: x2c :: o2r :: tail) = some m :=
+        (hagree tail).trans hsm
+      have hstTr : stonesOf true (opc :: o1r :: x2c :: o2r :: tail) = p1 := rfl
+      have hstFr : stonesOf false (opc :: o1r :: x2c :: o2r :: tail) = p2R := rfl
       split at h
       · exact absurd h (by simp)
       · rename_i hguard
@@ -485,11 +493,14 @@ theorem simulate (σ : Strategy) {B n : ℕ}
             simpa using this
           have hm6 : m ∈ board 6 := win_move_in_box hp1box hp1no hw
           have hmfree := hfree m hm6 ⟨fun hc => hm1' hc, fun hc => hm2' hc⟩
-          refine P1CanWin.now m (mem_empties.mpr ⟨hb6n m hm6, ?_, ?_⟩) hw
-          · intro hc
-            exact hmfree.1 (List.mem_toFinset.mp hc)
-          · intro hc
-            exact hmfree.2 (List.mem_toFinset.mp hc)
+          refine WinsWith.now m hσr ?_ ?_
+          · rw [hstTr, hstFr]
+            refine mem_empties.mpr ⟨hb6n m hm6, ?_, ?_⟩
+            · intro hc
+              exact hmfree.1 (List.mem_toFinset.mp hc)
+            · intro hc
+              exact hmfree.2 (List.mem_toFinset.mp hc)
+          · rw [hstTr]; exact hw
         · rename_i hnowin
           have hp1no' : ¬ HasSquare (insert m p1.toFinset) := by
             intro hc
@@ -609,29 +620,104 @@ theorem simulate (σ : Strategy) {B n : ℕ}
                           exact hz2 (List.mem_toFinset.mp hc)
                       have hne : (empties n (insert m p1.toFinset)
                           p2R.toFinset).Nonempty := ⟨z₀, hthE z₀ hz₀⟩
-                      refine P1CanWin.step m hmE hne hsafe ?_
+                      refine WinsWith.step m hσr hmE hne hsafe ?_
                       intro r hr
                       obtain ⟨hrb, hr1, hr2⟩ := mem_empties.mp hr
-                      -- the two-move win through a standing threat
+                      -- the real history after the reply, and its stones
+                      have hlenR : (opc :: o1r :: x2c :: o2r :: tail).length % 2 = 0 := by
+                        simp only [List.length_cons]; omega
+                      have hsR1 : stonesOf true (((opc :: o1r :: x2c :: o2r :: tail) ++ [m]) ++ [r])
+                          = p1 ++ [m] := by
+                        rw [stonesOf_snoc_odd_true (by rw [List.length_append]; simp; omega),
+                          stonesOf_snoc_even_true hlenR, hstTr]
+                      have hsR2 :
+                          stonesOf false (((opc :: o1r :: x2c :: o2r :: tail) ++ [m]) ++ [r])
+                          = p2R ++ [r] := by
+                        rw [stonesOf_snoc_odd_false (by rw [List.length_append]; simp; omega),
+                          stonesOf_snoc_even_false hlenR, hstFr]
+                      have hmemR : ∀ w, w ∈ ((opc :: o1r :: x2c :: o2r :: tail) ++ [m]) ++ [r] ↔
+                          w ∈ p1 ++ [m] ∨ w ∈ p2R ++ [r] := by
+                        intro w
+                        rw [mem_stonesOf (((opc :: o1r :: x2c :: o2r :: tail) ++ [m]) ++ [r]) true,
+                          hsR1]
+                        simp only [Bool.not_true]
+                        rw [hsR2]
+                      -- the two-move win: the strategy takes a standing threat
                       have hnow : ∀ z ∈ ths, z ≠ r →
-                          P1CanWin n (insert m p1.toFinset)
-                            (insert r p2R.toFinset) := by
+                          WinsWith σ n (((opc :: o1r :: x2c :: o2r :: tail) ++ [m]) ++ [r]) := by
                         intro z hz hzr
-                        obtain ⟨hwz, -, -⟩ := hthdata z hz
-                        have hwz' : HasSquare (insert z
-                            (insert m p1.toFinset)) := by
-                          have : (m :: p1).toFinset =
-                              insert m p1.toFinset := by
-                            ext w; simp
-                          rwa [this] at hwz
-                        have hzE := hthE z hz
-                        obtain ⟨hzb', hz1', hz2'⟩ := mem_empties.mp hzE
-                        refine P1CanWin.now z
-                          (mem_empties.mpr ⟨hzb', hz1', ?_⟩) hwz'
-                        intro hc
-                        rcases Finset.mem_insert.mp hc with rfl | hc
-                        · exact hzr rfl
-                        · exact hz2' hc
+                        obtain ⟨hz1, hz2, hzm⟩ := hthfree z hz
+                        -- z is a threat on the real board after the reply
+                        have hzreal : z ∈ threatsL (squaresList n) (p1 ++ [m])
+                            (((opc :: o1r :: x2c :: o2r :: tail) ++ [m]) ++ [r]) := by
+                          obtain ⟨sq, hsq, hfil, -⟩ := mem_threatsL (hths ▸ hz)
+                          have hmine6 : ∀ x ∈ m :: p1, x ∈ board 6 := fun x hx =>
+                            List.mem_cons.mp hx |>.elim (fun he => he ▸ hm6) (hp1box x)
+                          have hsq6 : sq ∈ squaresList 6 :=
+                            square_filter_confine (by omega) (by omega) hmine6 hsq hfil
+                          refine threatsL_of_filter (squaresList_mono (by omega) hsq6) ?_ ?_
+                          · rw [← hfil]
+                            apply List.filter_congr
+                            intro x _
+                            congr 1
+                            rw [Bool.eq_iff_iff, List.contains_iff_mem, List.contains_iff_mem]
+                            simp only [List.mem_append, List.mem_cons, List.not_mem_nil, or_false]
+                            tauto
+                          · rw [Bool.eq_false_iff]
+                            intro hx
+                            rw [List.contains_iff_mem, hmemR, List.mem_append, List.mem_append,
+                              List.mem_singleton, List.mem_singleton] at hx
+                            rcases hx with (hx | rfl) | (hx | rfl)
+                            · exact hz1 hx
+                            · exact hzm rfl
+                            · exact hz2 hx
+                            · exact hzr rfl
+                        have hthneR : threatsL (squaresList n)
+                            (stonesOf true (((opc :: o1r :: x2c :: o2r :: tail) ++ [m]) ++ [r]))
+                            (((opc :: o1r :: x2c :: o2r :: tail) ++ [m]) ++ [r]) ≠ [] := by
+                          rw [hsR1]
+                          exact List.ne_nil_of_mem hzreal
+                        have hshape : [opc, o1r, x2c, o2r] ++ ((tail ++ [m]) ++ [r]) =
+                            ((opc :: o1r :: x2c :: o2r :: tail) ++ [m]) ++ [r] := by simp
+                        obtain ⟨z', hσz', hz'th⟩ := htake ((tail ++ [m]) ++ [r])
+                          (by rw [hshape, List.length_append, List.length_append]
+                              simp only [List.length_cons, List.length_nil]; omega)
+                          (by rw [hshape, hsR1]
+                              intro x hx
+                              rw [List.mem_append, List.mem_singleton] at hx
+                              rcases hx with hx | rfl
+                              · exact inBox_iff.mpr (hp1box x hx)
+                              · exact inBox_iff.mpr hm6)
+                          (by rw [hshape]
+                              intro x hx
+                              rw [hmemR, List.mem_append, List.mem_append, List.mem_singleton,
+                                List.mem_singleton] at hx
+                              rcases hx with (hx | rfl) | (hx | rfl)
+                              · exact hb6n x (hp1box x hx)
+                              · exact hb6n x hm6
+                              · rw [hp2Rdef, List.mem_cons, List.mem_cons] at hx
+                                rcases hx with rfl | rfl | hx
+                                · exact ho1n
+                                · exact ho2n
+                                · exact hb6n x (hDBt x hx)
+                              · exact hrb)
+                          (by rw [hshape]; exact hthneR)
+                        rw [hshape] at hσz' hz'th
+                        rw [hsR1] at hz'th
+                        obtain ⟨hwz', hz'b, hz'occ⟩ := threat_wins hz'th
+                        rw [Bool.eq_false_iff] at hz'occ
+                        refine WinsWith.now z' hσz' ?_ ?_
+                        · rw [hsR1, hsR2]
+                          refine mem_empties.mpr ⟨hz'b, ?_, ?_⟩
+                          · intro hc
+                            exact hz'occ (by
+                              rw [List.contains_iff_mem, hmemR]
+                              exact Or.inl (List.mem_toFinset.mp hc))
+                          · intro hc
+                            exact hz'occ (by
+                              rw [List.contains_iff_mem, hmemR]
+                              exact Or.inr (List.mem_toFinset.mp hc))
+                        · rw [hsR1]; exact hwz'
                       by_cases hrths : r ∈ ths
                       · by_cases hrhot : hot = some r
                         · -- the block took the farm cell: win through
@@ -749,24 +835,26 @@ theorem simulate (σ : Strategy) {B n : ℕ}
                                     (List.mem_cons_of_mem _ hc))
                                 · rw [List.mem_singleton] at hc
                                   exact hrhot (hc ▸ rfl))
-                          rw [hstT', hstF'] at hind
-                          have e1 : (opc :: x2c :: (TT ++ [m])).toFinset =
-                              insert m p1.toFinset := by
-                            ext w
-                            rw [hp1def]
-                            simp [List.toFinset_append, or_comm]
-                            tauto
-                          have e2 : (o1r :: o2r :: (DB ++ [r])).toFinset =
-                              insert r p2R.toFinset := by
-                            ext w
-                            rw [hp2Rdef]
-                            simp [List.toFinset_append, or_comm]
-                            tauto
-                          rwa [e1, e2] at hind
+                          have hlist : ((opc :: o1r :: x2c :: o2r :: tail) ++ [m]) ++ [r] =
+                              opc :: o1r :: x2c :: o2r :: ((tail ++ [m]) ++ [r]) := by simp
+                          rw [hlist]
+                          exact hind
                       · -- not a block: the standing threat wins now
                         exact hnow z₀ hz₀ (fun he => hrths (he ▸ hz₀))
 
-/-- The table instance: a forced base run of a table with box `6`. -/
+/-- The base view of a real history: the two reply slots replaced by
+their base stand-ins. -/
+def baseView (o1b o2b : Cell) : List Cell → List Cell
+  | a :: _ :: c :: _ :: rest => a :: o1b :: c :: o2b :: rest
+  | h => h
+
+/-- The strategy that plays a base strategy's move on the base view. -/
+def viewStrategy (σ : Strategy) (B : ℕ) (o1b o2b : Cell) : Strategy :=
+  fun _ hist => σ (squaresList B) (baseView o1b o2b hist)
+
+/-- The table instance: a forced base run of a table with box `6`
+yields a win on the target board; the moves are the table's moves read
+on the base view of the position. -/
 theorem simulate_table (t : Table) (hbox : t.box = 6) {B n : ℕ}
     (hot : Option Cell) (hn17 : 17 ≤ n) (hB17 : 17 ≤ B)
     {opc x2c o1b o1r o2b o2r : Cell}
@@ -783,11 +871,74 @@ theorem simulate_table (t : Table) (hbox : t.box = 6) {B n : ℕ}
         PairMode hot o1r o2r (o1r :: o2r :: stonesOf false tail)) →
       P1CanWin n (opc :: x2c :: stonesOf true tail).toFinset
         (o1r :: o2r :: stonesOf false tail).toFinset := by
-  intro fuel tail hlen htail hrun
-  have hrun' : goForcedS (strategyMove t) 6 (squaresList B) B hot fuel
+  intro fuel tail hlen htail hrun hnoB hp1no hpair
+  set σv := viewStrategy (strategyMove t) B o1b o2b with hσv
+  -- on base histories the view strategy is the table strategy
+  have hsame : ∀ h : List Cell, [opc, o1b, x2c, o2b] <+: h →
+      strategyMove t (squaresList B) h = σv (squaresList B) h := by
+    intro h hpre
+    obtain ⟨rest, rfl⟩ := hpre
+    rfl
+  have hrun' : goForcedS σv 6 (squaresList B) B hot fuel
       (opc :: o1b :: x2c :: o2b :: tail) = true := by
     rw [goForced, hbox] at hrun
+    have hc := goForcedS_congr (box := 6) (n := B) (hot := hot) hsame fuel
+      (opc :: o1b :: x2c :: o2b :: tail) ⟨tail, rfl⟩
+    rw [← hc]
     exact hrun
-  exact simulate (strategyMove t) hot hn17 hB17 hop hx2 hs1 hs2 fuel tail hlen htail hrun'
+  have hagree : ∀ tl : List Cell,
+      σv (squaresList n) (opc :: o1r :: x2c :: o2r :: tl) =
+        σv (squaresList B) (opc :: o1b :: x2c :: o2b :: tl) := fun _ => rfl
+  -- the view strategy takes its wins on the real board: its threats are
+  -- the base board's, since occupancy agrees on the box
+  have htake : TakesWinsOn σv 6 n [opc, o1r, x2c, o2r] := by
+    intro tl _ hp1box _ hne
+    have hshape : [opc, o1r, x2c, o2r] ++ tl = opc :: o1r :: x2c :: o2r :: tl := rfl
+    rw [hshape] at hp1box hne ⊢
+    have e1r : stonesOf true (opc :: o1r :: x2c :: o2r :: tl) =
+        opc :: x2c :: stonesOf true tl := rfl
+    have e1b : stonesOf true (opc :: o1b :: x2c :: o2b :: tl) =
+        opc :: x2c :: stonesOf true tl := rfl
+    have e2b : stonesOf false (opc :: o1b :: x2c :: o2b :: tl) =
+        o1b :: o2b :: stonesOf false tl := rfl
+    rw [e1r] at hp1box hne
+    have hmine6 : ∀ x ∈ opc :: x2c :: stonesOf true tl, x ∈ board 6 :=
+      fun x hx => inBox_iff.mp (hp1box x hx)
+    -- occupancy on the box agrees between the base stones and the real history
+    have hocc : ∀ x ∈ board 6,
+        (x ∈ opc :: x2c :: (stonesOf true tl ++ o1b :: o2b :: stonesOf false tl) ↔
+          x ∈ opc :: o1r :: x2c :: o2r :: tl) := by
+      intro x hx6
+      have hx12 : x ∈ board 12 := by rw [mem_board] at hx6 ⊢; omega
+      have hslot : ∀ {b r : Cell}, SlotOk B n b r → (x = b ↔ x = r) := by
+        intro b r hs
+        rcases hs with ⟨rfl, -, -⟩ | ⟨-, hb12, -, hr12, -⟩
+        · exact Iff.rfl
+        · exact ⟨fun he => absurd (he ▸ hx12) hb12, fun he => absurd (he ▸ hx12) hr12⟩
+      simp only [List.mem_append, List.mem_cons]
+      rw [mem_stonesOf tl true]
+      simp only [Bool.not_true]
+      rw [hslot hs1, hslot hs2]
+      tauto
+    have hcross := fun z => mem_threatsL_iff_cross (B := B) (n := n) (by omega) (by omega)
+      (mine := opc :: x2c :: stonesOf true tl) hmine6 hocc (z := z)
+    have hneB : threatsL (squaresList B) (opc :: x2c :: stonesOf true tl)
+        (opc :: x2c :: (stonesOf true tl ++ o1b :: o2b :: stonesOf false tl)) ≠ [] := by
+      intro hnil
+      obtain ⟨z, hz⟩ := List.exists_mem_of_ne_nil _ hne
+      have := (hcross z).mpr hz
+      rw [hnil] at this
+      simp at this
+    show ∃ z, strategyMove t (squaresList B) (opc :: o1b :: x2c :: o2b :: tl) = some z ∧ _
+    unfold strategyMove
+    rw [e1b, e2b]
+    simp only [List.cons_append]
+    rcases hmin : minThreat (squaresList B) (opc :: x2c :: stonesOf true tl)
+        (opc :: x2c :: (stonesOf true tl ++ o1b :: o2b :: stonesOf false tl)) with _ | z
+    · exact absurd (minThreat_eq_none hmin) hneB
+    · exact ⟨z, by simp, (hcross z).mp (minThreat_some_mem hmin)⟩
+  have := simulate σv hot hn17 hB17 hop hx2 hs1 hs2 hagree htake fuel tail hlen htail hrun'
+    hnoB hp1no hpair
+  exact this.p1CanWin (by simp only [List.length_cons]; omega)
 
 end SquareAchievement
