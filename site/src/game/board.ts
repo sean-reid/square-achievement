@@ -83,7 +83,7 @@ export class SagBoard extends HTMLElement {
       </p>
       <aside class="sag-explain" aria-label="what the bot is thinking">
         <p class="sag-now">
-          <span class="sag-explain-label">bot's move</span>
+          <span class="sag-explain-label">bot</span>
           <span class="sag-now-text"></span>
         </p>
         <p class="sag-plan" hidden>
