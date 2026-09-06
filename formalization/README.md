@@ -13,7 +13,8 @@ core: the game, its outcomes, the strategy-table format, the checkers,
 and their soundness theorems. `Threshold` is the first result built on
 it: the tables, the uniform argument, the certificates, and the
 threshold theorems below. `Plus` is the second: a strategy stated as a
-rule rather than a table, and its certificates. Further results get
+rule rather than a table, certified directly for every board from 6 up
+with no data file anywhere. Further results get
 libraries of their own beside them.
 
 ## Results
@@ -32,9 +33,10 @@ libraries of their own beside them.
 | `checkForced_sound` | the same for the forced-tree checker |
 | `refute_sound` | a successful refuter run refutes a first-player win |
 | `escape_farm` | a square escaping the base board is latent: box corner plus the reply pair |
-| `simulate` | a forced base run replays on every larger board |
+| `simulate` | a forced base run of any strategy replays on every larger board |
 | `check_sound_uniform` | the checked run at 17, with the anchored certificates, wins every board from 17 up |
-| `Plus.plus_wins_of_le_seventeen` | the plus rule, a table-free strategy, wins every board from 6 to 17 |
+| `Plus.plus_wins` | the plus rule, a strategy stated without a lookup table, wins every board from 6 up |
+| `Plus.plus_wins_of_le_seventeen` | the rule's direct certificates for the boards from 6 to 17 |
 
 ## Building
 
@@ -129,16 +131,19 @@ for n in $(seq 6 17); do lake exe checker "$n" forced; done
   being one instance), and the refuter with their soundness proofs;
   and a byte-board checker used only by the executable, never cited
   in proofs.
+- `General/` the simulation argument any forced strategy can use:
+  span and invariance geometry (`Invariance`), the latency dichotomy
+  (`Coverage`), the replay of a forced base run on every larger board
+  (`Simulation`), and the small facts every wrapper of it needs
+  (`Dispatch`).
 
 `Threshold/`, the threshold result:
 
 - `ExactFarm.lean` the anchored farm-safety certificates.
 - `Data/` machine-generated strategy tables: the n = 5 table and the
   general corner-box table.
-- `General/` the uniform proof: span and invariance geometry
-  (`Invariance`), the latency dichotomy (`Coverage`), the simulation
-  (`Simulation`), and the wrapper assembling `check_sound_uniform`
-  (`Wrapper`).
+- `General/Wrapper.lean` the dispatch assembling `check_sound_uniform`
+  from the table's lookups and the simulation.
 - `Results/` the evaluated certificates and the threshold theorems.
 
 `Plus/`, the plus rule:
@@ -147,7 +152,14 @@ for n in $(seq 6 17); do lake exe checker "$n" forced; done
   second-move diagram, tempo moves, pluses of side one and two, and the
   shortest line within three tempo moves, read off an abstraction of
   the position.
-- `Results.lean` the forced-tree checker run on the rule itself at every
-  size from 6 to 17.
+- `Anchors.lean` the rule's anchored runs on the board of size 23: the
+  base run for the uniform argument and the three far-pair families,
+  with the latent corner as a guard.
+- `Uniform.lean` the wrapper dispatching every real reply pair to the
+  simulation, using the rule's own second move and stand-ins beyond the
+  base board.
+- `Results.lean` the certificates, evaluated: the runs at sizes 6 to 17,
+  the anchor-board run, and the anchored families, and the theorems
+  `plus_wins_of_le_seventeen` and `plus_wins`.
 
 `Checker.lean` is the executable, built from the core and `Threshold`.
