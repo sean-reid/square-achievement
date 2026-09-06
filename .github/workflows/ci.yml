@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        paper: [threshold]
+        paper: [threshold, plus]
     steps:
       - uses: actions/checkout@v7
       - uses: xu-cheng/latex-action@v4

@@ -15,7 +15,9 @@ when n >= 5, by a machine-checked strategy.
   formalization tarball.
 - `papers/` the LaTeX sources, one directory per paper, with the
   shared bibliography and macros in `papers/shared/`; CI builds every
-  PDF. `papers/threshold/` is the paper on the winning threshold.
+  PDF. `papers/threshold/` is the paper on the winning threshold and
+  `papers/plus/` the paper on the plus rule, a winning strategy with
+  no lookup table.
 - `formalization/` the Lean 4 development: a core library with the
   game semantics and the checkers with machine-checked soundness, and
   a library per result, the first holding the strategy tables as
@@ -54,7 +56,7 @@ Requires a TeX Live installation with `amsart`, `tikz`, and
 `algorithm`.
 
 ```sh
-cd papers/threshold
+cd papers/threshold   # or papers/plus
 latexmk -pdf main.tex
 ```
 
