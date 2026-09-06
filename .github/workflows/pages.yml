@@ -29,17 +29,11 @@ jobs:
         working-directory: site
       - uses: xu-cheng/latex-action@v4
         with:
-          root_file: |
-            papers/threshold/main.tex
-            papers/plus/main.tex
+          root_file: paper/main.tex
           work_in_root_file_dir: true
       - run: |
           mkdir -p site/dist/downloads
-          for d in papers/*/; do
-            [ -f "$d/main.pdf" ] || continue
-            slug=$(basename "$d")
-            cp "$d/main.pdf" "site/dist/downloads/$slug.pdf"
-          done
+          cp paper/main.pdf site/dist/downloads/paper.pdf
           git archive HEAD --prefix=square-achievement-formalization/ formalization \
             -o site/dist/downloads/square-achievement-formalization.tar.gz
       - uses: actions/upload-pages-artifact@v5
