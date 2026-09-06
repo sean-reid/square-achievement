@@ -2,10 +2,10 @@
 
 import json
 
+from squares.five import strategy5
+from squares.five.crosscheck import read_lean_table
+from squares.five.export_site import table_json
 from squares.paths import LEAN_DATA, SITE_FIVE_TABLE
-from squares.threshold import strategy5
-from squares.threshold.crosscheck import read_lean_table
-from squares.threshold.export_site import table_json
 
 
 def test_lean_five_table_matches_site_and_python():

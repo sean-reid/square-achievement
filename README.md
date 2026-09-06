@@ -8,11 +8,10 @@ when n >= 5, by a machine-checked strategy.
 
 ## Layout
 
-- `site/` the site: a hub with the playable game and one card per
-  result, and for each result an overview page at `/<slug>/` and an
-  illustrated proof guide at `/<slug>/proof/`. Astro, statically
-  built; the deploy also packages every paper's PDF and the
-  formalization tarball.
+- `site/` the site: the overview with the theorem and the playable
+  game, and an illustrated proof guide at `/proof/`. Astro, statically
+  built; the deploy also packages the paper's PDF and the formalization
+  tarball.
 - `papers/` the LaTeX sources, one directory per paper, with the
   shared bibliography and macros in `papers/shared/`; CI builds every
   PDF. `papers/threshold/` is the paper on the winning threshold and

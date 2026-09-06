@@ -1,7 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
 import katex from "katex";
-import { results } from "../results";
 
 const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
 const base = import.meta.env.BASE_URL.endsWith("/")
@@ -10,59 +9,124 @@ const base = import.meta.env.BASE_URL.endsWith("/")
 ---
 
 <Base
-  title="The Square Achievement Game"
-  description="Results on the square achievement game: two players claim cells of an n by n grid, and the first to own four corners of an axis-aligned square wins. Papers, machine-checked proofs in Lean, and a playable strategy."
+  title="The Square Achievement Game on n × n Boards"
+  description="Two players claim cells of an n by n grid; the first to own four corners of a square wins. The first player wins exactly when n is at least 5, by a rule with no lookup table from 6 by 6 up, machine-checked in Lean. Play against it."
 >
   <header class="masthead">
-    <h1>The Square Achievement Game</h1>
-    <p class="byline">Sean Reid</p>
+    <h1>The Square Achievement Game on n × n Boards</h1>
+    <p class="byline">Sean Reid · September 2026</p>
   </header>
 
   <p class="lead">
     Two players take turns claiming cells of an
     <span set:html={k("n \\times n")} /> grid. The first to hold all four corners
     of an axis-aligned square wins; a full board with no square is a draw. Erickson
-    asked who wins. This site collects results on the game, each with a paper, an
-    illustrated proof guide, and a proof checked in Lean 4 on one shared formal model
-    of the game.
+    asked who wins. The answer: the first player wins exactly when
+    <span set:html={k("n \\ge 5")} />, and from 6 × 6 up a rule of one paragraph
+    wins by the seventeenth ply. The whole argument, every board size at once,
+    is checked in Lean 4.
+  </p>
+
+  <div class="theorem">
+    <span class="label">Theorem.</span> The first player has a winning strategy in
+    the square achievement game on the
+    <span set:html={k("n \\times n")} /> board if and only if
+    <span set:html={k("n \\ge 5")} />. For <span set:html={k("n \\le 4")} /> the game
+    is a draw under optimal play. For <span set:html={k("n \\ge 6")} /> the first
+    player following the plus rule wins by the seventeenth ply.
+  </div>
+
+  <p>
+    The plus rule: open at (2,2), answer the first reply with a fixed second
+    move, take a completion or a block whenever one exists, and otherwise follow
+    the shortest line of at most three single forcing moves ending in the arms
+    of a
+    <em>plus</em>, a held stone with the four cells at a common distance along
+    the axes. Once the centre and one arm are held, each further arm makes three
+    corners of a square, so the opponent must block on a diagonal cell, and the
+    last arm threatens two squares at once. The rule reads only its own stones,
+    the opponent's stones inside a 17 × 17 region, and one derived cell, so the
+    same rule serves every board; it plays the same 79 lines on every board from
+    6 × 6 to 17 × 17. On 5 × 5 no forcing strategy exists and a table with quiet
+    forks plays instead.
   </p>
 
   <figure class="game">
-    <sag-board n="6" strategy="plus"></sag-board>
+    <sag-board n="6"></sag-board>
     <figcaption>
-      Play against the plus rule. The bot moves first and explains each move;
-      click a cell, or use the arrow keys and Enter. Switch to the table
-      strategy to compare. Below 6 × 6 the tables play.
+      Play against the rule. The bot moves first, explains each move, and draws
+      the line it is following; click a cell, or use the arrow keys and Enter.
+      Change n to explore: on 5 × 5 the table plays, and below 5 × 5 neither
+      side can force a win.
     </figcaption>
   </figure>
 
-  <h2>Results</h2>
-  {
-    results.map((r) => (
-      <article class="result">
-        <h3>{r.title}</h3>
-        <p>{r.statement}</p>
-        <nav class="result-links" aria-label={`${r.title}: where to go`}>
-          <a href={`${base}${r.slug}/`}>overview</a>
-          <a href={`${base}downloads/${r.slug}.pdf`}>paper (PDF)</a>
-          <a href={`${base}${r.slug}/proof/`}>proof guide</a>
-          <a href={`${base}downloads/square-achievement-formalization.tar.gz`}>
-            Lean ({r.lean})
-          </a>
-        </nav>
-      </article>
-    ))
-  }
+  <nav class="routes" aria-label="where to go next">
+    <a class="route" href={`${base}downloads/paper.pdf`}>
+      <span class="route-title">Read the paper</span>
+      <span class="route-body">
+        The outcome theorem, the rule in full, why plus arms force, the
+        verification runs, the simulation argument that carries one checked
+        board to all larger ones, and the formal theorem that the rule's own
+        play wins. PDF, built from this repository.
+      </span>
+    </a>
+    <a class="route" href={`${base}proof/`}>
+      <span class="route-title">See how the proof works</span>
+      <span class="route-body">
+        An illustrated guide: pluses and tempo moves, the latent corner, the
+        draws and the 5 × 5 board, what a computer search has to be trusted
+        with, and how one run on the 23 × 23 board covers every larger board.
+      </span>
+    </a>
+    <a
+      class="route"
+      href={`${base}downloads/square-achievement-formalization.tar.gz`}
+    >
+      <span class="route-title">Check it yourself</span>
+      <span class="route-body">
+        The Lean 4 development. The rule is the definition <code>plusMove</code
+        >, 250 lines with no data; a successful <code>lake build</code> is the proof,
+        and the README shows how to print the theorems and their axioms.
+      </span>
+    </a>
+  </nav>
+
+  <h2>What you have to trust</h2>
+  <p>
+    The headline statements in the development read as follows, with
+    <code>P1CanWin</code> the first player forcing a win, the two draw predicates
+    each player securing at least a draw, and <code>WinsWith σ n h</code> the tree
+    in which the first player plays the move of the strategy <code>σ</code> at every
+    node after the history <code>h</code>, against every legal reply, ending in
+    a first-player square on every branch.
+  </p>
+  <pre
+    class="lean"><code>theorem outcome (n : ℕ) :
+    (P1CanWin n ∅ ∅ ↔ 5 ≤ n) ∧
+      ((P1CanDraw n ∅ ∅ ∧ P2CanDraw n ∅ ∅) ↔ n ≤ 4)
+
+theorem plus_wins_with {"{"}n : ℕ{"}"} (h : 6 ≤ n) :
+    WinsWith plusMove n []</code></pre>
+  <p>
+    The definitions behind them, cells, squares, the winning predicate as a
+    strategy tree, and the 250 lines of <code>plusMove</code>, are the only part
+    a skeptic has to read. Beyond them the trust is Lean's kernel, mathlib, and
+    <code>native_decide</code>, which lets the Lean compiler evaluate the
+    exhaustive checks instead of the kernel. The 5 × 5 table was found by a
+    Python search, but nothing about that search enters the proof: a wrong table
+    fails the check. The bot on this page is a TypeScript copy of the rule,
+    compared with the Lean definition on every reply pair of the 6 × 6 board and
+    on the anchored positions of the proof.
+  </p>
 
   <h2>Open questions</h2>
   <p>
-    The plus rule wins by ply 17 on every board, while the least possible is 15
-    on the 6, 7, and 8 boards: how quickly can the first player force a win on
-    the
-    <span set:html={k("n \\times n")} /> board, and can one strategy be fastest for
-    every <span set:html={k("n")} />? The rule's second move has seven
-    exceptions; is there an opening that needs none? Are the constants of the
-    proofs, the 6 × 6 plan region and the 17 × 17 base board, least? And 5 × 5,
-    where no purely forcing strategy exists, still has no short rule.
+    The rule wins by ply 17: how quickly can the first player force a win on the
+    <span set:html={k("n \\times n")} /> board, and can one rule of comparable length
+    be fastest for every <span set:html={k("n")} />? The rule's second move has
+    seven exceptions; is there an opening that needs none? Are the constants of
+    the proof, the 6 × 6 plan region and the 17 × 17 base board, least? And 5 ×
+    5, where no purely forcing strategy exists, still has no short rule.
   </p>
 </Base>

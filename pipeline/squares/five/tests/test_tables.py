@@ -1,6 +1,6 @@
 """Claims the paper makes about the 5 x 5 table generation."""
 
-from squares.threshold.tables import build_tables
+from squares.five.tables import build_tables
 
 
 def test_twenty_openings_on_five_have_no_forcing_win():

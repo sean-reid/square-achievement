@@ -6,7 +6,7 @@ back into the pipeline's shape and compares them with the site's
 JSON tables and the generated Python module, so a stale export fails
 here rather than letting the verifiers judge different strategies.
 
-python3 -m squares.threshold.crosscheck exits nonzero on any mismatch.
+python3 -m squares.five.crosscheck exits nonzero on any mismatch.
 """
 
 import json

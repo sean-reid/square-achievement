@@ -1,6 +1,6 @@
 from squares import P1, P2, Game
+from squares.five.forcing import forcing_script, resolve, table_strategy
 from squares.solver import Solver, forcing_bits
-from squares.threshold.forcing import forcing_script, resolve, table_strategy
 
 
 def ladder_game():
