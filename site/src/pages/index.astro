@@ -36,19 +36,30 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     player following the plus rule wins by the seventeenth ply.
   </div>
 
+  <p>The rule, for every board from 6 × 6 up:</p>
+  <ol class="rule">
+    <li>
+      Open at (2,2). Answer the first reply at (3,2), except against seven
+      replies next to the opening, where a small diagram gives the second move.
+    </li>
+    <li>
+      If you can complete a square, do it. Otherwise, if the opponent could
+      complete one on their next move, block it.
+    </li>
+    <li>
+      Otherwise follow the line you chose after the second reply: at most three
+      forcing moves, each answered by a forced block, and then the arms of a
+      plus.
+    </li>
+  </ol>
   <p>
-    The plus rule: open at (2,2), answer the first reply with a fixed second
-    move, take a completion or a block whenever one exists, and otherwise follow
-    the shortest line of at most three single forcing moves ending in the arms
-    of a
-    <em>plus</em>, a held stone with the four cells at a common distance along
-    the axes. Once the centre and one arm are held, each further arm makes three
-    corners of a square, so the opponent must block on a diagonal cell, and the
-    last arm threatens two squares at once. The rule reads only its own stones,
-    the opponent's stones inside a 17 × 17 region, and one derived cell, so the
-    same rule serves every board; it plays the same 79 lines on every board from
-    6 × 6 to 17 × 17. On 5 × 5 no forcing strategy exists and a table with quiet
-    forks plays instead.
+    A <em>plus</em> is a stone with the four cells at equal distance above, below,
+    left, and right of it. Once you hold the centre and one arm, each further arm
+    makes three corners of a square, so the opponent must block on a diagonal cell;
+    the last arm threatens two squares at once, and no single block stops both. The
+    rule looks only at the 6 × 6 corner of the board and the opponent's stones near
+    it, so one rule serves every board. On 5 × 5 no forcing strategy exists and a
+    table with branch points plays instead.
   </p>
 
   <figure class="game">
@@ -74,7 +85,7 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     <a class="route" href={`${base}proof/`}>
       <span class="route-title">See how the proof works</span>
       <span class="route-body">
-        An illustrated guide: pluses and tempo moves, the latent corner, the
+        An illustrated guide: pluses and tempo moves, the hidden corner, the
         draws and the 5 × 5 board, what a computer search has to be trusted
         with, and how one run on the 23 × 23 board covers every larger board.
       </span>

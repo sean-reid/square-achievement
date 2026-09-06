@@ -3,7 +3,7 @@
  * Mirrors the certificate checker's semantics move for move: reflexes
  * at the lexicographically least cell, then the lookup chain (exact
  * key, alignment class, default), then the first unplayed plan cell,
- * with quiet forks resolved against the reply to their own move. Every
+ * with branch points resolved against the reply to their own move. Every
  * move reports its decision source, which also drives annotations.
  */
 

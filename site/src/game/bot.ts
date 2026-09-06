@@ -1,7 +1,7 @@
 /** The first-player bot.
  *
  * From 6 x 6 up the plus rule plays (plus.ts), a strategy stated without
- * a table. On 5 x 5 the n=5 table with its quiet forks plays, replayed
+ * a table. On 5 x 5 the n=5 table with its branch points plays, replayed
  * bit-for-bit by table.ts. Below 5 the game is a draw under best play,
  * and the bot replays an exact never-losing policy (smallbot.ts). The
  * tables are loaded on demand, so a page ships only what a board size

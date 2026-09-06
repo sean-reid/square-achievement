@@ -3,7 +3,7 @@
 Each figure is drawn from positions the rule computes, so the diagrams
 cannot drift from the code: the basic line and the longest line are
 replayed against an opponent who blocks, the second-move diagram reads
-the rule's second move, and the latent-corner figure asserts its pair's
+the rule's second move, and the hidden-corner figure asserts its pair's
 corner.
 
 python3 -m squares.paper.figures   writes paper/fig-*.tex

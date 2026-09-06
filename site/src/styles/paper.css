@@ -517,3 +517,12 @@ footer a {
   grid-column: 2;
   color: var(--muted);
 }
+
+ol.rule {
+  margin: 0.4rem 0 1rem;
+  padding-left: 1.6em;
+}
+
+ol.rule li {
+  margin: 0.25rem 0;
+}

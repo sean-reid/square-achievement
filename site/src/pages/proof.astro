@@ -305,18 +305,18 @@ const tempoEnd = board6({
     </figcaption>
   </figure>
 
-  <h2>The latent corner</h2>
+  <h2>The hidden corner</h2>
   <p>
     The rule reads only an abstraction of the position: our stones, which never
     leave the 6 × 6 corner, the opponent's stones inside the 17 × 17 base board,
     and one more cell. Two opponent stones far from the corner, each with a
     coordinate of 12 or more, can be two corners of a square whose third corner
     lies in the 6 × 6 region; we call that region cell their <em
-      >latent corner</em
+      >hidden corner</em
     >. If the opponent were ever forced to block there, they would hold three
     corners of that square and threaten at its fourth, which may lie beyond
     anything the rule looks at. So the rule never makes a threat whose only
-    block is the latent corner. A containment lemma from the earlier version of
+    block is the hidden corner. A containment lemma from the earlier version of
     this work says this is all the far stones can do: two stones of the corner
     region lie in a common square only if that square fits inside the 12 × 12
     board, so a far stone shares no square with two of the opponent's forced
@@ -354,10 +354,10 @@ const tempoEnd = board6({
     larger board, with replies inside the base board read verbatim and replies
     beyond it replaced by stand-in cells. For the rule the base board is 23 ×
     23, the smallest that holds the stand-ins, and three families of anchored
-    runs, 176 positions in all, cover the reply pairs with a latent corner, with
-    the latent corner as an extra guard. Since the rule reads only the
+    runs, 176 positions in all, cover the reply pairs with a hidden corner, with
+    the hidden corner as an extra guard. Since the rule reads only the
     abstraction, and the stand-ins lie beyond the 17 × 17 board and share the
-    latent corner with the stones they replace, the rule computes the same move
+    hidden corner with the stones they replace, the rule computes the same move
     on the real board and on the base board; this agreement lemma is what makes
     the replayed run the rule's own play rather than merely a win found by the
     checker.
@@ -415,9 +415,9 @@ const tempoEnd = board6({
     beaten can secure a draw. Together they give each player a drawing strategy
     on every board up to 4 × 4. The 5 × 5 board is won, but no purely forcing
     strategy from (2,2) exists there: from twenty reply pairs every all-forcing
-    continuation fails. Its strategy is a table with quiet moves that fork on
-    the reply, extracted from a full solution of the 5 × 5 game and verified
-    over the complete game tree; it plays on this page when you set n to 5.
+    continuation fails. Its strategy is a table with quiet moves at branch
+    points, extracted from a full solution of the 5 × 5 game and verified over
+    the complete game tree; it plays on this page when you set n to 5.
   </p>
 
   <h2>Open questions</h2>
