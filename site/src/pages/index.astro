@@ -56,8 +56,9 @@ const base = import.meta.env.BASE_URL.endsWith("/")
 
   <h2>Open questions</h2>
   <p>
-    The plus rule wins by ply 17 on every board, while per-size searches find
-    wins within 13 plies: how quickly can the first player force a win on the
+    The plus rule wins by ply 17 on every board, while the least possible is 15
+    on the 6, 7, and 8 boards: how quickly can the first player force a win on
+    the
     <span set:html={k("n \\times n")} /> board, and can one strategy be fastest for
     every <span set:html={k("n")} />? The rule's second move has seven
     exceptions; is there an opening that needs none? Are the constants of the
