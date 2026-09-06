@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/sean-reid/square-achievement/compare/v0.1.4...v0.1.5) (2026-09-06)
+
+
+### Bug Fixes
+
+* **paper:** the least forced win is 15 plies, not 13 ([#93](https://github.com/sean-reid/square-achievement/issues/93)) ([a5b7c08](https://github.com/sean-reid/square-achievement/commit/a5b7c08e1d8449d29ec568de0ac99c1adb1883ae))
+
 ## [0.1.4](https://github.com/sean-reid/square-achievement/compare/v0.1.3...v0.1.4) (2026-09-06)
 
 
