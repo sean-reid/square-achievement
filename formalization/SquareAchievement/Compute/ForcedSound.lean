@@ -1,5 +1,6 @@
 import SquareAchievement.Compute.Uniform
 import SquareAchievement.Compute.CheckerSound
+import SquareAchievement.Compute.WinsWith
 
 /-!
 # Soundness of the forced-tree checker
@@ -136,20 +137,25 @@ theorem completesL_eq_false_of_threats_nil {n : ℕ} {mine occ : List Cell}
   rw [hnil] at this
   simp at this
 
-/-- Soundness of the forced-tree checker, by the same induction as
-`go_sound`; the non-blocking replies are covered by two-move wins. -/
-theorem goForcedS_sound (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
+/-- Soundness of the forced-tree checker, in the strong form: the tree
+the strategy itself plays is winning. The same induction as `go_sound`;
+the non-blocking replies, which the checker never visits, are covered
+by the strategy taking the standing threat, which `TakesWinsOn`
+guarantees. -/
+theorem goForcedS_winsWith (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
     ∀ (fuel : ℕ) (hist : List Cell),
       hist.length % 2 = 0 →
       (∀ x ∈ hist, x ∈ board n) →
+      (∀ x ∈ stonesOf true hist, inBox box x = true) →
+      TakesWinsOn σ box n hist →
       ¬ HasSquare (stonesOf false hist).toFinset →
       goForcedS σ box (squaresList n) n hot fuel hist = true →
-      P1CanWin n (stonesOf true hist).toFinset (stonesOf false hist).toFinset := by
+      WinsWith σ n hist := by
   intro fuel
   induction fuel with
-  | zero => intro hist _ _ _ h; simp [goForcedS] at h
+  | zero => intro hist _ _ _ _ _ h; simp [goForcedS] at h
   | succ fuel ih =>
-    intro hist hEven hBoard hNoSq2 h
+    intro hist hEven hBoard hP1box htake hNoSq2 h
     simp only [goForcedS] at h
     set p1L := stonesOf true hist with hp1L
     set p2L := stonesOf false hist with hp2L
@@ -172,13 +178,15 @@ theorem goForcedS_sound (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
         split at h
         · -- P1 completes a square: the `now` constructor
           rename_i hwin
-          refine P1CanWin.now m hmE ?_
+          refine WinsWith.now m hsm hmE ?_
           have := hasSquareL_sound (n := n) (L := m :: p1L) hwin
           simpa using this
         · rename_i hnowin
           split at h
           · exact absurd h (by simp)
           · rename_i hmbox
+            have hmboxT : inBox box m = true := by
+              revert hmbox; cases inBox box m <;> simp
             split at h
             · exact absurd h (by simp)
             · rename_i hp2scan
@@ -224,7 +232,7 @@ theorem goForcedS_sound (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
               have hrec : ∀ r : Cell, r ∈ board n →
                   r ∉ hist ++ [m] →
                   goForcedS σ box (squaresList n) n hot fuel ((hist ++ [m]) ++ [r]) = true →
-                  P1CanWin n (insert m p1L.toFinset) (insert r p2L.toFinset) := by
+                  WinsWith σ n ((hist ++ [m]) ++ [r]) := by
                 intro r hrb hrmem hgo
                 have hrE : r ∈ empties n (insert m p1L.toFinset) p2L.toFinset := by
                   rw [hh] at hrmem
@@ -256,9 +264,16 @@ theorem goForcedS_sound (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                 have hnosq'' : ¬ HasSquare (stonesOf false ((hist ++ [m]) ++ [r])).toFinset := by
                   rw [hs2, hins]
                   exact hsafe r hrE
-                have := ih ((hist ++ [m]) ++ [r]) hlen'' hboard'' hnosq'' hgo
-                rw [hs1, hs2, hp1'F, hins] at this
-                exact this
+                have hP1box'' : ∀ x ∈ stonesOf true ((hist ++ [m]) ++ [r]), inBox box x = true := by
+                  intro x hx
+                  rw [hs1, List.mem_append, List.mem_singleton] at hx
+                  rcases hx with hx | rfl
+                  · exact hP1box x hx
+                  · exact hmboxT
+                have htake'' : TakesWinsOn σ box n ((hist ++ [m]) ++ [r]) := by
+                  rw [List.append_assoc]
+                  exact htake.extend _
+                exact ih ((hist ++ [m]) ++ [r]) hlen'' hboard'' hP1box'' htake'' hnosq'' hgo
               split at h
               · -- free level: every reply enumerated
                 rename_i hfree
@@ -308,7 +323,7 @@ theorem goForcedS_sound (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                       simp at hrep
                     obtain ⟨r, hr⟩ := List.exists_mem_of_ne_nil _ this
                     exact ⟨r, (hreplies r).mp hr⟩
-                  refine P1CanWin.step m hmE hne hsafe ?_
+                  refine WinsWith.step m hsm hmE hne hsafe ?_
                   intro r hr
                   have hr' := (hreplies r).mpr hr
                   obtain ⟨hrb, -, -⟩ := mem_empties.mp hr
@@ -361,7 +376,7 @@ theorem goForcedS_sound (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                           rwa [this] at hwin'
                       have hne : (empties n (insert m p1L.toFinset) p2L.toFinset).Nonempty :=
                         ⟨z₀, (hthE z₀ hz₀).1⟩
-                      refine P1CanWin.step m hmE hne hsafe ?_
+                      refine WinsWith.step m hsm hmE hne hsafe ?_
                       intro r hr
                       by_cases hrths : r ∈ ths
                       · -- the block: the checker visited this branch
@@ -381,34 +396,247 @@ theorem goForcedS_sound (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                               exact Or.inl (List.mem_cons_self ..)
                           · exact Or.inr hx
                         exact hrec r hrb hrmem (h r hrths)
-                      · -- non-blocking reply: a standing threat wins now
-                        obtain ⟨hz₀E, hz₀win⟩ := hthE z₀ hz₀
+                      · -- non-blocking reply: the strategy takes a standing threat
+                        obtain ⟨hz₀E, -⟩ := hthE z₀ hz₀
                         have hz₀ne : z₀ ≠ r := fun he => hrths (he ▸ hz₀)
                         obtain ⟨hz₀b, hz₀1, hz₀2⟩ := mem_empties.mp hz₀E
-                        refine P1CanWin.now z₀ (mem_empties.mpr ⟨hz₀b, hz₀1, ?_⟩) hz₀win
-                        intro hx
-                        rcases Finset.mem_insert.mp hx with h' | h'
-                        · exact hz₀ne h'
-                        · exact hz₀2 h'
+                        obtain ⟨hrb, hr1, hr2⟩ := mem_empties.mp hr
+                        have hlen'' : ((hist ++ [m]) ++ [r]).length % 2 = 0 := by
+                          simp [List.length_append]; omega
+                        have hs1 : stonesOf true ((hist ++ [m]) ++ [r]) = p1L ++ [m] := by
+                          rw [stonesOf_snoc_odd_true hlen', hstone1]
+                        have hs2 : stonesOf false ((hist ++ [m]) ++ [r]) = p2L ++ [r] := by
+                          rw [stonesOf_snoc_odd_false hlen', hstone2]
+                        have hboard'' : ∀ x ∈ (hist ++ [m]) ++ [r], x ∈ board n := by
+                          intro x hx
+                          rcases List.mem_append.mp hx with hx | hx
+                          · rcases List.mem_append.mp hx with hx | hx
+                            · exact hBoard x hx
+                            · rw [List.mem_singleton] at hx; exact hx ▸ hmb'
+                          · rw [List.mem_singleton] at hx; exact hx ▸ hrb
+                        have hP1box'' : ∀ x ∈ stonesOf true ((hist ++ [m]) ++ [r]),
+                            inBox box x = true := by
+                          intro x hx
+                          rw [hs1, List.mem_append, List.mem_singleton] at hx
+                          rcases hx with hx | rfl
+                          · exact hP1box x hx
+                          · exact hmboxT
+                        -- the standing threat is still a threat after the reply
+                        have hz₀th :
+                            z₀ ∈ threatsL (squaresList n) (p1L ++ [m]) ((hist ++ [m]) ++ [r]) := by
+                          obtain ⟨sq, hsq, hfil, hocc⟩ := mem_threatsL (hths ▸ hz₀)
+                          refine threatsL_of_filter hsq ?_ ?_
+                          · rw [← hfil]
+                            apply List.filter_congr
+                            intro x _
+                            congr 1
+                            rw [Bool.eq_iff_iff, List.contains_iff_mem, List.contains_iff_mem]
+                            simp only [List.mem_append, List.mem_cons, List.not_mem_nil, or_false]
+                            tauto
+                          · rw [Bool.eq_false_iff]
+                            intro hx
+                            rw [List.contains_iff_mem, List.mem_append, List.mem_singleton] at hx
+                            rcases hx with hx | rfl
+                            · rw [hh] at hx
+                              rcases hx with hx | hx
+                              · rw [List.mem_append, List.mem_singleton] at hx
+                                rcases hx with hx | rfl
+                                · exact hz₀1 (Finset.mem_insert_of_mem (List.mem_toFinset.mpr hx))
+                                · exact hz₀1 (Finset.mem_insert_self _ _)
+                              · exact hz₀2 (List.mem_toFinset.mpr hx)
+                            · exact hz₀ne rfl
+                        have hthne'' :
+                            threatsL (squaresList n) (stonesOf true ((hist ++ [m]) ++ [r]))
+                            ((hist ++ [m]) ++ [r]) ≠ [] := by
+                          rw [hs1]
+                          exact List.ne_nil_of_mem hz₀th
+                        obtain ⟨z, hσz, hzth⟩ := htake ([m] ++ [r])
+                          (by rw [← List.append_assoc]; exact hlen'')
+                          (by rw [← List.append_assoc]; exact hP1box'')
+                          (by rw [← List.append_assoc]; exact hboard'')
+                          (by rw [← List.append_assoc]; exact hthne'')
+                        rw [← List.append_assoc] at hσz hzth
+                        rw [hs1] at hzth
+                        obtain ⟨hwz, hzb, hzocc⟩ := threat_wins hzth
+                        rw [Bool.eq_false_iff] at hzocc
+                        refine WinsWith.now z hσz ?_ ?_
+                        · rw [hs1, hs2]
+                          refine mem_empties.mpr ⟨hzb, ?_, ?_⟩
+                          · intro hx
+                            rw [List.mem_toFinset, List.mem_append, List.mem_singleton] at hx
+                            apply hzocc
+                            rw [List.contains_iff_mem, List.mem_append, List.mem_append]
+                            rcases hx with hx | hx
+                            · exact Or.inl (Or.inl ((mem_stonesOf hist true).mpr (Or.inl hx)))
+                            · exact Or.inl (Or.inr (List.mem_singleton.mpr hx))
+                          · intro hx
+                            rw [List.mem_toFinset, List.mem_append, List.mem_singleton] at hx
+                            apply hzocc
+                            rw [List.contains_iff_mem, List.mem_append, List.mem_append]
+                            rcases hx with hx | hx
+                            · exact Or.inl (Or.inl ((mem_stonesOf hist false).mpr (Or.inl hx)))
+                            · exact Or.inr (List.mem_singleton.mpr hx)
+                        · rw [hs1]; exact hwz
+
+/-- The existential form, for any strategy that takes its wins. -/
+theorem goForcedS_sound (σ : Strategy) (box n : ℕ) (hot : Option Cell)
+    (fuel : ℕ) (hist : List Cell)
+    (hEven : hist.length % 2 = 0)
+    (hBoard : ∀ x ∈ hist, x ∈ board n)
+    (hP1box : ∀ x ∈ stonesOf true hist, inBox box x = true)
+    (htake : TakesWinsOn σ box n hist)
+    (hNoSq2 : ¬ HasSquare (stonesOf false hist).toFinset)
+    (h : goForcedS σ box (squaresList n) n hot fuel hist = true) :
+    P1CanWin n (stonesOf true hist).toFinset (stonesOf false hist).toFinset :=
+  (goForcedS_winsWith σ box n hot fuel hist hEven hBoard hP1box htake hNoSq2 h).p1CanWin hEven
+
+/-- A checked run from the empty board: following the strategy wins. -/
+theorem checkForcedS_winsWith {σ : Strategy} {box n : ℕ}
+    (htake : TakesWinsOn σ box n []) (h : checkForcedS σ box n = true) :
+    WinsWith σ n [] :=
+  goForcedS_winsWith σ box n none (n * n + 1) [] (by simp) (by simp) (by simp [stonesOf])
+    htake (by simpa [stonesOf] using not_hasSquare_empty) (by simpa [checkForcedS] using h)
+
+theorem checkForcedS_sound {σ : Strategy} {box n : ℕ}
+    (htake : TakesWinsOn σ box n []) (h : checkForcedS σ box n = true) :
+    P1CanWin n ∅ ∅ := by
+  have := (checkForcedS_winsWith htake h).p1CanWin (by simp)
+  simpa [stonesOf] using this
+
+/-! ## The table strategy takes its wins -/
+
+/-- `threatsL` reads the occupancy list only through membership. -/
+theorem threatsL_congr_occ {squares : List (List Cell)} {mine occ occ' : List Cell}
+    (h : ∀ x, x ∈ occ ↔ x ∈ occ') :
+    threatsL squares mine occ = threatsL squares mine occ' := by
+  unfold threatsL
+  congr 1
+  funext sq
+  split
+  · rename_i m heq
+    have : occ.contains m = occ'.contains m := by
+      rw [Bool.eq_iff_iff, List.contains_iff_mem, List.contains_iff_mem]
+      exact h m
+    rw [this]
+  · rfl
+
+/-- The choice `minThreat` makes between two threat cells. -/
+def pickMin (best : Option Cell) (m : Cell) : Option Cell :=
+  match best with
+  | none => some m
+  | some b => if cellLt m b then some m else some b
+
+/-- `minThreat` folds `pickMin` over the threat cells, in order. -/
+theorem minThreat_eq_foldl (squares : List (List Cell)) (mine occ : List Cell) :
+    minThreat squares mine occ = (threatsL squares mine occ).foldl pickMin none := by
+  unfold minThreat threatsL
+  suffices hgen : ∀ (sqs : List (List Cell)) (init : Option Cell),
+      sqs.foldl (fun best sq =>
+        match sq.filter (fun x => !mine.contains x) with
+        | [m] =>
+          if occ.contains m then best
+          else
+            match best with
+            | none => some m
+            | some b => if cellLt m b then some m else some b
+        | _ => best) init =
+      (sqs.filterMap fun sq =>
+        match sq.filter (fun x => !mine.contains x) with
+        | [m] => if occ.contains m then none else some m
+        | _ => none).foldl pickMin init from hgen squares none
+  intro sqs
+  induction sqs with
+  | nil => intro init; rfl
+  | cons sq rest ih =>
+    intro init
+    rw [List.foldl_cons, List.filterMap_cons]
+    rcases hfil : sq.filter (fun x => !mine.contains x) with _ | ⟨m, _ | ⟨b, rest'⟩⟩
+    · simp only; exact ih init
+    · by_cases hocc : occ.contains m = true
+      · simp only [hocc, if_true]; exact ih init
+      · simp only [hocc, Bool.false_eq_true, if_false, List.foldl_cons]
+        rw [ih]
+        rfl
+    · simp only; exact ih init
+
+/-- A fold of `pickMin` that ends on a cell started on it or picked it. -/
+theorem foldl_pickMin_mem : ∀ (l : List Cell) (init : Option Cell) {z : Cell},
+    l.foldl pickMin init = some z → z ∈ l ∨ init = some z := by
+  intro l
+  induction l with
+  | nil => intro init z h; exact Or.inr h
+  | cons m rest ih =>
+    intro init z h
+    rw [List.foldl_cons] at h
+    rcases ih _ h with hz | hz
+    · exact Or.inl (List.mem_cons_of_mem _ hz)
+    · unfold pickMin at hz
+      split at hz
+      · exact Or.inl (Option.some_inj.mp hz ▸ List.mem_cons_self ..)
+      · split at hz
+        · exact Or.inl (Option.some_inj.mp hz ▸ List.mem_cons_self ..)
+        · exact Or.inr hz
+
+/-- `minThreat` returns a member of `threatsL`. -/
+theorem minThreat_some_mem {squares : List (List Cell)} {mine occ : List Cell} {z : Cell}
+    (h : minThreat squares mine occ = some z) : z ∈ threatsL squares mine occ := by
+  rw [minThreat_eq_foldl] at h
+  rcases foldl_pickMin_mem _ none h with hz | hz
+  · exact hz
+  · simp at hz
+
+/-- A fold of `pickMin` is `none` only on the empty list. -/
+theorem foldl_pickMin_eq_none : ∀ (l : List Cell) (init : Option Cell),
+    l.foldl pickMin init = none → l = [] ∧ init = none := by
+  intro l
+  induction l with
+  | nil => intro init h; exact ⟨rfl, h⟩
+  | cons m rest ih =>
+    intro init h
+    rw [List.foldl_cons] at h
+    have := (ih _ h).2
+    unfold pickMin at this
+    split at this
+    · simp at this
+    · split at this <;> simp at this
+
+/-- `minThreat` is `none` only when there is no threat. -/
+theorem minThreat_eq_none {squares : List (List Cell)} {mine occ : List Cell}
+    (h : minThreat squares mine occ = none) : threatsL squares mine occ = [] := by
+  rw [minThreat_eq_foldl] at h
+  exact (foldl_pickMin_eq_none _ none h).1
+
+/-- The table strategy takes its wins: its first reflex is `minThreat`. -/
+theorem takesWinsOn_table (t : Table) (n : ℕ) (root : List Cell) :
+    TakesWinsOn (strategyMove t) t.box n root := by
+  intro tail _ _ _ hne
+  have hocc : ∀ x, x ∈ root ++ tail ↔
+      x ∈ stonesOf true (root ++ tail) ++ stonesOf false (root ++ tail) := by
+    intro x
+    rw [mem_stonesOf (root ++ tail) true, List.mem_append]
+    simp
+  rw [threatsL_congr_occ hocc] at hne ⊢
+  unfold strategyMove
+  rcases hmin : minThreat (squaresList n) (stonesOf true (root ++ tail))
+      (stonesOf true (root ++ tail) ++ stonesOf false (root ++ tail)) with _ | z
+  · exact absurd (minThreat_eq_none hmin) hne
+  · exact ⟨z, by simp [hmin], minThreat_some_mem hmin⟩
 
 /-- The table instance, in the original shape. -/
 theorem goForced_sound (t : Table) (n : ℕ) (hot : Option Cell) :
     ∀ (fuel : ℕ) (hist : List Cell),
       hist.length % 2 = 0 →
       (∀ x ∈ hist, x ∈ board n) →
+      (∀ x ∈ stonesOf true hist, inBox t.box x = true) →
       ¬ HasSquare (stonesOf false hist).toFinset →
       goForced t (squaresList n) n hot fuel hist = true →
       P1CanWin n (stonesOf true hist).toFinset (stonesOf false hist).toFinset :=
-  goForcedS_sound (strategyMove t) t.box n hot
-
-theorem checkForcedS_sound {σ : Strategy} {box n : ℕ}
-    (h : checkForcedS σ box n = true) : P1CanWin n ∅ ∅ := by
-  have := goForcedS_sound σ box n none (n * n + 1) [] (by simp) (by simp)
-    (by simpa [stonesOf] using not_hasSquare_empty) (by simpa [checkForcedS] using h)
-  simpa [stonesOf] using this
+  fun fuel hist hEven hBoard hP1box hNoSq2 h =>
+    goForcedS_sound (strategyMove t) t.box n hot fuel hist hEven hBoard hP1box
+      (takesWinsOn_table t n hist) hNoSq2 h
 
 theorem checkForced_sound {t : Table} {n : ℕ}
     (h : checkForced t n = true) : P1CanWin n ∅ ∅ :=
-  checkForcedS_sound (σ := strategyMove t) (box := t.box) h
+  checkForcedS_sound (σ := strategyMove t) (box := t.box) (takesWinsOn_table t n []) h
 
 end SquareAchievement
