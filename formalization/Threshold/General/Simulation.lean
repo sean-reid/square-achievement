@@ -406,7 +406,7 @@ theorem simulate (t : Table) (hbox : t.box = 6) {B n : ℕ}
     omega
   intro fuel
   induction fuel with
-  | zero => intro tail _ _ h _ _ _; simp [goForced] at h
+  | zero => intro tail _ _ h _ _ _; simp [goForced, goForcedS] at h
   | succ fuel ih =>
     intro tail hlen htail h hnoB hp1no hpair
     set TT := stonesOf true tail with hTT
@@ -460,7 +460,7 @@ theorem simulate (t : Table) (hbox : t.box = 6) {B n : ℕ}
         · exact hzb.2 (heq ▸ List.mem_cons_of_mem _ (List.mem_cons_self ..))
         · exact h12 (hb612 _ hz6)
       · exact hzb.2 (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ hz))
-    simp only [goForced] at h
+    simp only [goForced, goForcedS] at h
     rw [hstT, hstF] at h
     split at h
     · exact absurd h (by simp)
