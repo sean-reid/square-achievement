@@ -1,0 +1,396 @@
+---
+import Base from "../../layouts/Base.astro";
+import katex from "katex";
+
+const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
+const base = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+
+type Cell = [number, number];
+
+/** A 6 by 6 diagram in the paper's idiom: black stones ours, white the
+ * opponent's, dashed cells the threats, letters for labels. */
+function board6(opts: {
+  black?: Cell[];
+  white?: Cell[];
+  threats?: Cell[];
+  labels?: [number, number, string][];
+  squares?: [number, number, number][];
+}): string {
+  const U = 24;
+  const size = 6 * U;
+  const parts: string[] = [];
+  parts.push(
+    `<rect width="${size}" height="${size}" fill="url(#grid6p)"></rect>`,
+    `<rect width="${size}" height="${size}" fill="none" stroke="var(--rule)" stroke-width="0.8" opacity="0.5"></rect>`,
+  );
+  for (const [r, c, s] of opts.squares ?? []) {
+    parts.push(
+      `<rect x="${c * U + 3}" y="${r * U + 3}" width="${(s + 1) * U - 6}" height="${(s + 1) * U - 6}" fill="none" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="4 3"></rect>`,
+    );
+  }
+  for (const [r, c] of opts.black ?? []) {
+    parts.push(
+      `<circle cx="${c * U + 12}" cy="${r * U + 12}" r="6.5" fill="var(--ink)"></circle>`,
+    );
+  }
+  for (const [r, c] of opts.white ?? []) {
+    parts.push(
+      `<circle cx="${c * U + 12}" cy="${r * U + 12}" r="6.5" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.3"></circle>`,
+    );
+  }
+  for (const [r, c] of opts.threats ?? []) {
+    parts.push(
+      `<circle cx="${c * U + 12}" cy="${r * U + 12}" r="7" fill="none" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="3 2.5"></circle>`,
+    );
+  }
+  for (const [r, c, text] of opts.labels ?? []) {
+    parts.push(
+      `<text x="${c * U + 12}" y="${r * U + 17}" text-anchor="middle" font-size="13" font-style="italic" fill="var(--ink)">${text}</text>`,
+    );
+  }
+  return parts.join("");
+}
+
+const anatomy1 = board6({
+  labels: [
+    [2, 2, "c"],
+    [1, 2, "a"],
+    [3, 2, "a"],
+    [2, 1, "a"],
+    [2, 3, "a"],
+    [1, 1, "d"],
+    [1, 3, "d"],
+    [3, 1, "d"],
+    [3, 3, "d"],
+  ],
+  squares: [[1, 1, 1]],
+});
+const anatomy2 = board6({
+  labels: [
+    [3, 2, "c"],
+    [1, 2, "a"],
+    [5, 2, "a"],
+    [3, 0, "a"],
+    [3, 4, "a"],
+    [1, 0, "d"],
+    [1, 4, "d"],
+    [5, 0, "d"],
+    [5, 4, "d"],
+  ],
+  squares: [[1, 0, 2]],
+});
+const basic = board6({
+  black: [
+    [2, 2],
+    [3, 2],
+    [2, 1],
+    [1, 2],
+    [2, 3],
+  ],
+  white: [
+    [0, 0],
+    [4, 4],
+    [3, 1],
+    [1, 1],
+  ],
+  threats: [
+    [1, 3],
+    [3, 3],
+  ],
+});
+const tempoEnd = board6({
+  black: [
+    [2, 2],
+    [3, 2],
+    [3, 3],
+    [4, 3],
+    [3, 4],
+    [1, 2],
+    [5, 2],
+    [3, 0],
+  ],
+  white: [
+    [0, 0],
+    [3, 1],
+    [2, 3],
+    [4, 2],
+    [4, 4],
+    [1, 4],
+    [5, 4],
+  ],
+  threats: [
+    [1, 0],
+    [5, 0],
+  ],
+});
+---
+
+<Base
+  title="How the proof works · A short winning rule"
+  description="An illustrated guide to the plus rule: a winning strategy for the square achievement game on every board from 6 by 6 up, stated without a lookup table, verified by exhaustive search and formalized in Lean."
+>
+  <header class="masthead">
+    <h1>How the proof works</h1>
+    <p class="byline">An illustrated guide to the plus rule</p>
+  </header>
+
+  <p class="abstract">
+    <strong>Summary.</strong> Two players alternately claim cells of an
+    <span set:html={k("n \\times n")} /> grid; the first to hold all four corners
+    of an axis-aligned square wins. The threshold result gave a first-player strategy
+    for every board from 6 × 6 up, driven by a table of some eight thousand forcing
+    plans. This result replaces the table by a rule built on one shape, the plus,
+    with at most three preparatory forcing moves. The rule is verified by exhaustive
+    search on the boards from 6 × 6 to 17 × 17, a run on the 23 × 23 board is carried
+    to every larger board, and the whole argument is formalized in Lean 4 as a theorem
+    about the rule's own play.
+  </p>
+
+  <figure class="game">
+    <sag-board n="6" strategy="plus"></sag-board>
+    <figcaption>
+      Figure 1. The bot follows the rule described below and explains each move.
+      Change n to explore.
+    </figcaption>
+  </figure>
+
+  <h2>Pluses</h2>
+  <p>
+    A <em>plus</em> of side <span set:html={k("s")} /> is a centre cell with its four
+    <em>arms</em>, the cells at distance <span set:html={k("s")} /> above, below,
+    left, and right, and its four <em>diagonals</em>, the cells at distance <span
+      set:html={k("s")}
+    /> in both directions. The centre, two perpendicular arms, and the diagonal between
+    them are the four corners of a square of side <span set:html={k("s")} />. So
+    once we hold the centre and one arm, each further arm perpendicular to a
+    held arm makes three corners of such a square, and the opponent must block
+    at the diagonal or lose; and once we hold two opposite arms, the next arm is
+    perpendicular to both and threatens two diagonals at once, which no single
+    block answers. Inside the 6 × 6 corner of the board there are sixteen pluses
+    of side 1 and four of side 2; side 3 does not fit.
+  </p>
+
+  <figure class="diagram">
+    <svg
+      viewBox="-4 -4 316 152"
+      role="img"
+      aria-label="Two 6 by 6 grids: the plus of side 1 at (2,2) and the plus of side 2 at (3,2), with centre, arms, and diagonals labelled"
+    >
+      <defs>
+        <pattern
+          id="grid6p"
+          width="24"
+          height="24"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M24 0H0V24"
+            fill="none"
+            stroke="var(--rule)"
+            stroke-width="0.8"
+            opacity="0.5"></path>
+        </pattern>
+      </defs>
+      <g set:html={anatomy1} />
+      <g transform="translate(164 0)" set:html={anatomy2} />
+    </svg>
+    <figcaption>
+      Figure 2. Left, the plus of side 1 at (2,2); right, the plus of side 2 at
+      (3,2). The centre is c, the arms a, the diagonals d. The dashed outline
+      encloses one of the four squares of each plus.
+    </figcaption>
+  </figure>
+
+  <p>
+    The opening (2,2) and the second move (3,2) are the centre and an arm of the
+    side-1 plus at (2,2), and an arm and the centre of the side-1 plus at (3,2).
+    Against most replies one of these pluses wins outright, in three moves.
+  </p>
+
+  <figure class="diagram">
+    <svg
+      viewBox="-4 -4 152 152"
+      role="img"
+      aria-label="The end of the basic line: black holds the plus of side 1 at (2,2) except the last arm's threats"
+    >
+      <g set:html={basic} />
+    </svg>
+    <figcaption>
+      Figure 3. The basic line against the replies (0,0) and (4,4). The arms
+      (2,1) and (1,2) each forced a block on a diagonal; the last arm (2,3)
+      threatens at both dashed cells. The game ends on the ninth ply.
+    </figcaption>
+  </figure>
+
+  <h2>Tempo moves and lines</h2>
+  <p>
+    When the opponent's stones spoil both pluses, sitting on an arm or a
+    diagonal, the rule first plays <em>tempo moves</em>: single forcing moves,
+    each threatening exactly one square, whose block leaves the opponent without
+    a threat of their own. A tempo move and its block add one stone to each side
+    and hand the move back to us, and our new stone is where we chose it. A
+    <em>line</em> is a sequence of at most three tempo moves followed by the arms
+    of one plus, each arm before the last forcing a block and the last making two
+    threats. The rule prefers lines with fewer tempo moves, then fewer arms left to
+    play, then the smaller plus, then the earliest cells, and it commits to the chosen
+    line after the opponent's second reply. Every line has at most six moves, and
+    the win comes by the seventeenth ply of the game at the latest.
+  </p>
+
+  <figure class="diagram">
+    <svg
+      viewBox="-4 -4 152 152"
+      role="img"
+      aria-label="The end of the longest line: two tempo moves prepared the plus of side 2 at (3,2)"
+    >
+      <g set:html={tempoEnd} />
+    </svg>
+    <figcaption>
+      Figure 4. The longest line, against the replies (0,0) and (3,1). The tempo
+      moves (3,3) and (4,3) were each blocked; then the arms (3,4), (1,2), (5,2)
+      of the side-2 plus at (3,2) each forced a block, and the last arm (3,0)
+      threatens at both dashed cells.
+    </figcaption>
+  </figure>
+
+  <h2>The latent corner</h2>
+  <p>
+    The rule reads only an abstraction of the position: our stones, which never
+    leave the 6 × 6 corner, the opponent's stones inside the 17 × 17 base board,
+    and one more cell. Two opponent stones far from the corner, each with a
+    coordinate of 12 or more, can be two corners of a square whose third corner
+    lies in the 6 × 6 region; we call that region cell their <em
+      >latent corner</em
+    >. If the opponent were ever forced to block there, they would hold three
+    corners of that square and threaten at its fourth, which may lie beyond
+    anything the rule looks at. So the rule never makes a threat whose only
+    block is the latent corner. A containment lemma from the threshold result
+    says this is all the far stones can do: two stones of the corner region lie
+    in a common square only if that square fits inside the 12 × 12 board, so a
+    far stone shares no square with two of the opponent's forced blocks, and a
+    square through a far stone and one block has both free replies as its other
+    corners.
+  </p>
+
+  <h2>What is checked by hand and what by machine</h2>
+  <p>
+    Why arms force, why the last arm doubles, and why the abstraction sees
+    everything that matters are short arguments written out in the paper. That
+    every reply pair has a line, and that following it wins against every reply,
+    is a case analysis too large for a page and is done by a checker. The
+    checker walks the <em>forced tree</em>: every reply at the first two levels,
+    and below that only the replies that block a threat, since a reply that
+    blocks nothing loses to the standing threat at once. At every node it
+    evaluates the rule afresh; no table is consulted anywhere. The runs for the
+    boards from 6 × 6 to 17 × 17 take from under a second to 75 seconds each.
+  </p>
+  <p>
+    Rules are only as trustworthy as the programs that check them, so the rule
+    exists three times, in Python, in Lean, and in TypeScript for the bot on
+    this page. The Lean version is the one the proof cites, and its checker
+    comes with a machine-checked soundness theorem. The three are compared on
+    the same positions: the pipeline exports the line the rule commits to for
+    every reply pair on the 6 × 6 board and for the anchored positions of the
+    next section, and the TypeScript rule is replayed against that fixture in
+    the site's tests.
+  </p>
+
+  <h2>Every board at once</h2>
+  <p>
+    Boards from 17 × 17 up are covered by the simulation argument of the
+    threshold result: a checked run on a base board is replayed on any larger
+    board, with replies inside the base board read verbatim and replies beyond
+    it replaced by stand-in cells. For the rule the base board is 23 × 23, the
+    smallest that holds the stand-ins, and three families of anchored runs, 176
+    positions in all, cover the reply pairs with a latent corner, with the
+    latent corner as an extra guard. Since the rule reads only the abstraction,
+    and the stand-ins lie beyond the 17 × 17 board and share the latent corner
+    with the stones they replace, the rule computes the same move on the real
+    board and on the base board; this agreement lemma is what makes the replayed
+    run the rule's own play rather than merely a win found by the checker.
+  </p>
+
+  <h2>What the formal theorem says</h2>
+  <p>
+    The threshold result proved <code>P1CanWin</code>: a winning strategy tree
+    exists, namely one the checker found. This result proves more. The predicate
+    <code>WinsWith σ n h</code> says that the game tree in which the first player
+    plays the move of the strategy <code>σ</code> at every node after the history
+    <code>h</code>, against every legal reply, ends in a first-player square on
+    every branch. The theorem is
+  </p>
+  <pre
+    class="lean"><code>theorem plus_wins_with {"{"}n : ℕ{"}"} (h : 6 ≤ n) :
+    WinsWith plusMove n []</code></pre>
+  <p>
+    where <code>plusMove</code> is the rule as a Lean definition, 250 lines with no
+    data beyond the seven exceptional second moves. Its axioms are the usual three
+    of Lean plus the six evaluated certificates, the runs at 6 to 16, at 17, on the
+    23 × 23 board, and the three anchored families, discharged by
+    <code>native_decide</code>. Both artifacts are built from this repository on
+    every deploy:
+    <a href={`${base}downloads/plus.pdf`}>the paper (PDF)</a> and
+    <a href={`${base}downloads/square-achievement-formalization.tar.gz`}
+      >the Lean development (tar.gz)</a
+    >.
+  </p>
+
+  <h2>How the rule was found</h2>
+  <p>
+    The old table had 8,383 entries but only 186 distinct plans, and nearly all
+    of them begin with an arm of the side-1 plus at (2,2) or (3,2). The shortest
+    plans are that plus; the long ones, replayed in the positions where they are
+    used, turn out to force blocks so as to place a stone a later square needs,
+    or to play the arms of the side-2 plus at (3,2) one at a time. A first
+    attempt at a rule scored moves by how many threats they made available and
+    failed on 31 reply pairs; asking instead which plus can be completed by
+    force, after a few tempo moves, gave a rule that wins them all. Compiled
+    back into a table, the rule needs 2,330 entries against 8,135 and plays the
+    same 79 lines on every board from 6 × 6 to 17 × 17.
+  </p>
+
+  <h2>Open questions</h2>
+  <p>
+    The rule wins by ply 17; Adler's searches find wins by ply 13 on each board
+    from 6 to 14. Is there a rule of comparable length that wins by ply 13 on
+    every board, and what is the least ply by which the first player can force a
+    win? The second move has seven exceptions; is there an opening from which a
+    rule of this kind needs none? And the rule does not apply to 5 × 5, where no
+    purely forcing strategy from (2,2) exists; a short rule for that board is
+    open.
+  </p>
+
+  <h2>References</h2>
+  <ol class="refs">
+    <li id="ref-1">
+      S. Reid, The square achievement game on n × n boards, preprint, 2026.
+      <a href={`${base}downloads/threshold.pdf`}>the threshold paper (PDF)</a>
+    </li>
+    <li id="ref-2">
+      K. Adler, Is the square achievement game on the n × n grid resolved for 6
+      ≤ n ≤ 14?, MathOverflow question 514742, August 2026.
+      <a href="https://mathoverflow.net/q/514742">mathoverflow.net</a>
+    </li>
+    <li id="ref-3">
+      M. Erickson, Pearls of Discrete Mathematics, CRC Press, 2010.
+    </li>
+    <li id="ref-4">
+      T. Jenrich, Guaranteed successful strategies for a square achievement game
+      on an n × n grid, 2012.
+      <a href="https://arxiv.org/abs/1109.2341">arXiv:1109.2341</a>
+    </li>
+    <li id="ref-5">
+      R. Bacher and S. Eliahou, Extremal binary matrices without constant
+      2-squares, Journal of Combinatorics 1 (2010), no. 1, 77–100.
+    </li>
+    <li id="ref-6">
+      L. de Moura and S. Ullrich, The Lean 4 theorem prover and programming
+      language, Automated Deduction – CADE 28, Springer, 2021.
+    </li>
+    <li id="ref-7">
+      The mathlib Community, The Lean mathematical library, CPP 2020.
+    </li>
+  </ol>
+</Base>

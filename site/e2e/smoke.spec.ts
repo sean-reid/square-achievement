@@ -4,9 +4,12 @@ test("the hub leads with the game and lists the results", async ({ page }) => {
   await page.goto("./");
   await expect(page.locator("h1")).toContainText("Square Achievement Game");
   await expect(page.locator("sag-board .sag-svg")).toBeVisible();
-  await expect(page.locator("article.result")).toHaveCount(1);
-  await expect(page.locator("article.result h3")).toContainText(
+  await expect(page.locator("article.result")).toHaveCount(2);
+  await expect(page.locator("article.result h3").first()).toContainText(
     "winning threshold",
+  );
+  await expect(page.locator("article.result h3").nth(1)).toContainText(
+    "short winning rule",
   );
 });
 
@@ -75,14 +78,20 @@ test("games are shareable through the URL", async ({ page }) => {
 
 test("the bot explains its moves and shows its line", async ({ page }) => {
   await page.goto("./");
-  await expect(page.locator("sag-board .sag-moves li")).toHaveCount(1);
-  await expect(page.locator("sag-board .sag-moves li").first()).toContainText(
+  await expect(page.locator("sag-board .sag-now-text")).toContainText(
     "the opening",
   );
   await page.locator('sag-board rect[data-i="0"]').click();
   await page.locator('sag-board rect[data-i="5"]').click();
-  await expect(page.locator("sag-board .sag-moves li")).toHaveCount(5);
-  await expect(page.locator("sag-board .sag-line")).toContainText("plus at");
+  await expect(page.locator("sag-board .sag-now-text")).toContainText(
+    "threatens",
+  );
+  await expect(page.locator("sag-board .sag-plan-note")).toContainText(
+    "plus at",
+  );
+  await expect
+    .poll(async () => page.locator("sag-board .sag-chip").count())
+    .toBeGreaterThan(2);
   await expect
     .poll(async () => page.locator("sag-board .sag-mark").count())
     .toBeGreaterThan(0);
@@ -90,17 +99,51 @@ test("the bot explains its moves and shows its line", async ({ page }) => {
 
 test("the strategy selector switches to the table", async ({ page }) => {
   await page.goto("./");
-  await page.locator("sag-board .sag-strategy").selectOption("table");
+  await page.locator('sag-board .sag-strategy [data-strategy="table"]').click();
   await expect(page.locator("sag-board .sag-x")).toHaveCount(1);
-  await expect(page.locator("sag-board .sag-moves li").first()).toContainText(
+  await expect(page.locator("sag-board .sag-now-text")).toContainText(
     "the opening",
   );
-  await expect(page.locator("sag-board .sag-line")).toHaveText("");
+  await expect(page.locator("sag-board .sag-plan")).toBeHidden();
+  await expect(
+    page.locator('sag-board .sag-strategy [data-strategy="table"]'),
+  ).toHaveAttribute("aria-pressed", "true");
   expect(page.url()).toContain("s=table");
 });
 
 test("the threshold page defaults to the table strategy", async ({ page }) => {
   await page.goto("./threshold/");
-  await expect(page.locator("sag-board .sag-strategy")).toHaveValue("table");
-  await expect(page.locator("sag-board .sag-strategy")).toBeDisabled();
+  await expect(
+    page.locator('sag-board .sag-strategy [data-strategy="table"]'),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.locator('sag-board .sag-strategy [data-strategy="plus"]'),
+  ).toBeDisabled();
+  await expect(page.locator("sag-board .sag-strategy-hint")).toContainText(
+    "from 6 × 6",
+  );
+});
+
+test("the plus overview states its theorem and plays the rule", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await page.locator('article.result a[href$="plus/"]').click();
+  await expect(page.locator(".theorem")).toContainText("plus rule");
+  await expect(page.locator("nav.routes a")).toHaveCount(3);
+  await expect(page.locator("pre.lean")).toContainText("plus_wins_with");
+  await expect(
+    page.locator('sag-board .sag-strategy [data-strategy="plus"]'),
+  ).toHaveAttribute("aria-pressed", "true");
+});
+
+test("the plus proof guide has its figures and references", async ({
+  page,
+}) => {
+  await page.goto("./plus/");
+  await page.locator('nav.routes a[href$="plus/proof/"]').click();
+  await expect(page.locator("h1")).toContainText("How the proof works");
+  await expect(page.locator("figure.diagram")).toHaveCount(3);
+  await expect(page.locator("ol.refs li")).toHaveCount(7);
+  await expect(page.locator("sag-board .sag-x")).toHaveCount(1);
 });
