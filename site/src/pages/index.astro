@@ -28,12 +28,14 @@ const base = import.meta.env.BASE_URL.endsWith("/")
   </p>
 
   <figure class="game">
-    <sag-board n="5"></sag-board>
+    <sag-board n="6" strategy="plus"></sag-board>
     <figcaption>
-      Play against the winning strategy. The bot moves first and replays the
-      proof's tables move for move; you reply by clicking a cell, or with the
-      arrow keys and Enter. Change n to explore; below 5 × 5 neither side can
-      force a win.
+      Play against the winning strategy. The bot moves first and follows the
+      plus rule, a strategy stated without a lookup table; it says why it plays
+      each move and shows the line it is following. You reply by clicking a
+      cell, or with the arrow keys and Enter. Switch to the table strategy of
+      the threshold paper to compare, and change n to explore; on 5 × 5 the
+      table plays, and below 5 × 5 neither side can force a win.
     </figcaption>
   </figure>
 

@@ -53,6 +53,8 @@ python3 -m squares.smallboard                 # write the site's small_tables.js
 python3 -m squares.threshold.crosscheck       # the three copies of the tables agree
 python3 -m squares.threshold.instrument 6 7   # measure the strategy's frame
 python3 -m squares.plus.sweep 15              # the plus rule over every opening of the 15 board
+python3 -m squares.plus.measure               # the rule's lines per board: count, longest, tempo split
+python3 -m squares.plus.export_site           # write the site's plus_lines.json fixture
 ```
 
 The general table is generated on the 15 x 15 board (`GEN_N` in

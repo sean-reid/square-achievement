@@ -20,11 +20,20 @@ export interface StrategyTable {
 }
 
 export type Source =
-  "win" | "block" | "opening" | "second" | "plan" | "exhausted";
+  | "win"
+  | "block"
+  | "opening"
+  | "second"
+  | "plan"
+  | "tempo"
+  | "arm"
+  | "exhausted";
 
 export interface Decision {
   move: [number, number] | null;
   source: Source;
+  /** A sentence saying why, for the move list. */
+  reason?: string;
 }
 
 function cellKey(cell: [number, number]): string {
@@ -41,11 +50,11 @@ function classKey(box: number, cell: [number, number]): string | null {
 /** The hot cell a far reply pair can farm through, mirroring the
  * pipeline's farm_relation: one member is aligned with the corner
  * region, and the pair pins the square's box corner exactly. */
-function farmKey(
+export function farmCell(
   box: number,
   o1: [number, number],
   o2: [number, number],
-): string | null {
+): [number, number] | null {
   const far = 2 * box;
   if (Math.max(o1[0], o1[1]) < far || Math.max(o2[0], o2[1]) < far) {
     return null;
@@ -57,19 +66,28 @@ function farmKey(
     if (p[0] < box && q[1] === p[1]) {
       const s = q[0] - p[0];
       const b = p[1] - s;
-      if (s >= 1 && b >= 0 && b < box) return `farm:${p[0]},${b}`;
+      if (s >= 1 && b >= 0 && b < box) return [p[0], b];
     }
     if (p[1] < box && q[0] === p[0]) {
       const s = q[1] - p[1];
       const a = p[0] - s;
-      if (s >= 1 && a >= 0 && a < box) return `farm:${a},${p[1]}`;
+      if (s >= 1 && a >= 0 && a < box) return [a, p[1]];
     }
     if (p[0] < box && q[1] < box) {
       const s = p[1] - q[1];
-      if (s >= 1 && s === q[0] - p[0]) return `farm:${p[0]},${q[1]}`;
+      if (s >= 1 && s === q[0] - p[0]) return [p[0], q[1]];
     }
   }
   return null;
+}
+
+function farmKey(
+  box: number,
+  o1: [number, number],
+  o2: [number, number],
+): string | null {
+  const cell = farmCell(box, o1, o2);
+  return cell ? `farm:${cell[0]},${cell[1]}` : null;
 }
 
 function lookup<T>(
@@ -124,21 +142,23 @@ export function strategyDecision(
   const mine = threats(pos, pos.p1);
   if (mine.length > 0) {
     const [r, c] = pos.cell(mine[0]!);
-    return { move: [r, c], source: "win" };
+    return { move: [r, c], source: "win", reason: "completes a square" };
   }
   const theirs = threats(pos, pos.p2);
   if (theirs.length > 0) {
     const [r, c] = pos.cell(theirs[0]!);
-    return { move: [r, c], source: "block" };
+    return { move: [r, c], source: "block", reason: "blocks your threat" };
   }
   if (pos.history.length === 0) {
-    return { move: table.opening, source: "opening" };
+    return { move: table.opening, source: "opening", reason: "the opening" };
   }
   const o1raw = pos.cell(pos.history[1]!);
   const o1: [number, number] = [o1raw[0], o1raw[1]];
   const second = lookup(table.box, table.x2, o1);
   if (second === undefined) return { move: null, source: "exhausted" };
-  if (!pos.p1.has(pos.idx(second))) return { move: second, source: "second" };
+  if (!pos.p1.has(pos.idx(second))) {
+    return { move: second, source: "second", reason: "the tabled second move" };
+  }
   const o2 = replyTo(pos, second);
   if (o2 === null) return { move: null, source: "exhausted" };
   const entries = lookup(table.box, table.scripts, o1);
@@ -155,5 +175,7 @@ export function strategyDecision(
   if (entry === undefined) entry = lookup(table.box, entries, o2);
   if (entry === undefined) return { move: null, source: "exhausted" };
   const move = resolveEntry(table, pos, entry);
-  return move ? { move, source: "plan" } : { move: null, source: "exhausted" };
+  return move
+    ? { move, source: "plan", reason: "the next cell of the tabled plan" }
+    : { move: null, source: "exhausted" };
 }

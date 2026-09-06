@@ -8,7 +8,7 @@ import { Position, threats, winningSquare } from "../src/game/rules";
 
 /** True if the bot wins against every reply sequence from pos. */
 function verifyAll(pos: Position): boolean {
-  const move = botMove(pos);
+  const move = botMove(pos, "table");
   const won = winningSquare(pos, new Set([...pos.p1, pos.idx(move)]), move);
   pos.play(move);
   try {
