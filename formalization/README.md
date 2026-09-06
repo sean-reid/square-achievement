@@ -35,8 +35,10 @@ libraries of their own beside them.
 | `escape_farm` | a square escaping the base board is latent: box corner plus the reply pair |
 | `simulate` | a forced base run of any strategy replays on every larger board |
 | `check_sound_uniform` | the checked run at 17, with the anchored certificates, wins every board from 17 up |
-| `Plus.plus_wins` | the plus rule, a strategy stated without a lookup table, wins every board from 6 up |
-| `Plus.plus_wins_of_le_seventeen` | the rule's direct certificates for the boards from 6 to 17 |
+| `checkForcedS_winsWith` | a successful forced run of a strategy that takes its wins yields the strategy's own winning tree, `WinsWith` |
+| `Plus.plus_wins_with` | following the plus rule, a strategy stated without a lookup table, wins every board from 6 up: the winning tree is the rule's own play |
+| `Plus.plus_wins` | the same with the moves forgotten, a `P1CanWin` tree |
+| `Plus.plus_wins_with_of_le_seventeen` | the rule's direct certificates for the boards from 6 to 17 |
 
 ## Building
 
@@ -79,8 +81,11 @@ building:
 
 ```sh
 echo 'import Threshold
+import Plus
 #check @SquareAchievement.outcome
-#print axioms SquareAchievement.outcome' | lake env lean --stdin
+#print axioms SquareAchievement.outcome
+#check @SquareAchievement.Plus.plus_wins_with
+#print axioms SquareAchievement.Plus.plus_wins_with' | lake env lean --stdin
 ```
 
 The axioms are `propext`, `Classical.choice`, `Quot.sound`, and one
@@ -129,8 +134,9 @@ for n in $(seq 6 17); do lake exe checker "$n" forced; done
 - `Compute/` the strategy table format; the enumerating checker, the
   forced-tree checker (generic over strategies, the table strategy
   being one instance), and the refuter with their soundness proofs;
-  and a byte-board checker used only by the executable, never cited
-  in proofs.
+  `WinsWith`, the predicate that a strategy's own play wins, which the
+  forced checker's soundness theorem concludes; and a byte-board
+  checker used only by the executable, never cited in proofs.
 - `General/` the simulation argument any forced strategy can use:
   span and invariance geometry (`Invariance`), the latency dichotomy
   (`Coverage`), the replay of a forced base run on every larger board
@@ -155,11 +161,17 @@ for n in $(seq 6 17); do lake exe checker "$n" forced; done
 - `Anchors.lean` the rule's anchored runs on the board of size 23: the
   base run for the uniform argument and the three far-pair families,
   with the latent corner as a guard.
+- `Threats.lean` the rule's pair-based threat scan agrees with the
+  checker's square scan, so the rule takes every completion the board
+  offers.
+- `Agreement.lean` the rule reads the same move from a real history and
+  from its base view: stand-ins and anchors beyond the base board leave
+  its abstraction unchanged.
 - `Uniform.lean` the wrapper dispatching every real reply pair to the
   simulation, using the rule's own second move and stand-ins beyond the
-  base board.
+  base board, and concluding that the rule's own play wins.
 - `Results.lean` the certificates, evaluated: the runs at sizes 6 to 17,
   the anchor-board run, and the anchored families, and the theorems
-  `plus_wins_of_le_seventeen` and `plus_wins`.
+  `plus_wins_with` and `plus_wins`.
 
 `Checker.lean` is the executable, built from the core and `Threshold`.
