@@ -349,7 +349,7 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
   rw [checkForced] at hforce
   obtain ⟨fuel, hfuel⟩ : ∃ f, 17 * 17 + 1 = f + 1 := ⟨17 * 17, rfl⟩
   rw [hfuel] at hforce
-  simp only [goForced, strategyMove_nil] at hforce
+  simp only [goForced, goForcedS, strategyMove_nil] at hforce
   split at hforce
   · exact absurd hforce (by simp)
   · rename_i hguard0
@@ -384,11 +384,11 @@ theorem check_sound_uniform_aux {t : Table} {n : ℕ} (hn : 17 ≤ n)
                   simp [List.contains_iff_mem, stonesOf]
                   exact fun he => hr1op (by simp [he]))
                 rcases fuel with _ | fuel1
-                · simp [goForced] at hbr1
+                · simp [goForced, goForcedS] at hbr1
                 have hcons : (([] : List Cell) ++ [t.opening]) ++ [r1] =
                     [t.opening, r1] := by simp
                 rw [hcons] at hbr1
-                simp only [goForced, strategyMove_two hsane] at hbr1
+                simp only [goForced, goForcedS, strategyMove_two hsane] at hbr1
                 rcases hx2l : lookup t.box t.x2 r1 with _ | x2v
                 · simp only [hx2l] at hbr1
                   exact absurd hbr1 (by simp)

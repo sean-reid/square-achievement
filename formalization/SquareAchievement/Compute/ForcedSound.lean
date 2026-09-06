@@ -138,19 +138,19 @@ theorem completesL_eq_false_of_threats_nil {n : ℕ} {mine occ : List Cell}
 
 /-- Soundness of the forced-tree checker, by the same induction as
 `go_sound`; the non-blocking replies are covered by two-move wins. -/
-theorem goForced_sound (t : Table) (n : ℕ) (hot : Option Cell) :
+theorem goForcedS_sound (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
     ∀ (fuel : ℕ) (hist : List Cell),
       hist.length % 2 = 0 →
       (∀ x ∈ hist, x ∈ board n) →
       ¬ HasSquare (stonesOf false hist).toFinset →
-      goForced t (squaresList n) n hot fuel hist = true →
+      goForcedS σ box (squaresList n) n hot fuel hist = true →
       P1CanWin n (stonesOf true hist).toFinset (stonesOf false hist).toFinset := by
   intro fuel
   induction fuel with
-  | zero => intro hist _ _ _ h; simp [goForced] at h
+  | zero => intro hist _ _ _ h; simp [goForcedS] at h
   | succ fuel ih =>
     intro hist hEven hBoard hNoSq2 h
-    simp only [goForced] at h
+    simp only [goForcedS] at h
     set p1L := stonesOf true hist with hp1L
     set p2L := stonesOf false hist with hp2L
     have hp2board : ∀ x ∈ p2L, x ∈ board n := fun x hx =>
@@ -223,7 +223,7 @@ theorem goForced_sound (t : Table) (n : ℕ) (hot : Option Cell) :
               -- recursion helper shared by both level shapes
               have hrec : ∀ r : Cell, r ∈ board n →
                   r ∉ hist ++ [m] →
-                  goForced t (squaresList n) n hot fuel ((hist ++ [m]) ++ [r]) = true →
+                  goForcedS σ box (squaresList n) n hot fuel ((hist ++ [m]) ++ [r]) = true →
                   P1CanWin n (insert m p1L.toFinset) (insert r p2L.toFinset) := by
                 intro r hrb hrmem hgo
                 have hrE : r ∈ empties n (insert m p1L.toFinset) p2L.toFinset := by
@@ -391,11 +391,24 @@ theorem goForced_sound (t : Table) (n : ℕ) (hot : Option Cell) :
                         · exact hz₀ne h'
                         · exact hz₀2 h'
 
-/-- One forced-tree run certifies the win on its board. -/
-theorem checkForced_sound {t : Table} {n : ℕ}
-    (h : checkForced t n = true) : P1CanWin n ∅ ∅ := by
-  have := goForced_sound t n none (n * n + 1) [] (by simp) (by simp)
-    (by simpa [stonesOf] using not_hasSquare_empty) (by simpa [checkForced] using h)
+/-- The table instance, in the original shape. -/
+theorem goForced_sound (t : Table) (n : ℕ) (hot : Option Cell) :
+    ∀ (fuel : ℕ) (hist : List Cell),
+      hist.length % 2 = 0 →
+      (∀ x ∈ hist, x ∈ board n) →
+      ¬ HasSquare (stonesOf false hist).toFinset →
+      goForced t (squaresList n) n hot fuel hist = true →
+      P1CanWin n (stonesOf true hist).toFinset (stonesOf false hist).toFinset :=
+  goForcedS_sound (strategyMove t) t.box n hot
+
+theorem checkForcedS_sound {σ : Strategy} {box n : ℕ}
+    (h : checkForcedS σ box n = true) : P1CanWin n ∅ ∅ := by
+  have := goForcedS_sound σ box n none (n * n + 1) [] (by simp) (by simp)
+    (by simpa [stonesOf] using not_hasSquare_empty) (by simpa [checkForcedS] using h)
   simpa [stonesOf] using this
+
+theorem checkForced_sound {t : Table} {n : ℕ}
+    (h : checkForced t n = true) : P1CanWin n ∅ ∅ :=
+  checkForcedS_sound (σ := strategyMove t) (box := t.box) h
 
 end SquareAchievement

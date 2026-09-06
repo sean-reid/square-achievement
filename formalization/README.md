@@ -8,11 +8,13 @@ everything below builds or refutes such trees. The development has no
 unproved declarations, and its axiom footprint is Lean's kernel plus
 the compiler-evaluation axiom that `native_decide` uses.
 
-The package holds two libraries. `SquareAchievement` is the shared
+The package holds three libraries. `SquareAchievement` is the shared
 core: the game, its outcomes, the strategy-table format, the checkers,
 and their soundness theorems. `Threshold` is the first result built on
 it: the tables, the uniform argument, the certificates, and the
-theorems below. Further results get libraries of their own beside it.
+threshold theorems below. `Plus` is the second: a strategy stated as a
+rule rather than a table, and its certificates. Further results get
+libraries of their own beside them.
 
 ## Results
 
@@ -32,6 +34,7 @@ theorems below. Further results get libraries of their own beside it.
 | `escape_farm` | a square escaping the base board is latent: box corner plus the reply pair |
 | `simulate` | a forced base run replays on every larger board |
 | `check_sound_uniform` | the checked run at 17, with the anchored certificates, wins every board from 17 up |
+| `Plus.plus_wins_of_le_seventeen` | the plus rule, a table-free strategy, wins every board from 6 to 17 |
 
 ## Building
 
@@ -62,7 +65,7 @@ silicon) and Linux x86-64.
 The build is the proof, and it runs on the author's machine before a
 change to the formalization merges; the `lean` workflow rebuilds it
 weekly and on demand rather than per pull request, since a full build
-costs most of an hour of runner time. `lake build` builds both
+costs most of an hour of runner time. `lake build` builds all three
 libraries: it elaborates every file and the kernel checks every
 theorem, evaluating the certificates along the
 way, so a successful build verifies everything in the results table,
@@ -122,7 +125,8 @@ for n in $(seq 6 17); do lake exe checker "$n" forced; done
 - `Game/` the rules and `P1CanWin`; `Outcome` adds the draw
   predicates, strategy stealing, and determinacy.
 - `Compute/` the strategy table format; the enumerating checker, the
-  forced-tree checker, and the refuter with their soundness proofs;
+  forced-tree checker (generic over strategies, the table strategy
+  being one instance), and the refuter with their soundness proofs;
   and a byte-board checker used only by the executable, never cited
   in proofs.
 
@@ -137,4 +141,13 @@ for n in $(seq 6 17); do lake exe checker "$n" forced; done
   (`Wrapper`).
 - `Results/` the evaluated certificates and the threshold theorems.
 
-`Checker.lean` is the executable, built from both libraries.
+`Plus/`, the plus rule:
+
+- `Rule.lean` the strategy as executable code: the opening, the
+  second-move diagram, tempo moves, pluses of side one and two, and the
+  shortest line within three tempo moves, read off an abstraction of
+  the position.
+- `Results.lean` the forced-tree checker run on the rule itself at every
+  size from 6 to 17.
+
+`Checker.lean` is the executable, built from the core and `Threshold`.
