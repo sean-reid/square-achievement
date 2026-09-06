@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0](https://github.com/sean-reid/square-achievement/compare/v0.1.5...v0.2.0) (2026-09-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **paper:** the two papers, their pages, and the general-table strategy are replaced by one paper and one result.
+
+### Features
+
+* **paper:** one paper for the outcome theorem and the plus rule ([#99](https://github.com/sean-reid/square-achievement/issues/99)) ([5722f47](https://github.com/sean-reid/square-achievement/commit/5722f47c7d067a153a92d495e8826772e2949a77))
+
 ## [0.1.5](https://github.com/sean-reid/square-achievement/compare/v0.1.4...v0.1.5) (2026-09-06)
 
 
