@@ -220,7 +220,7 @@ const tempoEnd = board6({
     <figcaption>
       Figure 3. The basic line against the replies (0,0) and (4,4). The arms
       (2,1) and (1,2) each forced a block on a diagonal; the last arm (2,3)
-      threatens at both dashed cells. The game ends on the ninth ply.
+      threatens at both dashed cells; the win comes on the eleventh ply.
     </figcaption>
   </figure>
 
@@ -353,13 +353,16 @@ const tempoEnd = board6({
 
   <h2>Open questions</h2>
   <p>
-    The rule wins by ply 17; Adler's searches find wins by ply 13 on each board
-    from 6 to 14. Is there a rule of comparable length that wins by ply 13 on
-    every board, and what is the least ply by which the first player can force a
-    win? The second move has seven exceptions; is there an opening from which a
-    rule of this kind needs none? And the rule does not apply to 5 × 5, where no
-    purely forcing strategy from (2,2) exists; a short rule for that board is
-    open.
+    The rule wins by ply 17; the least possible is 15 on the 6, 7, and 8 boards,
+    and at most 15 up to 14. (Adler's searches report 13, but they score a
+    double threat at the search horizon as a loss, two plies before the
+    completing move; his own depth-11 runs find no win, and his certified tree
+    for 6 × 6 has its deepest leaves at ply 15.) Is there a rule of comparable
+    length that wins by ply 15 on every board, and what is the least ply for
+    large boards? The second move has seven exceptions; is there an opening from
+    which a rule of this kind needs none? And the rule does not apply to 5 × 5,
+    where no purely forcing strategy from (2,2) exists; a short rule for that
+    board is open.
   </p>
 
   <h2>References</h2>

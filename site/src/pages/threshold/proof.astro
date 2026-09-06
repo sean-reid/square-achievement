@@ -142,13 +142,14 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     through 14 × 14, nothing was published until August 2026, when Keith Adler
     announced computer searches for those nine sizes
     <a class="cite" href="#ref-9">[9]</a>: a depth-limited search reports a
-    first-player win within 13 plies for each of them, with full strategy trees
-    certified for 6 × 6 and 7 × 7 and search verdicts for the rest, one search
-    per size and no strategy shared between sizes; the results are unrefereed by
-    his own account. Independently and at the same time, this work took a
-    different route: one strategy for every board, machine-checked for all sizes
-    at once. It is also a strategy you can watch: the bot in Figure 1 is playing
-    it.
+    first-player win for each of them, forced within 15 plies (reported there as
+    13, two plies short because of how the search scores its horizon), with full
+    strategy trees certified for 6 × 6 and 7 × 7 and search verdicts for the
+    rest, one search per size and no strategy shared between sizes; the results
+    are unrefereed by his own account. Independently and at the same time, this
+    work took a different route: one strategy for every board, machine-checked
+    for all sizes at once. It is also a strategy you can watch: the bot in
+    Figure 1 is playing it.
   </p>
 
   <h2>The strategy</h2>
@@ -462,10 +463,11 @@ const base = import.meta.env.BASE_URL.endsWith("/")
   <p>
     The strategy is not the fastest. Its longest verified lines run 26 plies on
     the 6 × 6, 7 × 7, and 8 × 8 boards, while Adler's searches report a forced
-    win within 13 plies on each board from 6 to 14, one search per size. Is
-    there one strategy that wins within 13 plies on every board from 6 × 6 up?
-    More generally, how quickly can the first player force a win on the n × n
-    board, and can a single strategy be fastest for every n?
+    win within 15 plies on each board from 6 to 14, one search per size, and 15
+    is exact on the 6, 7, and 8 boards. Is there one strategy that wins within
+    15 plies on every board from 6 × 6 up? More generally, how quickly can the
+    first player force a win on the n × n board, and can a single strategy be
+    fastest for every n?
   </p>
   <p>
     Are the constants least? The plans cannot fit a smaller corner than 6 × 6

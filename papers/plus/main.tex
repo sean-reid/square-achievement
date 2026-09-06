@@ -68,9 +68,10 @@ wins from $n = 15$ follow by strategy stealing from the theorem of
 Bacher and Eliahou \cite{bacher-eliahou} that every two-coloring of
 the $15 \times 15$ grid contains a monochromatic square; and for
 $5 \le n \le 14$ nothing had been published until the concurrent
-searches of Adler \cite{adler}, which report first-player wins within
-$13$ plies for $6 \le n \le 14$, with certified strategy trees for
-$n = 6$ and $7$. The strategy in
+searches of Adler \cite{adler}, which report first-player wins for
+$6 \le n \le 14$, forced within $15$ plies, with certified strategy
+trees for $n = 6$ and $7$; the bound is stated there as $13$, and
+Section~\ref{sec:measure} explains the correction. The strategy in
 \cite{reid-threshold} for $n \ge 6$ consists of two reflexes, complete
 a square if possible and otherwise block one, over a lookup table of
 $237$ branches and $8{,}135$ forcing plans confined to the
@@ -239,7 +240,8 @@ $(3,2)$, so most lines need no preparation.
 $(2,1)$ threatens at the diagonal $(3,1)$, dashed. Middle: the opponent
 (white) blocked there; the arm $(1,2)$ threatens at $(1,1)$. Right: the
 opponent blocked again; the last arm $(2,3)$ threatens at $(1,3)$ and
-$(3,3)$. We win on the ninth ply.}
+$(3,3)$. The double threat comes on the ninth ply and the win on the
+eleventh.}
 \label{fig:basic}
 \end{figure}
 
@@ -514,7 +516,8 @@ ply & we & opponent & what the move does \\
 3, 4 & $(3,2)$ & $(4,4)$ & second move; free reply \\
 5, 6 & $(2,1)$ & $(3,1)$ & arm; threat at $(3,1)$ through $\Sq(2,1,1)$, blocked \\
 7, 8 & $(1,2)$ & $(1,1)$ & arm; threat at $(1,1)$ through $\Sq(1,1,1)$, blocked \\
-9 & $(2,3)$ & & arm; threats at $(1,3)$ and $(3,3)$; wins \\
+9, 10 & $(2,3)$ & $(1,3)$ & arm; threats at $(1,3)$ and $(3,3)$; one is blocked \\
+11 & $(3,3)$ & & completes $\Sq(2,2,1)$; wins \\
 \midrule
 1, 2 & $(2,2)$ & $(0,0)$ & opening; free reply \\
 3, 4 & $(3,2)$ & $(3,1)$ & second move; free reply on a diagonal \\
@@ -576,8 +579,8 @@ It has $8{,}135$ plan entries and $248$ latent entries, $8{,}383$ in
 all, but only $186$ distinct plans, and $8{,}354$ entries begin with
 $(2,1)$ or $(2,3)$, an arm of the side-$1$ plus at $(2,2)$ or at
 $(3,2)$. The shortest plans are that plus: two plans of three moves,
-used in $157$ entries, play its three free arms and win on the ninth
-ply. The longer plans, the bulk of the table, mostly continue from the
+used in $157$ entries, play its three free arms and win on the
+eleventh ply. The longer plans, the bulk of the table, mostly continue from the
 first arm into a ladder, a run of side-$1$ threats climbing a column
 such as $(2,1)$, $(1,1)$, $(1,0)$, $(0,0)$, and finish elsewhere.
 Replayed in the positions where they are used, the moves that make them
@@ -806,9 +809,27 @@ side-$2$ plus behind one to three tempo moves, and only $79$ pairs on
 any board, all with both replies in $\Board_6$, need two or three.
 And the rule wins by ply $17$ against $27$ for the table of
 \cite{reid-threshold}, in the same measure, the ply of the winning
-move against an opponent who always blocks. Adler's searches
-\cite{adler} report wins by ply $13$ for $6 \le n \le 14$, so the rule
-is not optimal in length.
+move against an opponent who always blocks.
+
+How far is $17$ from the least possible? Adler \cite{adler} reports
+forced wins within $13$ plies for $6 \le n \le 14$, from depth-limited
+searches whose horizon is scored as a draw. The searches, however,
+test for a double threat before applying the horizon, and a position
+in which the side to move faces two threats is scored as lost even at
+the horizon, although the completing move lies two plies beyond it.
+A depth-$13$ search therefore proves a win by ply $15$, and the test
+for a win by ply $13$ is the depth-$11$ search, which in Adler's own
+logs finds no win for $n = 6$, $7$, $8$. We re-ran his solver with the
+horizon applied first: the first win appears at depth $15$ for
+$n = 6$, $7$, $8$, and at depth $19$ for $n = 5$, where he reports
+$17$; and in his certified strategy tree for $n = 6$, $35$ million of
+the $54$ million winning leaves lie at ply $15$. So the least ply by
+which the first player can force a win is $15$ on the boards of size
+$6$, $7$, and $8$, and at most $15$ up to $14$. The rule, at $17$, is
+two plies from optimal where the optimum is known. The optimal lines
+differ from the rule's in one respect: they allow the opponent a
+counter-threat and answer it with a move that is itself a threat,
+which the rule's definition of a line excludes.
 
 \begin{table}[ht]
 \centering
@@ -856,11 +877,11 @@ verifier on $\Board_6$.
 
 \section{Open questions}\label{sec:open}
 
-The rule wins by ply $17$; Adler's searches \cite{adler} find wins by
-ply $13$ on each board from $6$ to $14$, one search per board. Is
-there a rule of comparable length that wins by ply $13$ on every
+The rule wins by ply $17$; the least possible is $15$ on the boards
+of size $6$ to $8$ and at most $15$ up to $14$ (Section~\ref{sec:measure}).
+Is there a rule of comparable length that wins by ply $15$ on every
 board, and what is the least ply by which the first player can force
-a win on $\Board_n$? Other orderings, or other target shapes, might
+a win on $\Board_n$ for large $n$? Other orderings, or other target shapes, might
 shorten the longest games at the cost of a longer statement.
 
 The second move has seven exceptions. Is there an opening, or an
