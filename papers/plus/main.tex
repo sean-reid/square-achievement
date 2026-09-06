@@ -29,23 +29,23 @@
 
 \begin{abstract}
 Two players alternately claim cells of an $n \times n$ grid, and the
-first to hold the four corners of an axis-aligned square wins. Earlier
-we gave a first-player strategy that wins on every board of size at
-least $6$, driven by a lookup table of some eight thousand forcing
-plans. Here the table is replaced by a rule that fits in a paragraph:
-open at $(2,2)$, answer the first reply with a fixed second move, take
-a completion or a block whenever one is available, and otherwise play
-the shortest line of at most three single forcing moves followed by
-the arms of a \emph{plus}, a held stone with the four cells at a
-common distance along the axes. The rule wins every game by the
-seventeenth ply, plays the same $79$ lines on every board, and reads
-only its own stones, the opponent's stones inside a $17 \times 17$
-region, and one derived cell. Boards of size $6$ to $17$ are verified
-by exhaustive forced-tree search, and a run on the $23 \times 23$
-board is transported to every larger board by the simulation theorem
-of the earlier work. Everything is formalized in Lean~4, and the
-formal theorem says more than that a win exists: the tree of the
-rule's own moves is a winning tree.
+first to hold the four corners of an axis-aligned square wins. In
+earlier work we gave a first-player strategy that wins on every board of
+size at least $6$; it consulted a lookup table of some eight thousand
+forcing plans. Here we give a strategy for the same boards that uses no
+table. It is stated as a rule: open at $(2,2)$, answer the first reply
+with a fixed second move, take a completion or a block whenever one is
+available, and otherwise play the shortest line of at most three single
+forcing moves followed by the arms of a \emph{plus}, a held stone with
+the four cells at a common distance along the axes. The rule wins every
+game by the seventeenth ply, plays the same $79$ lines on every board,
+and reads only its own stones, the opponent's stones inside a $17 \times
+17$ region, and one derived cell. Boards of size $6$ to $17$ are
+verified by exhaustive forced-tree search, and a run on the $23 \times
+23$ board is transported to every larger board by the simulation theorem
+of the earlier work. The argument is formalized in Lean~4; the formal
+theorem states that the tree of the rule's own moves is a winning tree,
+not only that a winning tree exists.
 \end{abstract}
 
 \maketitle
@@ -70,40 +70,35 @@ the $15 \times 15$ grid contains a monochromatic square; and for
 $5 \le n \le 14$ nothing had been published until the concurrent
 searches of Adler \cite{adler}, which report first-player wins within
 $13$ plies for $6 \le n \le 14$, with certified strategy trees for
-$n = 6$ and $7$. Our proof gave one explicit strategy for every
-$n \ge 6$: complete a square if you can, otherwise block one,
-otherwise consult a table of $237$ branches and $8{,}135$ forcing
-plans, all confined to the $6 \times 6$ corner of the board. The
-table was found by search and verified by search, and we asked for a
-winning strategy that a reader can carry in their head, with no table
-at all.
+$n = 6$ and $7$. The strategy in
+\cite{reid-threshold} for $n \ge 6$ consists of two reflexes, complete
+a square if possible and otherwise block one, over a lookup table of
+$237$ branches and $8{,}135$ forcing plans confined to the
+$6 \times 6$ corner of the board. The table was produced by search,
+and \cite{reid-threshold} left open whether a winning strategy for all
+$n \ge 6$ can be stated without one.
 
-This paper gives one. Open at $(2,2)$ and answer the first reply at
-$(3,2)$, with seven exceptions given by a small diagram. Take a
-completion or a block whenever one exists. Otherwise follow the line
-chosen after the second reply: the shortest sequence of at most three
-single forcing moves followed by the arms of a plus of side $1$ or
-$2$, never making a threat whose only block is the latent corner of
-the opponent's two free stones. A \emph{plus} is a stone with the
-four cells at a common distance from it along the axes. Once its
-centre and one arm are held, each further arm makes three corners of
-a square whose fourth corner is a diagonal cell, so the opponent must
-block there, and the last arm threatens two such squares at once. A
-\emph{single forcing move} makes exactly one threat and so adds a
-stone at no cost in tempo. The \emph{latent corner} is the one cell of
-the $6 \times 6$ corner, if any, that forms a square with two far
-replies; Section~\ref{sec:defs} defines all of these.
+We give such a strategy here. Its free moves are chosen by a rule
+built on one shape, the \emph{plus}: a stone together with the four
+cells at a common distance from it along the axes. Once the centre
+and one arm are held, each further arm makes three corners of a square
+whose fourth corner is a diagonal cell, so the opponent must block
+there, and the last arm threatens two squares at once. The rule opens
+at $(2,2)$, answers the first reply with a fixed second move, and then
+follows a line of at most three single forcing moves, each of which
+places a stone the opponent must answer, ending in the arms of a
+plus. Section~\ref{sec:defs} defines the terms and
+Section~\ref{sec:rule} states the rule in full.
 
 \begin{theorem}\label{thm:main}
 For every $n \ge 6$, the first player following the rule wins the
 square achievement game on the $n \times n$ board.
 \end{theorem}
 
-Three things about the theorem. First, no data enters the rule or
-the proof beyond the seven exceptional second moves; the Lean
-definition of the rule is $250$ lines, most of them the search for
-the line. Second, the theorem is about the rule's own play. The
-formal statement is
+No data enters the rule or the proof beyond seven exceptional second
+moves; the Lean definition of the rule is $250$ lines, most of them
+the search for the line. The theorem is about the rule's own play.
+Its formal statement is
 \[
   \texttt{plus\_wins\_with} \;:\; 6 \le n \;\longrightarrow\;
   \texttt{WinsWith}\ \texttt{plusMove}\ n\ [\,],
@@ -111,26 +106,24 @@ formal statement is
 where $\texttt{WinsWith}\ \sigma\ n\ h$ says that the game tree in
 which the first player plays $\sigma$'s move at every node after the
 history $h$, against every legal reply, ends in a first-player square
-on every branch. The theorem of \cite{reid-threshold} said that a
-winning tree exists and that the checker found one; here the tree is
-the one the rule plays. Third, the rule is short in play as well: it
-wins by the seventeenth ply on every board, where the table strategy
-needed $27$, and on every board from $6$ to $17$ it plays the same
-$79$ lines, each with at most six first-player moves after the
-opening pair.
+on every branch. The theorem of \cite{reid-threshold} states that a
+winning tree exists, namely one the checker found; here the tree is
+the one the rule plays. The rule also wins faster than the table: by
+the seventeenth ply on every board, where the table strategy needed
+$27$. On every board from $6$ to $17$ it plays the same $79$ lines,
+each with at most six first-player moves after the opening pair.
 
-The proof has the shape of \cite{reid-threshold} with one new
-ingredient. Boards of size $6$ to $17$ are verified by a forced-tree
-checker that evaluates the rule at every node. For larger boards a
-checked run on the $23 \times 23$ board, with three families of
-anchored runs, is transported to every $n \ge 17$ by the simulation
-theorem of \cite{reid-threshold}. The new ingredient is an agreement
-lemma: the rule reads the same move from a real history and from its
-image on the base board, in which far replies are replaced by fixed
-stand-ins, because the stand-ins lie beyond the region the rule looks
-at and share the latent corner with the stones they replace. That
-lemma turns the simulation into a statement about the rule rather
-than about the existence of a win.
+The proof follows \cite{reid-threshold} with one addition. Boards of
+size $6$ to $17$ are verified by a forced-tree checker that evaluates
+the rule at every node. For larger boards a checked run on the $23
+\times 23$ board, with three families of anchored runs, is transported
+to every $n \ge 17$ by the simulation theorem of \cite{reid-threshold}.
+The addition is an agreement lemma: the rule reads the same move from a
+real history and from its image on the base board, in which far replies
+are replaced by fixed stand-ins, because the stand-ins lie beyond the
+region the rule looks at and share the latent corner with the stones
+they replace. That lemma is what makes the simulation a statement about
+the rule rather than about the existence of a win.
 
 \section{Definitions}\label{sec:defs}
 
@@ -213,7 +206,7 @@ threatens at two diagonals at once. Blocks land on diagonals, never
 on arms. Figure~\ref{fig:basic} plays this out. The opening $(2,2)$
 and the second move $(3,2)$ are the centre and an arm of the side-$1$
 plus at $(2,2)$, and an arm and the centre of the side-$1$ plus at
-$(3,2)$, which is why the rule usually needs no preparation.
+$(3,2)$, so most lines need no preparation.
 
 \begin{figure}[ht]
 \centering
@@ -371,8 +364,8 @@ block there they would threaten at $z$, a cell the rule does not see.}
 \label{fig:latent}
 \end{figure}
 
-Two facts from \cite[Section~6]{reid-threshold} say why this is the
-right cell to record. First, two stones in $\Board_6$ lie in a common
+Two facts from \cite[Section~6]{reid-threshold} explain why this cell
+is recorded. First, two stones in $\Board_6$ lie in a common
 square only if that square lies in $\Board_{12}$. In a position the
 rule reaches, the opponent's stones are the two free replies and
 forced blocks, and the blocks lie in $\Board_6$; so a stone beyond
@@ -569,30 +562,30 @@ the line at every move would also be a rule of this kind; the
 committed version makes the verified tree a function of the reply
 pair, which the argument of Section~\ref{sec:uniform} needs.
 
-The rule is quick to evaluate: the compiled Lean definition finds the
-line from an abstract position in about $80$ microseconds, the Python
-twin in a quarter of a millisecond. The search has at most three
+The compiled Lean definition finds the line from an abstract position
+in about $80$ microseconds, the Python twin in a quarter of a
+millisecond. The search has at most three
 levels of tempo moves with at most $36$ candidates each, and at each
 position at most $20$ pluses with at most $24$ arm orders.
 
 \section{How the rule was found}\label{sec:how}
 
 The table of \cite{reid-threshold} was generated by depth-first search
-over forcing moves on $\Board_{15}$, with a preference for short
-plans. It has $8{,}135$ plan entries and $248$ latent entries,
-$8{,}383$ in all, but only $186$ distinct plans, and $8{,}354$ entries
-begin with $(2,1)$ or $(2,3)$, an arm of the side-$1$ plus at $(2,2)$
-or at $(3,2)$. The shortest plans are that plus: two plans of three
-moves, used in $157$ entries, play its three free arms and win on the
-ninth ply. The longer plans, the bulk of the table, mostly continue
-from the first arm into a ladder, a run of side-$1$ threats climbing a
-column such as $(2,1)$, $(1,1)$, $(1,0)$, $(0,0)$, and finish
-elsewhere. Replayed in the positions where they are used, the moves
-that make them long do one of two things: they force a block so as to
-place a stone that a later square needs, or they are the arms of a
-side-$2$ plus at $(3,2)$, forced one at a time, the last making the
-double threat. That is the observation behind the rule: a plan is a
-plus, possibly prepared by a few forcing moves.
+over forcing moves on $\Board_{15}$, with a preference for short plans.
+It has $8{,}135$ plan entries and $248$ latent entries, $8{,}383$ in
+all, but only $186$ distinct plans, and $8{,}354$ entries begin with
+$(2,1)$ or $(2,3)$, an arm of the side-$1$ plus at $(2,2)$ or at
+$(3,2)$. The shortest plans are that plus: two plans of three moves,
+used in $157$ entries, play its three free arms and win on the ninth
+ply. The longer plans, the bulk of the table, mostly continue from the
+first arm into a ladder, a run of side-$1$ threats climbing a column
+such as $(2,1)$, $(1,1)$, $(1,0)$, $(0,0)$, and finish elsewhere.
+Replayed in the positions where they are used, the moves that make them
+long do one of two things: they force a block so as to place a stone
+that a later square needs, or they are the arms of a side-$2$ plus at
+$(3,2)$, forced one at a time, the last making the double threat. This
+suggested describing a plan as a plus, possibly prepared by a few
+forcing moves.
 
 A first attempt at a rule did not use shapes. It scored moves by the
 number of threats we could make next and played the highest score. On
@@ -804,17 +797,16 @@ evaluations.
 For each board from $6$ to $17$ we ran the Python twin over every
 reply pair and recorded the line, its tempo moves, and the ply of the
 win against an opponent who blocks. Table~\ref{tab:lines} summarizes
-the result. Three things stand out. The set of lines does not depend
+the result. The set of lines does not depend
 on the board: every board plays exactly the $79$ lines of $\Board_6$,
 since a pair's line depends only on its abstraction. Most pairs need
 no preparation: on $\Board_{17}$, $81{,}186$ of $82{,}368$ pairs are
 won by a side-$1$ plus with no tempo move, the other $1{,}182$ by a
 side-$2$ plus behind one to three tempo moves, and only $79$ pairs on
 any board, all with both replies in $\Board_6$, need two or three.
-And the rule is faster than the table without being designed for
-speed: it wins by ply $17$ against $27$ for the table of
+And the rule wins by ply $17$ against $27$ for the table of
 \cite{reid-threshold}, in the same measure, the ply of the winning
-move against the most stubborn opponent. Adler's searches
+move against an opponent who always blocks. Adler's searches
 \cite{adler} report wins by ply $13$ for $6 \le n \le 14$, so the rule
 is not optimal in length.
 
