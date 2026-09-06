@@ -1,8 +1,8 @@
 /** The interactive board: an SVG figure in the paper's own idiom.
  *
- * The visitor plays white against the bot's black stones, under the
- * plus rule or the table strategy; the `strategy` attribute picks the
- * page's default. Hairline rules, drawn stones, threat washes, a
+ * The visitor plays white against the bot's black stones: the plus rule
+ * from 6 x 6 up, the 5 x 5 table on 5, a never-losing policy below.
+ * Hairline rules, drawn stones, threat washes, a
  * winning square that draws itself in, the bot's latest move with its
  * stated reason, the rule's committed line drawn on the board, undo,
  * a shareable link, and a self-playing demonstration. Motion is subtle
@@ -10,12 +10,7 @@
  */
 
 import { Position, threats, winningSquare } from "./rules";
-import {
-  botDecision,
-  effectiveStrategy,
-  loadTables,
-  type Strategy,
-} from "./bot";
+import { botDecision, loadTables } from "./bot";
 import { fmt, lineOf, type Line } from "./plus";
 import { decodeGame, encodeGame } from "./url";
 
@@ -31,28 +26,18 @@ export class SagBoard extends HTMLElement {
   private focusIdx = 0;
   private generation = 0;
   private thinking = false;
-  private wanted: Strategy = "plus";
 
   connectedCallback(): void {
-    const params = new URLSearchParams(location.search);
-    const fromUrl = params.get("g");
+    const fromUrl = new URLSearchParams(location.search).get("g");
     const decoded = fromUrl ? decodeGame(fromUrl) : null;
-    const n = decoded?.n ?? Number(this.getAttribute("n") ?? "5");
-    const attr = this.getAttribute("strategy");
-    const fromParam = params.get("s");
-    this.wanted =
-      fromParam === "table" || fromParam === "plus"
-        ? fromParam
-        : attr === "table"
-          ? "table"
-          : "plus";
+    const n = decoded?.n ?? Number(this.getAttribute("n") ?? "6");
     this.buildShell(n);
     this.newGame(n, decoded?.history);
   }
 
-  /** The strategy playing on the current board. */
-  private strategy(): Strategy {
-    return effectiveStrategy(this.pos.n, this.wanted);
+  /** Whether the plus rule is playing, which is the case from 6 x 6 up. */
+  private ruleplays(): boolean {
+    return this.pos.n >= 6;
   }
 
   disconnectedCallback(): void {
@@ -67,12 +52,7 @@ export class SagBoard extends HTMLElement {
         <button class="sag-inc" aria-label="larger board">+</button>
         <button class="sag-new">new game</button>
       </div>
-      <div class="sag-strategy" role="group" aria-label="strategy">
-        <span class="sag-strategy-label">strategy</span>
-        <button data-strategy="plus" aria-pressed="false">plus rule</button>
-        <button data-strategy="table" aria-pressed="false">table</button>
-        <span class="sag-strategy-hint"></span>
-      </div>
+      <p class="sag-note"></p>
       <div class="sag-stage"></div>
       <p class="sag-status" role="status"></p>
       <p class="sag-quiet">
@@ -92,16 +72,6 @@ export class SagBoard extends HTMLElement {
           <span class="sag-plan-note"></span>
         </p>
       </aside>`;
-    for (const b of this.querySelectorAll<HTMLButtonElement>(
-      ".sag-strategy button",
-    )) {
-      b.addEventListener("click", () => {
-        if (b.disabled || b.dataset["strategy"] === this.wanted) return;
-        this.stopDemo();
-        this.wanted = b.dataset["strategy"] === "table" ? "table" : "plus";
-        this.newGame(this.pos.n);
-      });
-    }
     this.querySelector<HTMLButtonElement>(".sag-new")!.addEventListener(
       "click",
       () => {
@@ -164,9 +134,13 @@ export class SagBoard extends HTMLElement {
     this.pos = new Position(n);
     this.over = false;
     this.querySelector(".sag-size")!.textContent = `${n} × ${n}`;
-    this.paintStrategy();
     this.buildSvg();
-    if (n < 5) this.status("boards below 5 x 5 are drawn with best play");
+    this.querySelector<HTMLElement>(".sag-note")!.textContent =
+      n < 5
+        ? "below 5 × 5 the game is drawn; a never-losing policy plays"
+        : n === 5
+          ? "the 5 × 5 table plays here; the rule applies from 6 × 6"
+          : "";
     if (replay && replay.length > 0) {
       for (const i of replay) {
         if (this.over) break;
@@ -360,16 +334,16 @@ export class SagBoard extends HTMLElement {
     const gen = this.generation;
     this.thinking = true;
     try {
-      await loadTables(this.pos.n, this.strategy());
+      await loadTables(this.pos.n);
     } finally {
       this.thinking = false;
     }
     if (gen !== this.generation || this.over) return;
-    const d = botDecision(this.pos, this.strategy());
+    const d = botDecision(this.pos);
     if (d.move === null) {
       this.over = true;
       this.status(
-        this.strategy() === "plus"
+        this.ruleplays()
           ? "this position is outside the rule's play"
           : "this position is outside the table",
       );
@@ -461,31 +435,13 @@ export class SagBoard extends HTMLElement {
     history.replaceState(
       null,
       "",
-      `?g=${encodeGame(this.pos.n, this.pos.history)}&s=${this.wanted}`,
+      `?g=${encodeGame(this.pos.n, this.pos.history)}`,
     );
-  }
-
-  /** The segmented control: the playing strategy pressed, both disabled
-   * below 6 x 6 with a hint saying why. */
-  private paintStrategy(): void {
-    const playing = this.strategy();
-    const small = this.pos.n < 6;
-    for (const b of this.querySelectorAll<HTMLButtonElement>(
-      ".sag-strategy button",
-    )) {
-      b.setAttribute("aria-pressed", String(b.dataset["strategy"] === playing));
-      b.disabled = small;
-    }
-    this.querySelector<HTMLElement>(".sag-strategy-hint")!.textContent = small
-      ? this.pos.n === 5
-        ? "the rule applies from 6 × 6; the 5 × 5 table plays here"
-        : "below 5 × 5 the game is drawn; a never-losing policy plays"
-      : "";
   }
 
   /** The rule's committed line, if the rule is playing and has one. */
   private currentLine(): Line | null {
-    if (this.strategy() !== "plus") return null;
+    if (!this.ruleplays()) return null;
     return lineOf(this.pos);
   }
 
@@ -548,7 +504,7 @@ export class SagBoard extends HTMLElement {
   }
 
   private hotCell(): [number, number] | null {
-    const d = botDecision(this.pos, "plus");
+    const d = botDecision(this.pos);
     return "hot" in d
       ? ((d as { hot: [number, number] | null }).hot ?? null)
       : null;
@@ -572,7 +528,7 @@ export class SagBoard extends HTMLElement {
     const [r, c] = this.pos.cell(this.pos.history[last]!);
     let reason = "";
     try {
-      const d = botDecision(replay, this.strategy());
+      const d = botDecision(replay);
       if (d.move && d.move[0] === r && d.move[1] === c)
         reason = d.reason ?? d.source;
     } catch {

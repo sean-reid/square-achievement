@@ -1,5 +1,5 @@
 ---
-import Base from "../../layouts/Base.astro";
+import Base from "../layouts/Base.astro";
 import katex from "katex";
 
 const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
@@ -128,33 +128,83 @@ const tempoEnd = board6({
 ---
 
 <Base
-  title="How the proof works · A short winning rule"
-  description="An illustrated guide to the plus rule: a winning strategy for the square achievement game on every board from 6 by 6 up, stated without a lookup table, verified by exhaustive search and formalized in Lean."
+  title="How the proof works · The Square Achievement Game"
+  description="An illustrated guide to the proof that the first player wins the square achievement game exactly when n is at least 5: the plus rule, the 5 by 5 table, the draws, one run for every larger board, and the Lean formalization."
 >
   <header class="masthead">
     <h1>How the proof works</h1>
-    <p class="byline">An illustrated guide to the plus rule</p>
+    <p class="byline">An illustrated guide to the square achievement game</p>
   </header>
 
   <p class="abstract">
     <strong>Summary.</strong> Two players alternately claim cells of an
     <span set:html={k("n \\times n")} /> grid; the first to hold all four corners
-    of an axis-aligned square wins. The threshold result gave a first-player strategy
-    for every board from 6 × 6 up, driven by a table of some eight thousand forcing
-    plans. This result replaces the table by a rule built on one shape, the plus,
-    with at most three preparatory forcing moves. The rule is verified by exhaustive
-    search on the boards from 6 × 6 to 17 × 17, a run on the 23 × 23 board is carried
-    to every larger board, and the whole argument is formalized in Lean 4 as a theorem
-    about the rule's own play.
+    of an axis-aligned square wins. The first player has a winning strategy exactly
+    when <span set:html={k("n \\ge 5")} />, and every smaller board is drawn
+    under optimal play. From 6 × 6 up the winning strategy is a rule built on
+    one shape, the plus, with at most three preparatory forcing moves; it is
+    verified by exhaustive search on the boards from 6 × 6 to 17 × 17, a run on
+    the 23 × 23 board is carried to every larger board, and the whole argument,
+    the draws and the 5 × 5 board included, is formalized in Lean 4.
   </p>
 
   <figure class="game">
-    <sag-board n="6" strategy="plus"></sag-board>
+    <sag-board n="6"></sag-board>
     <figcaption>
       Figure 1. The bot follows the rule described below and explains each move.
       Change n to explore.
     </figcaption>
   </figure>
+
+  <h2>The game</h2>
+  <p>
+    Played on the cells of an <span set:html={k("n \\times n")} /> grid, the first
+    player moving first. A winning set is any
+    <span
+      set:html={k("\\{(r,c),\\,(r,c{+}s),\\,(r{+}s,c),\\,(r{+}s,c{+}s)\\}")}
+    />
+    with <span set:html={k("s \\ge 1")} />: the four corners of an axis-aligned
+    square, from 2 × 2 blocks up. A full board with no completed square is a
+    draw. Tilted squares do not count. Both players are after the same squares,
+    so even a player who cannot win anymore can still block, and on the boards
+    below 5 × 5 blocking is enough: neither player can force a win.
+  </p>
+
+  <div class="theorem">
+    <span class="label">Theorem.</span> The first player has a winning strategy in
+    the square achievement game on the <span set:html={k("n \\times n")} /> board
+    if and only if <span set:html={k("n \\ge 5")} />. For
+    <span set:html={k("n \\ge 6")} /> the first player following the plus rule wins
+    by the seventeenth ply.
+  </div>
+
+  <h2>History</h2>
+  <p>
+    Harary called games like this achievement games: both players build toward
+    the same target, and the first to finish wins <a class="cite" href="#ref-1"
+      >[1]</a
+    >; the convention goes back to the positional games of Hales and Jewett
+    <a class="cite" href="#ref-8">[8]</a>. Erickson asked what happens for the
+    axis-aligned square on an <span set:html={k("n \\times n")} /> grid
+    <a class="cite" href="#ref-2">[2]</a>, and the question is recorded on the
+    Open Problem Garden <a class="cite" href="#ref-3">[3]</a>. Two ends of the
+    answer were known. Jenrich reported computer searches giving draws on 3 × 3
+    and 4 × 4 and a first-player win on 5 × 5 <a class="cite" href="#ref-4"
+      >[4]</a
+    >. Bacher and Eliahou proved that every two-coloring of a 15 × 15 grid
+    contains a monochromatic square <a class="cite" href="#ref-5">[5]</a>, so no
+    game on a board of size 15 or more can end in a draw, and strategy stealing
+    then gives the first player a win, though it produces no strategy. In
+    between, from 6 × 6 through 14 × 14, nothing was published until August
+    2026, when Keith Adler announced computer searches settling those nine sizes
+    as first-player wins, with full strategy trees certified for 6 × 6 and 7 × 7
+    and search verdicts for the rest, one search per size <a
+      class="cite"
+      href="#ref-9">[9]</a
+    >. Independently and at the same time, this work took a different route: one
+    rule for every board, machine-checked for all sizes at once. The bot in
+    Figure 1 is playing it.
+  </p>
 
   <h2>Pluses</h2>
   <p>
@@ -266,12 +316,12 @@ const tempoEnd = board6({
     >. If the opponent were ever forced to block there, they would hold three
     corners of that square and threaten at its fourth, which may lie beyond
     anything the rule looks at. So the rule never makes a threat whose only
-    block is the latent corner. A containment lemma from the threshold result
-    says this is all the far stones can do: two stones of the corner region lie
-    in a common square only if that square fits inside the 12 × 12 board, so a
-    far stone shares no square with two of the opponent's forced blocks, and a
-    square through a far stone and one block has both free replies as its other
-    corners.
+    block is the latent corner. A containment lemma from the earlier version of
+    this work says this is all the far stones can do: two stones of the corner
+    region lie in a common square only if that square fits inside the 12 × 12
+    board, so a far stone shares no square with two of the opponent's forced
+    blocks, and a square through a far stone and one block has both free replies
+    as its other corners.
   </p>
 
   <h2>What is checked by hand and what by machine</h2>
@@ -299,23 +349,25 @@ const tempoEnd = board6({
 
   <h2>Every board at once</h2>
   <p>
-    Boards from 17 × 17 up are covered by the simulation argument of the
-    threshold result: a checked run on a base board is replayed on any larger
-    board, with replies inside the base board read verbatim and replies beyond
-    it replaced by stand-in cells. For the rule the base board is 23 × 23, the
-    smallest that holds the stand-ins, and three families of anchored runs, 176
-    positions in all, cover the reply pairs with a latent corner, with the
-    latent corner as an extra guard. Since the rule reads only the abstraction,
-    and the stand-ins lie beyond the 17 × 17 board and share the latent corner
-    with the stones they replace, the rule computes the same move on the real
-    board and on the base board; this agreement lemma is what makes the replayed
-    run the rule's own play rather than merely a win found by the checker.
+    Boards from 17 × 17 up are covered by the simulation argument of the earlier
+    version of this work: a checked run on a base board is replayed on any
+    larger board, with replies inside the base board read verbatim and replies
+    beyond it replaced by stand-in cells. For the rule the base board is 23 ×
+    23, the smallest that holds the stand-ins, and three families of anchored
+    runs, 176 positions in all, cover the reply pairs with a latent corner, with
+    the latent corner as an extra guard. Since the rule reads only the
+    abstraction, and the stand-ins lie beyond the 17 × 17 board and share the
+    latent corner with the stones they replace, the rule computes the same move
+    on the real board and on the base board; this agreement lemma is what makes
+    the replayed run the rule's own play rather than merely a win found by the
+    checker.
   </p>
 
   <h2>What the formal theorem says</h2>
   <p>
-    The threshold result proved <code>P1CanWin</code>: a winning strategy tree
-    exists, namely one the checker found. This result proves more. The predicate
+    The earlier version of this work proved <code>P1CanWin</code>: a winning
+    strategy tree exists, namely one the checker found. This result proves more.
+    The predicate
     <code>WinsWith σ n h</code> says that the game tree in which the first player
     plays the move of the strategy <code>σ</code> at every node after the history
     <code>h</code>, against every legal reply, ends in a first-player square on
@@ -331,7 +383,7 @@ const tempoEnd = board6({
     23 × 23 board, and the three anchored families, discharged by
     <code>native_decide</code>. Both artifacts are built from this repository on
     every deploy:
-    <a href={`${base}downloads/plus.pdf`}>the paper (PDF)</a> and
+    <a href={`${base}downloads/paper.pdf`}>the paper (PDF)</a> and
     <a href={`${base}downloads/square-achievement-formalization.tar.gz`}
       >the Lean development (tar.gz)</a
     >.
@@ -339,45 +391,61 @@ const tempoEnd = board6({
 
   <h2>How the rule was found</h2>
   <p>
-    The old table had 8,383 entries but only 186 distinct plans, and nearly all
-    of them begin with an arm of the side-1 plus at (2,2) or (3,2). The shortest
-    plans are that plus; the long ones, replayed in the positions where they are
-    used, turn out to force blocks so as to place a stone a later square needs,
-    or to play the arms of the side-2 plus at (3,2) one at a time. A first
-    attempt at a rule scored moves by how many threats they made available and
-    failed on 31 reply pairs; asking instead which plus can be completed by
-    force, after a few tempo moves, gave a rule that wins them all. Compiled
-    back into a table, the rule needs 2,330 entries against 8,135 and plays the
-    same 79 lines on every board from 6 × 6 to 17 × 17.
+    An earlier version of this work won the boards from 6 × 6 up with a lookup
+    table of several thousand forcing plans, one per pair of opponent replies,
+    found by search. Reading the plans rather than counting them, almost all
+    began with an arm of the side-1 plus at (2,2) or (3,2), the shortest ones
+    were that plus, and the long ones, replayed in the positions where they were
+    used, either forced a block so as to place a stone a later square needed or
+    played the arms of the side-2 plus at (3,2) one at a time. A first attempt
+    at a rule scored moves by how many threats they made available and failed on
+    a few dozen reply pairs near the opening; asking instead which plus can be
+    completed by force, after a few tempo moves, gave a rule that wins them all.
+  </p>
+
+  <h2>The draws and the 5 × 5 board</h2>
+  <p>
+    Below 5 × 5 the first player cannot force a win: a dual search, also proved
+    sound in Lean, exhibits a reply to every first-player move after which no
+    win exists. That the boards are drawn, rather than lost for the first
+    player, takes two more steps, both formalized. Strategy stealing shows the
+    second player never forces a win on any board: a second-player strategy
+    could be borrowed by the first player after an arbitrary opening move, since
+    a surplus stone never hurts. Determinacy shows that a player who cannot be
+    beaten can secure a draw. Together they give each player a drawing strategy
+    on every board up to 4 × 4. The 5 × 5 board is won, but no purely forcing
+    strategy from (2,2) exists there: from twenty reply pairs every all-forcing
+    continuation fails. Its strategy is a table with quiet moves that fork on
+    the reply, extracted from a full solution of the 5 × 5 game and verified
+    over the complete game tree; it plays on this page when you set n to 5.
   </p>
 
   <h2>Open questions</h2>
   <p>
-    The rule wins by ply 17; the least possible is 15 on the 6, 7, and 8 boards,
-    and at most 15 up to 14. (Adler's searches report 13, but they score a
-    double threat at the search horizon as a loss, two plies before the
-    completing move; his own depth-11 runs find no win, and his certified tree
-    for 6 × 6 has its deepest leaves at ply 15.) Is there a rule of comparable
-    length that wins by ply 15 on every board, and what is the least ply for
-    large boards? The second move has seven exceptions; is there an opening from
-    which a rule of this kind needs none? And the rule does not apply to 5 × 5,
-    where no purely forcing strategy from (2,2) exists; a short rule for that
-    board is open.
+    The rule wins by ply 17. What is the least ply by which the first player can
+    force a win on the <span set:html={k("n \\times n")} /> board, and is there a
+    rule of comparable length that attains it on every board? The second move has
+    seven exceptions; is there an opening from which a rule of this kind needs none?
+    The rule does not apply to 5 × 5, where no purely forcing strategy from (2,2)
+    exists; a short rule for that board is open. And are the constants least: the
+    6 × 6 region and the 17 × 17 base board?
   </p>
 
   <h2>References</h2>
   <ol class="refs">
     <li id="ref-1">
-      S. Reid, The square achievement game on n × n boards, preprint, 2026.
-      <a href={`${base}downloads/threshold.pdf`}>the threshold paper (PDF)</a>
+      F. Harary, Achievement and avoidance games for graphs, Annals of Discrete
+      Mathematics 13 (1982), 111–119.
     </li>
     <li id="ref-2">
-      K. Adler, Is the square achievement game on the n × n grid resolved for 6
-      ≤ n ≤ 14?, MathOverflow question 514742, August 2026.
-      <a href="https://mathoverflow.net/q/514742">mathoverflow.net</a>
+      M. Erickson, Pearls of Discrete Mathematics, CRC Press, 2010.
     </li>
     <li id="ref-3">
-      M. Erickson, Pearls of Discrete Mathematics, CRC Press, 2010.
+      M. Erickson, Square achievement game on an n × n grid, Open Problem
+      Garden.
+      <a href="http://www.openproblemgarden.org/op/a_game_on_an_n_x_n_grid"
+        >openproblemgarden.org</a
+      >
     </li>
     <li id="ref-4">
       T. Jenrich, Guaranteed successful strategies for a square achievement game
@@ -394,6 +462,19 @@ const tempoEnd = board6({
     </li>
     <li id="ref-7">
       The mathlib Community, The Lean mathematical library, CPP 2020.
+    </li>
+    <li id="ref-8">
+      A. W. Hales and R. I. Jewett, Regularity and positional games,
+      Transactions of the American Mathematical Society 106 (1963), 222–229.
+    </li>
+    <li id="ref-9">
+      K. Adler, Is the square achievement game on the n × n grid resolved for 6
+      ≤ n ≤ 14?, MathOverflow question 514742, August 2026.
+      <a href="https://mathoverflow.net/q/514742">mathoverflow.net</a>; code,
+      logs, and certificates at
+      <a href="https://github.com/keithadler/square-achievement-game"
+        >github.com/keithadler/square-achievement-game</a
+      >
     </li>
   </ol>
 </Base>

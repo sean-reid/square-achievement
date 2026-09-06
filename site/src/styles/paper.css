@@ -405,66 +405,12 @@ footer a {
   outline: none;
 }
 
-.sag-strategy {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: baseline;
-  gap: 0.35rem;
-  margin: -0.4rem 0 0.9rem;
-  font-size: 0.78em;
-  font-variant: small-caps;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-
-.sag-strategy-label {
-  margin-right: 0.3rem;
-}
-
-.sag-strategy button {
-  font: inherit;
-  background: none;
-  color: var(--ink);
-  border: 1px solid var(--rule);
-  padding: 0.1rem 0.7rem;
-  cursor: pointer;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease;
-}
-
-.sag-strategy button:first-of-type {
-  border-radius: 2px 0 0 2px;
-}
-
-.sag-strategy button:last-of-type {
-  border-radius: 0 2px 2px 0;
-  margin-left: -1px;
-}
-
-.sag-strategy button:hover:not([disabled]) {
-  border-color: var(--accent);
-}
-
-.sag-strategy button[aria-pressed="true"] {
-  background: var(--box);
-  border-color: var(--accent);
-  color: var(--accent);
-  position: relative;
-}
-
-.sag-strategy button[disabled] {
-  opacity: 0.45;
-  cursor: default;
-}
-
-.sag-strategy-hint {
-  flex-basis: 100%;
+.sag-note {
+  margin: -0.4rem 0 0.7rem;
   text-align: center;
-  font-variant: normal;
-  letter-spacing: 0;
+  font-size: 0.82em;
   font-style: italic;
+  color: var(--muted);
   min-height: 1.2em;
 }
 

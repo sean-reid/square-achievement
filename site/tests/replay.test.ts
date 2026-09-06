@@ -1,5 +1,5 @@
-/** Exhaustive replay: the TypeScript engine must win every line, making
- * the site a third independent verifier of the strategy tables. */
+/** Exhaustive replay: the TypeScript engine must win every line of the
+ * 5 x 5 table, making the site a third independent verifier of it. */
 
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -8,7 +8,7 @@ import { Position, threats, winningSquare } from "../src/game/rules";
 
 /** True if the bot wins against every reply sequence from pos. */
 function verifyAll(pos: Position): boolean {
-  const move = botMove(pos, "table");
+  const move = botMove(pos);
   const won = winningSquare(pos, new Set([...pos.p1, pos.idx(move)]), move);
   pos.play(move);
   try {
@@ -39,10 +39,6 @@ describe("exhaustive replay", () => {
   it("wins every line at n = 5", () => {
     expect(verifyAll(new Position(5))).toBe(true);
   }, 120_000);
-
-  it("wins every line at n = 6", () => {
-    expect(verifyAll(new Position(6))).toBe(true);
-  }, 240_000);
 
   it("threat computation matches the reflex convention", () => {
     const pos = new Position(6);
