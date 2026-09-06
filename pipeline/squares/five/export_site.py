@@ -1,11 +1,11 @@
-"""Export the strategy tables as the site's five.json and general.json.
+"""Export the 5 x 5 strategy table as the site's five.json.
 
 The interactive page replays the same tables the checker verifies, so
 the export must be bit-exact: cell keys as "r,c", alignment classes as
 "row:r" and "col:c", farm keys as "farm:a,b", the default as "*", and
 quiet forks as {"q": move, "b": branches}.
 
-python3 -m squares.threshold.export_site [dir], default the site's game
+python3 -m squares.five.export_site [dir], default the site's game
 directory. The two tables are separate files so the page loads only
 the one a board size needs.
 """
@@ -16,7 +16,6 @@ import sys
 
 from ..paths import SITE_GAME
 from . import strategy5
-from .tables import build_general
 
 
 def key_str(k):
@@ -53,11 +52,7 @@ def table_json(opening, box, x2, scripts):
 
 
 def main():
-    x2_map, scripts = build_general()
-    out = {
-        "general": table_json((2, 2), 6, x2_map, scripts),
-        "five": table_json((2, 2), 5, strategy5.X2, strategy5.SCRIPTS),
-    }
+    out = {"five": table_json((2, 2), 5, strategy5.X2, strategy5.SCRIPTS)}
     directory = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else SITE_GAME
     for name, table in out.items():
         path = directory / f"{name}.json"

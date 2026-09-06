@@ -1,8 +1,7 @@
 """The far-pair farm geometry and its generation-time constraints."""
 
+from squares.latent import farm_relation
 from squares.solver import Solver, forcing_bits
-from squares.threshold.forcing import farm_relation
-from squares.threshold.tables import _farm_hot_cells
 
 
 def test_refutation_pair_is_the_p3_farm():
@@ -23,17 +22,6 @@ def test_near_pairs_do_not_farm():
     assert farm_relation((0, 15), (12, 4)) is None  # relation off by one
     assert farm_relation((14, 13), (13, 14)) is None  # both generic
     assert farm_relation((0, 15), None) is None
-
-
-def test_hot_cells_by_branch():
-    assert _farm_hot_cells(("row", 2), 6, 14) == [(2, b) for b in range(6)]
-    assert _farm_hot_cells(("col", 4), 6, 14) == [(a, 4) for a in range(6)]
-    assert len(_farm_hot_cells(None, 6, 14)) == 36
-    # exact aligned key at the board edge faces only far-partner cells
-    assert _farm_hot_cells((3, 14), 6, 14) == [(3, 0), (3, 1), (3, 2)]
-    assert _farm_hot_cells((3, 12), 6, 14) == [(3, 0)]
-    # generic exact keys never farm abstractly
-    assert _farm_hot_cells((13, 8), 6, 14) == []
 
 
 def test_hot_pruning_blocks_the_hot_cell():

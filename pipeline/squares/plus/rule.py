@@ -23,7 +23,7 @@ latent corner of the free pair.
 from itertools import permutations
 
 from ..game import P1, P2
-from ..threshold.forcing import farm_relation
+from ..latent import farm_relation
 
 BOX = 6
 BASE = 17

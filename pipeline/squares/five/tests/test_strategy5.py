@@ -1,5 +1,5 @@
 from squares import verify
-from squares.threshold.strategy5 import strategy5
+from squares.five.strategy5 import strategy5
 
 
 def test_strategy5_is_proven_on_n5():
