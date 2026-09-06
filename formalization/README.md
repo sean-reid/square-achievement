@@ -115,12 +115,21 @@ byte-board checker.
 | `trace` | print the first failing line instead of a verdict |
 | `refute` | search for a second-player drawing strategy |
 | `exactfarm` | run the three coordinate-anchored farm-safety certificates |
+| `plus` | run the certified forced-tree checker on the plus rule instead of the table |
+| `plus anchors` | run the plus rule's three anchored far-pair families |
 
 To reproduce the runs reported in the paper's Table 1:
 
 ```sh
 lake exe checker 5 five slow
 for n in $(seq 6 17); do lake exe checker "$n" forced; done
+```
+
+To reproduce the plus rule's runs, Table 1 of the plus paper:
+
+```sh
+for n in $(seq 6 17) 23; do lake exe checker "$n" plus; done
+lake exe checker plus anchors
 ```
 
 ## Layout
