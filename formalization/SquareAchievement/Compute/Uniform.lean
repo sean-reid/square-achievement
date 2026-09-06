@@ -9,7 +9,7 @@ to the threat on the next move. `goForced` verifies exactly that
 shape. The two reply levels are enumerated in full; beyond them each
 node makes two whole-board scans, one to collect the strategy's
 threat cells and one to confirm the opponent can complete nothing,
-and recurses only on the blocks. `goForced_sound` covers every
+and recurses only on the blocks. `goForcedS_sound` covers every
 non-blocking reply with a single two-move argument, so the checker
 never has to visit them.
 
@@ -71,32 +71,5 @@ def goForcedS (σ : Strategy) (box : ℕ) (squares : List (List Cell)) (n : ℕ)
 /-- The strategy wins the `n` board through pure forcing. -/
 def checkForcedS (σ : Strategy) (box n : ℕ) : Bool :=
   goForcedS σ box (squaresList n) n none (n * n + 1) []
-
-/-- The forced-tree checker on the table strategy. -/
-def goForced (t : Table) (squares : List (List Cell)) (n : ℕ) (hot : Option Cell) :
-    ℕ → List Cell → Bool :=
-  goForcedS (strategyMove t) t.box squares n hot
-
-/-- The table wins the `n` board through pure forcing. -/
-def checkForced (t : Table) (n : ℕ) : Bool :=
-  goForced t (squaresList n) n none (n * n + 1) []
-
-mutual
-  /-- Every cell an entry can ever play lies inside the given box. -/
-  def entryConfined (box : ℕ) : Entry → Bool
-    | .plan cells => cells.all (onBoard box)
-    | .quiet move branches => onBoard box move && branchesConfined box branches
-
-  def branchesConfined (box : ℕ) : List (Key × Entry) → Bool
-    | [] => true
-    | (_, e) :: rest => entryConfined box e && branchesConfined box rest
-end
-
-/-- P1's plan never leaves the corner box: the opening, every second
-move, and every cell any entry can play lie inside `board t.box`. -/
-def planConfined (t : Table) : Bool :=
-  onBoard t.box t.opening &&
-  (t.x2.all fun e => onBoard t.box e.2) &&
-  t.scripts.all fun e => e.2.all fun e2 => entryConfined t.box e2.2
 
 end SquareAchievement

@@ -7,8 +7,17 @@ import SquareAchievement.Compute.Checker
 import SquareAchievement.Compute.CheckerSound
 import SquareAchievement.Compute.Refute
 import SquareAchievement.Compute.Uniform
+import SquareAchievement.Compute.WinsWith
 import SquareAchievement.Compute.ForcedSound
 import SquareAchievement.General.Invariance
 import SquareAchievement.General.Coverage
 import SquareAchievement.General.Simulation
 import SquareAchievement.General.Dispatch
+import SquareAchievement.Plus.Rule
+import SquareAchievement.Plus.Threats
+import SquareAchievement.Plus.Agreement
+import SquareAchievement.Plus.Anchors
+import SquareAchievement.Plus.Uniform
+import SquareAchievement.Plus.Results
+import SquareAchievement.Five.Table5
+import SquareAchievement.Results.Outcome

@@ -1,7 +1,7 @@
 import SquareAchievement.General.Dispatch
-import Plus.Anchors
-import Plus.Agreement
-import Plus.Threats
+import SquareAchievement.Plus.Anchors
+import SquareAchievement.Plus.Agreement
+import SquareAchievement.Plus.Threats
 
 /-!
 # The plus rule wins every board from the base up

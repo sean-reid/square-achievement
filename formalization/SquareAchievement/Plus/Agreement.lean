@@ -1,6 +1,6 @@
 import SquareAchievement.General.Dispatch
 import SquareAchievement.General.Coverage
-import Plus.Rule
+import SquareAchievement.Plus.Rule
 
 /-!
 # The rule reads the same move from a real history and its base view

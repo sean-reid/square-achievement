@@ -1,16 +1,11 @@
-"""The Lean data files, the site JSON, and the Python module agree."""
+"""The Lean data file, the site JSON, and the Python module agree."""
 
 import json
 
-from squares.paths import LEAN_DATA, SITE_FIVE_TABLE, SITE_GENERAL_TABLE
+from squares.paths import LEAN_DATA, SITE_FIVE_TABLE
 from squares.threshold import strategy5
 from squares.threshold.crosscheck import read_lean_table
 from squares.threshold.export_site import table_json
-
-
-def test_lean_general_table_matches_site_json():
-    site = json.loads(SITE_GENERAL_TABLE.read_text())
-    assert table_json(*read_lean_table(LEAN_DATA / "TableGen.lean")) == site
 
 
 def test_lean_five_table_matches_site_and_python():
@@ -21,9 +16,8 @@ def test_lean_five_table_matches_site_and_python():
 
 
 def test_read_lean_table_shapes():
-    opening, box, x2, scripts = read_lean_table(LEAN_DATA / "TableGen.lean")
-    assert (opening, box) == ((2, 2), 6)
-    assert x2[(0, 0)] == (3, 2)
-    assert None in scripts and ("row", 0) in scripts
+    opening, box, x2, scripts = read_lean_table(LEAN_DATA / "Table5.lean")
+    assert (opening, box) == ((2, 2), 5)
+    assert len(x2) == 24
     entries = [v for t in scripts.values() for v in t.values()]
     assert all(isinstance(v, tuple) or v[0] == "q" for v in entries)

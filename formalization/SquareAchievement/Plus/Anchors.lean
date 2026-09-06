@@ -1,5 +1,5 @@
 import SquareAchievement.Compute.ForcedSound
-import Plus.Rule
+import SquareAchievement.Plus.Rule
 
 /-!
 # The rule's certificates for every larger board

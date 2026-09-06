@@ -1,5 +1,5 @@
 import SquareAchievement.General.Simulation
-import Plus.Rule
+import SquareAchievement.Plus.Rule
 
 /-!
 # The pair-based threat scan is the square scan

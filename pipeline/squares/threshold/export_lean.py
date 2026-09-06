@@ -1,9 +1,8 @@
-"""Export strategy tables as Lean data files.
+"""Export the 5 x 5 strategy table as a Lean data file.
 
-python3 -m squares.threshold.export_lean [data-dir] writes Data/TableGen.lean
-(the general table, regenerated) and Data/Table5.lean (the n=5 table
-with quiet forks) into the Lean project's Data directory, by default
-the formalization next to this pipeline in the repository.
+python3 -m squares.threshold.export_lean [data-dir] writes Table5.lean (the
+n=5 table with quiet forks) into the Lean library's Five directory, by
+default the formalization next to this pipeline in the repository.
 """
 
 import pathlib
@@ -81,11 +80,8 @@ def as_entries(scripts):
 
 def main():
     from . import strategy5
-    from .tables import build_general
 
     out_dir = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else LEAN_DATA
-    x2_map, scripts = build_general()
-    emit("TableGen.lean", "gen", (2, 2), 6, x2_map, as_entries(scripts), out_dir)
     emit("Table5.lean", "five", (2, 2), 5, strategy5.X2, as_entries(strategy5.SCRIPTS), out_dir)
 
 
