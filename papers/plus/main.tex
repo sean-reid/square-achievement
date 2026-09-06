@@ -162,134 +162,292 @@ does on each board.
 \section{Definitions}\label{sec:defs}
 
 Cells are pairs $(r,c)$ of non-negative integers, row then column,
-and $\Board_n = \{0,\dots,n-1\}^2$. The square anchored at $(r,c)$
-with side $s \ge 1$ is
+with row $0$ at the top and column $0$ at the left in the figures, and
+$\Board_n = \{0,\dots,n-1\}^2$. The square anchored at $(r,c)$ with
+side $s \ge 1$ is
 $\Sq(r,c,s) = \{(r,c), (r,c+s), (r+s,c), (r+s,c+s)\}$; a set of cells
-contains a square if it contains some $\Sq(r,c,s)$. The first player
-\emph{threatens} at a cell $z$ if $z$ is empty and $z$ together with
-three of the first player's stones is a square; $z$ is a threat cell,
-and the opponent \emph{blocks} it by playing there. We write
-$\Board_6$ for the corner region in which the rule plays and
+contains a square if it contains some $\Sq(r,c,s)$. We call the first
+player \emph{we} and the second player \emph{the opponent}. We
+\emph{threaten} at a cell $z$ if $z$ is empty and $z$ together with
+three of our stones is a square; the opponent \emph{blocks} the threat
+by playing $z$. A move that makes exactly one threat is \emph{forcing}:
+the opponent must block or lose on the next move. A move that makes two
+threats at different cells wins, since one block leaves the other. We
+write $\Board_6$ for the corner region in which the rule plays and
 $\Board_{17}$ for the base board whose stones it reads verbatim.
+Table~\ref{tab:terms} collects the terms defined in this section.
+
+\subsection{Pluses}
 
 \begin{definition}[plus]\label{def:plus}
-The \emph{plus} of side $s$ at the centre $c = (r,k)$ consists of the
-four arms $(r-s,k)$, $(r+s,k)$, $(r,k-s)$, $(r,k+s)$. The plus lies
-in the region if all four arms do, that is, $s \le r, k$ and
-$r+s, k+s \le 5$. Two arms are \emph{perpendicular} if one is
-vertical and the other horizontal; the \emph{diagonal} between two
-perpendicular arms is the cell sharing its row with one and its
-column with the other.
+The \emph{plus} of side $s$ at the \emph{centre} $c = (r,k)$ has four
+\emph{arms}, the cells $(r-s,k)$, $(r+s,k)$, $(r,k-s)$, $(r,k+s)$, and
+four \emph{diagonals}, the cells $(r \pm s, k \pm s)$. Two arms are
+\emph{perpendicular} if one is above or below the centre and the other
+to its left or right; the diagonal between two perpendicular arms is
+the cell in the row of one and the column of the other. A plus lies
+in the region if its arms and diagonals do, that is, $s \le r, k$ and
+$r+s, k+s \le 5$.
 \end{definition}
-
-There are $16$ pluses of side $1$ in the region, with centres in
-$\{1,\dots,4\}^2$, and four of side $2$, with centres in
-$\{2,3\}^2$. The centre, two perpendicular arms, and their diagonal
-are the four corners of a square of side $s$.
-
-\begin{lemma}[arms force]\label{lem:arms}
-Suppose the first player holds the centre $c$ and the arm $a$ of a
-plus of side $s$, and the opponent holds none of the arms and none of
-the diagonals. Let $b$ be an arm perpendicular to $a$ and $d$ the
-diagonal between them. Playing $b$ makes $\{c, a, b\}$ three corners
-of the square with fourth corner $d$. If the first player also holds
-the arm $a'$ opposite to $a$, playing $b$ makes three corners of two
-squares, with fourth corners the diagonals between $a$ and $b$ and
-between $a'$ and $b$, which are distinct.
-\end{lemma}
-
-\begin{proof}
-Say $a = (r-s,k)$ and $b = (r,k-s)$. Then $c, a, b$ and
-$d = (r-s,k-s)$ are the corners of $\Sq(r-s,k-s,s)$. With
-$a' = (r+s,k)$ the second square is $\Sq(r,k-s,s)$ with fourth corner
-$(r+s,k-s)$, which differs from $d$ in its row. The other placements
-are the same up to symmetry.
-\end{proof}
-
-So a plus whose centre and one arm are already held wins in three
-moves against an opponent who has no threat of their own: the two
-arms perpendicular to the held arm each force a block on a diagonal,
-and the opposite arm then threatens two cells. Blocks land on
-diagonals, never on arms, so they do not interfere with the plus. The
-opening pair $(2,2)$, $(3,2)$ is the centre and an arm of the side-$1$
-plus at $(2,2)$ and also of the side-$1$ plus at $(3,2)$, which is
-why the rule can often win without any preparation.
 
 \begin{figure}[ht]
 \centering
 \begin{tikzpicture}[scale=0.55]
   \draw[gray!60] (0,0) grid (6,-6);
-  \foreach \r/\c in {2/2, 3/2, 2/1, 1/2, 2/3}
-    \fill[black] (\c+0.5,-\r-0.5) circle (0.26);
-  \foreach \r/\c in {0/0, 4/4, 3/1, 1/1}
-    \draw[thick] (\c+0.5,-\r-0.5) circle (0.26);
-  \draw[thick,dashed] (3.5,-1.5) circle (0.28);
-  \draw[thick,dashed] (3.5,-3.5) circle (0.28);
+  \node at (2.5,-2.5) {$c$};
+  \foreach \r/\c in {1/2, 3/2, 2/1, 2/3} \node at (\c+0.5,-\r-0.5) {$a$};
+  \foreach \r/\c in {1/1, 1/3, 3/1, 3/3} \node at (\c+0.5,-\r-0.5) {$d$};
+  \draw[thick,dashed] (1.08,-1.08) rectangle (2.92,-2.92);
 \end{tikzpicture}
-\caption{The side-$1$ plus at $(2,2)$ after the opening $(2,2)$,
-the reply $(0,0)$, the second move $(3,2)$, and the reply $(4,4)$. The
-first player (black) played the arms $(2,1)$ and $(1,2)$, each blocked
-on its diagonal, and then $(2,3)$, which threatens at both dashed
-cells. The game ends on the ninth ply.}
-\label{fig:plus}
+\hspace{2em}
+\begin{tikzpicture}[scale=0.55]
+  \draw[gray!60] (0,0) grid (6,-6);
+  \node at (2.5,-3.5) {$c$};
+  \foreach \r/\c in {1/2, 5/2, 3/0, 3/4} \node at (\c+0.5,-\r-0.5) {$a$};
+  \foreach \r/\c in {1/0, 1/4, 5/0, 5/4} \node at (\c+0.5,-\r-0.5) {$d$};
+  \draw[thick,dashed] (0.08,-1.08) rectangle (2.92,-3.92);
+\end{tikzpicture}
+\caption{Left: the plus of side $1$ at $c = (2,2)$, with its arms $a$
+and diagonals $d$. Right: the plus of side $2$ at $c = (3,2)$. In each
+picture the dashed outline encloses one of the four squares of the
+plus: its corners are the centre, two perpendicular arms, and the
+diagonal between them. There is one such square per diagonal.}
+\label{fig:anatomy}
 \end{figure}
 
-\begin{definition}[tempo move, line]\label{def:line}
-In a position where the opponent has no threat, a \emph{tempo move}
-is a cell in $\Board_6$ that makes exactly one threat, such that the
-block of that threat gives the opponent no threat and is not the
-latent corner of Definition~\ref{def:latent}. A \emph{line} from a
-position is a sequence of tempo moves, each answered by its block,
-followed by the arms of a plus in the region not yet held, in an
-order in which every arm before the last makes exactly one threat
-whose block is not the latent corner, the last arm makes at least
-two, and the opponent has no threat after any move of the sequence.
-The \emph{key} of a line is the triple (number of tempo moves,
-number of arms still to play, side of the plus); the rule prefers
-lines with a smaller key in lexicographic order, then a smaller
-centre in cell order, then the earlier line in the order the search
-generates them.
+There are $16$ pluses of side $1$ in the region, with centres in
+$\{1,\dots,4\}^2$, and four of side $2$, with centres in
+$\{2,3\}^2$. Pluses of side $3$ do not fit. The point of the shape is
+the following lemma.
+
+\begin{lemma}[arms force]\label{lem:arms}
+Suppose we hold the centre $c$ and one arm $a$ of a plus of side $s$,
+and the opponent holds none of its arms and none of its diagonals.
+Playing an arm $b$ perpendicular to $a$ threatens at the diagonal
+between $a$ and $b$. If we hold both $a$ and the arm $a'$ opposite to
+$a$, playing $b$ threatens at two cells, the diagonals between $a$ and
+$b$ and between $a'$ and $b$.
+\end{lemma}
+
+\begin{proof}
+Say $a = (r-s,k)$ and $b = (r,k-s)$. Then $c$, $a$, $b$ and
+$d = (r-s,k-s)$ are the four corners of $\Sq(r-s,k-s,s)$, so with
+$c, a, b$ held and $d$ empty we threaten at $d$. With
+$a' = (r+s,k)$ also held, $c$, $a'$, $b$ and $(r+s,k-s)$ are the
+corners of $\Sq(r,k-s,s)$, and $(r+s,k-s) \ne d$. The other placements
+are the same up to symmetry.
+\end{proof}
+
+So from a centre and one arm, three moves win against an opponent who
+has no threat of their own: the two arms perpendicular to the held arm
+each force a block on a diagonal, and the opposite arm then threatens
+at two diagonals at once. Blocks land on diagonals, never on arms, so
+they do not get in the way. Figure~\ref{fig:basic} plays this out. The
+opening $(2,2)$ and the second move $(3,2)$ are the centre and an arm
+of the side-$1$ plus at $(2,2)$, and also an arm and the centre of the
+side-$1$ plus at $(3,2)$; this is why the rule usually needs no
+preparation at all.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=0.5]
+  \draw[gray!60] (0,0) grid (6,-6);
+  \foreach \r/\c in {2/2, 3/2, 2/1} \fill[black] (\c+0.5,-\r-0.5) circle (0.26);
+  \foreach \r/\c in {0/0, 4/4} \draw[thick] (\c+0.5,-\r-0.5) circle (0.26);
+  \draw[thick,dashed] (1.5,-3.5) circle (0.28);
+  \node at (3,-6.6) {\small after $(2,1)$};
+\end{tikzpicture}
+\hspace{1em}
+\begin{tikzpicture}[scale=0.5]
+  \draw[gray!60] (0,0) grid (6,-6);
+  \foreach \r/\c in {2/2, 3/2, 2/1, 1/2} \fill[black] (\c+0.5,-\r-0.5) circle (0.26);
+  \foreach \r/\c in {0/0, 4/4, 3/1} \draw[thick] (\c+0.5,-\r-0.5) circle (0.26);
+  \draw[thick,dashed] (1.5,-1.5) circle (0.28);
+  \node at (3,-6.6) {\small after $(3,1)$, $(1,2)$};
+\end{tikzpicture}
+\hspace{1em}
+\begin{tikzpicture}[scale=0.5]
+  \draw[gray!60] (0,0) grid (6,-6);
+  \foreach \r/\c in {2/2, 3/2, 2/1, 1/2, 2/3} \fill[black] (\c+0.5,-\r-0.5) circle (0.26);
+  \foreach \r/\c in {0/0, 4/4, 3/1, 1/1} \draw[thick] (\c+0.5,-\r-0.5) circle (0.26);
+  \draw[thick,dashed] (3.5,-1.5) circle (0.28);
+  \draw[thick,dashed] (3.5,-3.5) circle (0.28);
+  \node at (3,-6.6) {\small after $(1,1)$, $(2,3)$};
+\end{tikzpicture}
+\caption{The basic line, against the replies $(0,0)$ and $(4,4)$. We
+(black) hold the centre $(2,2)$ and the arm $(3,2)$. Left: the arm
+$(2,1)$ threatens at the diagonal $(3,1)$, dashed. Middle: the opponent
+(white) blocked there; the arm $(1,2)$ threatens at $(1,1)$. Right: the
+opponent blocked again; the last arm $(2,3)$ threatens at $(1,3)$ and
+$(3,3)$, and no single block answers both. We win on the ninth ply.}
+\label{fig:basic}
+\end{figure}
+
+\subsection{Tempo moves and lines}
+
+When a plus cannot be completed directly, because the opponent holds
+an arm or a diagonal, or because our arms would not force, the rule
+first plays a few moves that each force a block and thereby add a
+stone of ours to the board.
+
+\begin{definition}[tempo move]\label{def:tempo}
+In a position where the opponent has no threat, a \emph{tempo move} is
+a cell in $\Board_6$ that makes exactly one threat, such that after
+the opponent blocks it the opponent still has no threat, and the block
+is not the latent corner of Definition~\ref{def:latent}.
 \end{definition}
 
-The rule looks for a line with at most three tempo moves. Whether a
-line exists, and which is preferred, depends only on the abstract
-position defined next.
+A tempo move and its block add one stone to each side and return the
+move to us. The opponent's new stone is where we forced it; ours is
+where we chose. Figure~\ref{fig:tempo} shows two tempo moves preparing
+a plus of side $2$.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=0.5]
+  \draw[gray!60] (0,0) grid (6,-6);
+  \foreach \r/\c in {2/2, 3/2, 3/3} \fill[black] (\c+0.5,-\r-0.5) circle (0.26);
+  \foreach \r/\c in {0/0, 3/1} \draw[thick] (\c+0.5,-\r-0.5) circle (0.26);
+  \draw[thick,dashed] (3.5,-2.5) circle (0.28);
+  \node at (3,-6.6) {\small tempo move $(3,3)$};
+\end{tikzpicture}
+\hspace{1em}
+\begin{tikzpicture}[scale=0.5]
+  \draw[gray!60] (0,0) grid (6,-6);
+  \foreach \r/\c in {2/2, 3/2, 3/3, 4/3} \fill[black] (\c+0.5,-\r-0.5) circle (0.26);
+  \foreach \r/\c in {0/0, 3/1, 2/3} \draw[thick] (\c+0.5,-\r-0.5) circle (0.26);
+  \draw[thick,dashed] (2.5,-4.5) circle (0.28);
+  \node at (3,-6.6) {\small tempo move $(4,3)$};
+\end{tikzpicture}
+\hspace{1em}
+\begin{tikzpicture}[scale=0.5]
+  \draw[gray!60] (0,0) grid (6,-6);
+  \foreach \r/\c in {2/2, 3/2, 3/3, 4/3, 3/4} \fill[black] (\c+0.5,-\r-0.5) circle (0.26);
+  \foreach \r/\c in {0/0, 3/1, 2/3, 4/2} \draw[thick] (\c+0.5,-\r-0.5) circle (0.26);
+  \draw[thick,dashed] (4.5,-4.5) circle (0.28);
+  \node at (3,-6.6) {\small first arm $(3,4)$};
+\end{tikzpicture}
+\caption{Against the replies $(0,0)$ and $(3,1)$ the side-$1$ pluses
+are spoiled: $(3,1)$ is a diagonal of both. Left: the tempo move
+$(3,3)$ threatens at $(2,3)$ through $\Sq(2,2,1)$. Middle: after the
+block, $(4,3)$ threatens at $(4,2)$ through $\Sq(3,2,1)$. Right: after
+that block, the stones $(3,3)$ and $(4,3)$ let the first arm $(3,4)$
+of the side-$2$ plus at $(3,2)$ force, through the small square
+$\Sq(3,3,1)$ with fourth corner $(4,4)$. From here the plus wins as
+in Lemma~\ref{lem:arms}; Figure~\ref{fig:tempoend} shows the end.}
+\label{fig:tempo}
+\end{figure}
+
+\begin{definition}[line, key]\label{def:line}
+A \emph{line} from a position consists of some tempo moves, each
+followed by its block, and then the arms of one plus in the region
+that we do not yet hold, in some order, such that: each arm before the
+last makes exactly one threat, whose block is not the latent corner;
+the last arm played makes at least two threats; and at no point does
+the opponent have a threat. The \emph{key} of a line is the triple
+\[
+  (\text{number of tempo moves},\ \text{number of arms to play},\
+  \text{side of the plus}).
+\]
+The rule prefers the line with the smallest key in lexicographic
+order; among lines with the same key it prefers the smaller centre in
+cell order, and among those the one its search generates first.
+\end{definition}
+
+The number of arms to play is three when we hold the centre and one
+arm, as in the basic line, and fewer if earlier moves have put us on
+more arms. The rule searches for lines with at most three tempo moves.
+Whether a line exists, and which one is preferred, depends only on the
+abstract position defined next.
+
+\subsection{Far stones and the latent corner}
 
 \begin{definition}[latent corner, abstraction]\label{def:latent}
 Two cells $x, y$ have a \emph{latent square} with corner $b$ if
-$b \in \Board_6$ and $\{b, x, y\}$ are three corners of a square not
-contained in $\Board_{17}$; $b$ is their latent corner. By
-the dichotomy lemma of \cite[Section~6]{reid-threshold} a pair has
-at most one latent corner, and a pair with one has both members outside $\Board_{12}$
-in the sense that each has a coordinate at least $12$. The
-\emph{abstraction} of a history in which the first player has moved
-at least twice consists of the first player's stones, the opponent's
-stones inside $\Board_{17}$, and the latent corner of the opponent's
-first two stones, if any.
+$b \in \Board_6$, the three cells $b, x, y$ are corners of one square,
+and that square is not contained in $\Board_{17}$; $b$ is the
+\emph{latent corner} of the pair. The \emph{abstraction} of a position
+in which we have moved at least twice consists of our stones, the
+opponent's stones inside $\Board_{17}$, and the latent corner of the
+opponent's first two stones, if they have one.
 \end{definition}
 
-The lemma behind the abstraction is a containment: two stones in
-$\Board_6$ lie in a common square only if that square lies in
-$\Board_{12}$ \cite[Section~6]{reid-threshold}. In a position the rule
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=0.32]
+  \fill[gray!25] (0,0) rectangle (6,-6);
+  \draw[gray!60] (0,0) grid (17,-17);
+  \draw[thick,dashed] (3.5,-0.5) rectangle (16.5,-13.5);
+  \foreach \r/\c in {0/16, 13/3}
+    \draw[thick] (\c+0.5,-\r-0.5) circle (0.3);
+  \draw[thick,dashed] (3.5,-0.5) circle (0.38);
+  \draw[thick,dashed] (16.5,-13.5) circle (0.38);
+  \node[above=1pt] at (3.5,-0.1) {$b$};
+  \node[above=1pt] at (16.5,-0.1) {$o_1$};
+  \node[left=2pt] at (3.1,-13.5) {$o_2$};
+  \node[right=2pt] at (17.0,-13.5) {$z$};
+\end{tikzpicture}
+\caption{A latent square, drawn on $\Board_{17}$. The opponent's free
+replies $o_1 = (0,16)$ and $o_2 = (13,3)$ are two corners of the dashed
+square, whose third corner $b = (0,3)$ lies in the region (shaded)
+and whose fourth corner $z = (13,16)$ lies just outside $\Board_{17}$.
+The rule never threatens at $b$: if the opponent had to block there
+they would threaten at $z$.}
+\label{fig:latent}
+\end{figure}
+
+Two facts from \cite[Section~6]{reid-threshold} explain the
+abstraction. First, two stones in $\Board_6$ lie in a common square
+only if that square lies in $\Board_{12}$. In a position the rule
 reaches, the opponent's stones are the two free replies and forced
-blocks, and the blocks lie in $\Board_6$. An opponent stone beyond
-$\Board_{17}$ therefore shares no square with two blocks, and a square
-through it and one block must have both replies as its other corners:
-a latent square. So the far stones matter only through the latent
-corner, and a rule that reads the abstraction reads everything that
-can affect the play. The rule never threatens at the latent corner,
-because the block there would give the opponent three corners of the
-latent square and a threat the first player would have to answer.
+blocks, and the blocks lie in $\Board_6$. So a stone beyond
+$\Board_{17}$ shares no square with two blocks, and a square through
+such a stone and one block has both free replies as its other corners:
+it is a latent square. Second, a pair of cells has at most one latent
+corner, and only pairs whose members both have a coordinate at least
+$12$ have one. Hence the stones the rule cannot see, the opponent's
+stones beyond $\Board_{17}$, can affect the game only through the
+latent corner, and the rule records exactly that cell. The clause of
+Definition~\ref{def:tempo} that keeps blocks off the latent corner is
+what prevents a far pair from ever coming into play: if the opponent
+were forced to block on $b$ in Figure~\ref{fig:latent}, they would
+hold three corners of the latent square and threaten at $z$, and we
+would have to answer instead of continuing our line.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lp{0.68\textwidth}}
+\toprule
+term & meaning \\
+\midrule
+threat & an empty cell that completes one of our squares \\
+block & the opponent's move on a threat cell \\
+forcing move & a move that makes exactly one threat \\
+plus & a centre with four arms at distance $s$ along the axes \\
+arm, diagonal & a cell of the plus on an axis; a cell of the plus off the axes \\
+tempo move & a forcing move in $\Board_6$ whose block leaves the opponent without a threat and misses the latent corner \\
+line & tempo moves, then the arms of one plus, the last arm making two threats \\
+key & (tempo moves, arms to play, side); smaller is preferred \\
+latent corner & the region cell completing three corners of a square with the two free replies, when the square leaves $\Board_{17}$ \\
+abstraction & our stones, the opponent's stones in $\Board_{17}$, the latent corner \\
+\bottomrule
+\end{tabular}
+\medskip
+\caption{The terms of the rule.}
+\label{tab:terms}
+\end{table}
 
 \section{The rule}\label{sec:rule}
 
-Algorithm~\ref{alg:rule} states the rule as it is defined in the
-formal development. The second move against a first reply $o_1$ is
-$(3,2)$, unless $o_1$ is one of seven cells, for which
-Figure~\ref{fig:second} gives the move.
+Algorithms~\ref{alg:move} and~\ref{alg:line} state the rule as it is
+defined in the formal development. The first is the move function; the
+second is the search it calls once, after the second reply, to choose
+the line. The second move against a first reply $o_1$ is $(3,2)$
+unless $o_1$ is one of seven cells, for which Figure~\ref{fig:second}
+gives the move.
 
 \begin{algorithm}[ht]
-\caption{The plus rule.}\label{alg:rule}
+\caption{The move function.}\label{alg:move}
 \begin{algorithmic}[1]
 \If{some cell completes one of our squares}
   \State play the least such cell
@@ -297,15 +455,43 @@ Figure~\ref{fig:second} gives the move.
   \State play the least such cell
 \ElsIf{we have not yet moved}
   \State play $(2,2)$
-\ElsIf{we do not hold the second move for $o_1$}
+\ElsIf{we do not yet hold the second move for the first reply $o_1$}
   \State play it
 \Else
-  \State take the abstraction of the position after the second reply
-  \State find the preferred line with at most three tempo moves
-  \State play the first cell of it we do not hold
+  \State let $L$ be the line of Algorithm~\ref{alg:line} for the
+    abstraction of the position after the second reply
+  \State play the first cell of $L$ that we do not hold
 \EndIf
 \end{algorithmic}
 \end{algorithm}
+
+\begin{algorithm}[ht]
+\caption{The line search, from an abstract position $A$.}\label{alg:line}
+\begin{algorithmic}[1]
+\State $F \gets \{(A, \text{empty prefix})\}$
+\For{$d = 0, 1, 2, 3$}
+  \ForAll{$(B, p) \in F$ in order, if the opponent has no threat in $B$}
+    \ForAll{pluses in the region whose centre we hold in $B$, side $1$ then $2$}
+      \State the arms to play are those we do not hold; skip the plus if the opponent holds one
+      \State try the orders of these arms; keep the first that wins by force (Definition~\ref{def:line})
+    \EndFor
+    \State record the best plus found from $B$, by (arms to play, side, centre), behind $p$
+  \EndFor
+  \If{some plus was recorded} \Return the recorded line with the smallest key \EndIf
+  \State $F \gets \{(B', p\,m) : (B, p) \in F,\ m \text{ a tempo move in } B,\ B' = B \text{ after } m \text{ and its block}\}$
+\EndFor
+\State \Return no line
+\end{algorithmic}
+\end{algorithm}
+
+The loop over $d$ is what makes fewer tempo moves come first: all
+lines with $d$ tempo moves are examined before any with $d+1$. Within
+one value of $d$ the key compares the arms to play, then the side,
+then the centre. The order in which tempo moves and arm orders are
+tried is fixed, cell order for tempo moves and a fixed enumeration of
+permutations for arms, so that two implementations of the rule choose
+the same line; the Lean definition and the Python twin are compared on
+this.
 
 \begin{figure}[ht]
 \centering
@@ -330,31 +516,58 @@ second move fails. The choice of $(3,2)$ and the order in which
 alternatives are tried, $(3,2)$, $(2,3)$, $(2,1)$, $(1,2)$, came from
 search: for each first reply on $\Board_6$ the second move is the
 first cell in that order against which the rest of the rule beats
-every second reply. All seven exceptions lie within one king's move of the opening or of
-$(3,2)$, and one of them is $(3,2)$ itself; the farthest, $(4,3)$, is
-a diagonal of the side-$1$ plus at $(3,2)$, the cell on which the
-default line would need the opponent to block.
+every second reply. All seven exceptions lie within one king's move of
+the opening or of $(3,2)$, and one of them is $(3,2)$ itself; the
+farthest, $(4,3)$, is a diagonal of the side-$1$ plus at $(3,2)$, the
+cell on which the default line would need the opponent to block.
 
-The line is chosen once, after the second reply, and followed. The
-opponent's blocks are forced, so in the tree the checker verifies
-every later position on a branch is determined by the line, and the
-first player's stones at any point are the opening pair and a prefix
-of the line. A rule that recomputed the line at every move would also
-be a rule of this kind; we fixed the committed version because it
-makes the verified tree a function of the reply pair, which is what
-the argument of Section~\ref{sec:uniform} needs.
+\subsection{Two games}
 
-Figure~\ref{fig:tempo} shows the longest line the rule ever plays. It
-begins with two tempo moves. The first, $(3,3)$, threatens the block
-of the $2 \times 2$ block $\Sq(2,2,1)$ at $(2,3)$; the second,
-$(4,3)$, threatens at $(4,2)$ through $\Sq(3,2,1)$. The stones
-$(3,3)$ and $(4,3)$ then let the first arm of the side-$2$ plus at
-$(3,2)$ force: $(3,4)$ threatens at $(4,4)$ through $\Sq(3,3,1)$,
-a square of side $1$ that has nothing to do with the plus. The arms
-$(1,2)$ and $(5,2)$ follow, each forced through a square of side $2$
-with the centre and the arm $(3,4)$, and the last arm $(3,0)$
-threatens at $(1,0)$ and $(5,0)$. The win comes on the seventeenth
-ply. On every board the rule never plays a longer game.
+Table~\ref{tab:games} lists two complete games against an opponent
+who always blocks, the shortest kind of line and the longest. In the
+first the replies $(0,0)$ and $(4,4)$ are far from the opening pair
+and the basic line of Figure~\ref{fig:basic} wins at once: no tempo
+moves, three arms, side $1$, key $(0,3,1)$. In the second the reply
+$(3,1)$ sits on a diagonal of both side-$1$ pluses, and the rule
+finds nothing with fewer than two tempo moves; its line has key
+$(2,4,2)$, the side-$2$ plus at $(3,2)$ with all four arms to play,
+prepared by the two tempo moves of Figure~\ref{fig:tempo}. This is the
+longest game the rule ever plays: the win comes on the seventeenth
+ply, on every board.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{rllp{0.5\textwidth}}
+\toprule
+ply & we & opponent & what the move does \\
+\midrule
+1, 2 & $(2,2)$ & $(0,0)$ & opening; free reply \\
+3, 4 & $(3,2)$ & $(4,4)$ & second move; free reply \\
+5, 6 & $(2,1)$ & $(3,1)$ & arm; threat at $(3,1)$ through $\Sq(2,1,1)$, blocked \\
+7, 8 & $(1,2)$ & $(1,1)$ & arm; threat at $(1,1)$ through $\Sq(1,1,1)$, blocked \\
+9 & $(2,3)$ & & arm; threats at $(1,3)$ and $(3,3)$; wins \\
+\midrule
+1, 2 & $(2,2)$ & $(0,0)$ & opening; free reply \\
+3, 4 & $(3,2)$ & $(3,1)$ & second move; free reply on a diagonal \\
+5, 6 & $(3,3)$ & $(2,3)$ & tempo move; threat at $(2,3)$ through $\Sq(2,2,1)$ \\
+7, 8 & $(4,3)$ & $(4,2)$ & tempo move; threat at $(4,2)$ through $\Sq(3,2,1)$ \\
+9, 10 & $(3,4)$ & $(4,4)$ & arm; threat at $(4,4)$ through $\Sq(3,3,1)$ \\
+11, 12 & $(1,2)$ & $(1,4)$ & arm; threat at $(1,4)$ through $\Sq(1,2,2)$ \\
+13, 14 & $(5,2)$ & $(5,4)$ & arm; threat at $(5,4)$ through $\Sq(3,2,2)$ \\
+15, 16 & $(3,0)$ & $(1,0)$ & arm; threats at $(1,0)$ and $(5,0)$; one is blocked \\
+17 & $(5,0)$ & & completes $\Sq(3,0,2)$; wins \\
+\bottomrule
+\end{tabular}
+\medskip
+\caption{Two games against an opponent who always blocks. Above, the
+basic line; below, the longest line. In the second game the arms of
+the side-$2$ plus at $(3,2)$ are $(1,2)$, $(5,2)$, $(3,0)$, $(3,4)$;
+the first of them is forced through a small square with the tempo
+stones, the next two through side-$2$ squares with the centre and the
+arm $(3,4)$, and the last threatens at two diagonals.}
+\label{tab:games}
+\end{table}
 
 \begin{figure}[ht]
 \centering
@@ -367,19 +580,28 @@ ply. On every board the rule never plays a longer game.
   \draw[thick,dashed] (0.5,-1.5) circle (0.28);
   \draw[thick,dashed] (0.5,-5.5) circle (0.28);
 \end{tikzpicture}
-\caption{The end of the longest line, against the replies $(0,0)$
-and $(3,1)$. Two tempo moves, $(3,3)$ and $(4,3)$, prepared the
-side-$2$ plus at $(3,2)$; its arms $(3,4)$, $(1,2)$, $(5,2)$ were
-each blocked, and $(3,0)$ threatens at both dashed cells.}
-\label{fig:tempo}
+\caption{The position after the fifteenth ply of the second game in
+Table~\ref{tab:games}. The side-$2$ plus at $(3,2)$ is complete except
+for the opponent's blocks on its diagonals $(1,4)$ and $(5,4)$; the
+last arm $(3,0)$ threatens at the other two diagonals, dashed.}
+\label{fig:tempoend}
 \end{figure}
 
-The rule is reasonably fast to evaluate. The Lean definition, run
-compiled, finds the line from an abstract position in about
-$80$ microseconds, and the Python twin in a quarter of a millisecond; the
-search is over at most three levels of tempo moves, each level
-consisting of at most $36$ candidates, and at most $20$ pluses with
-at most $24$ arm orders each.
+The line is chosen once, after the second reply, and followed. The
+opponent's blocks are forced, so in the tree the checker verifies
+every later position on a branch is determined by the line, and our
+stones at any point are the opening pair and a prefix of the line. A
+rule that recomputed the line at every move would also be a rule of
+this kind; we fixed the committed version because it makes the
+verified tree a function of the reply pair, which is what the argument
+of Section~\ref{sec:uniform} needs.
+
+The rule is quick to evaluate. The Lean definition, run compiled,
+finds the line from an abstract position in about $80$ microseconds,
+and the Python twin in a quarter of a millisecond. The search examines
+at most three levels of tempo moves, each with at most $36$
+candidates, and at each position at most $20$ pluses with at most
+$24$ arm orders each.
 
 \section{How the rule was found}\label{sec:how}
 
