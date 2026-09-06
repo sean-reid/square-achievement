@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.4](https://github.com/sean-reid/square-achievement/compare/v0.1.3...v0.1.4) (2026-09-06)
+
+
+### Features
+
+* **lean:** the plus rule wins every board from six up ([#86](https://github.com/sean-reid/square-achievement/issues/86)) ([350716d](https://github.com/sean-reid/square-achievement/commit/350716d38c79d9c02f10a73ea83e1e8fed8b8805))
+* **lean:** the plus rule, a table-free strategy certified to the base board ([#83](https://github.com/sean-reid/square-achievement/issues/83)) ([4d1a1d5](https://github.com/sean-reid/square-achievement/commit/4d1a1d5893a6f590520554352844b09aeccf6b89))
+* **lean:** the plus rule's own play wins, WinsWith plusMove n [] ([#87](https://github.com/sean-reid/square-achievement/issues/87)) ([7ccbcfc](https://github.com/sean-reid/square-achievement/commit/7ccbcfc626c9525051d5dc634c130a5c632b7165))
+* **paper:** a short winning rule for the square achievement game ([#88](https://github.com/sean-reid/square-achievement/issues/88)) ([5fe28ee](https://github.com/sean-reid/square-achievement/commit/5fe28ee62891b4185486fe86df463accea4bcf31))
+* **pipeline:** the plus rule as a subpackage ([#85](https://github.com/sean-reid/square-achievement/issues/85)) ([5616762](https://github.com/sean-reid/square-achievement/commit/5616762d12f0e2b9b59183166ffb11e2b3d0f943))
+* **site:** the plus rule as a selectable bot with move reasons and its line ([#91](https://github.com/sean-reid/square-achievement/issues/91)) ([6d0720f](https://github.com/sean-reid/square-achievement/commit/6d0720f5b211c37397057b006a5158c8b1a2329c))
+* **site:** the plus rule's pages, a better picker, and a leaner explainer ([#92](https://github.com/sean-reid/square-achievement/issues/92)) ([84089d8](https://github.com/sean-reid/square-achievement/commit/84089d8985dc9c20762f25aff78eecef45296e85))
+
 ## [0.1.3](https://github.com/sean-reid/square-achievement/compare/v0.1.2...v0.1.3) (2026-09-05)
 
 
