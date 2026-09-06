@@ -1,6 +1,6 @@
 """Sweep every opening on a board with the plus rule under forcing
 semantics, and replay the anchored far-pair positions of the uniform
-argument with the latent corner as a guard.
+argument with the hidden corner as a guard.
 
 python3 -m squares.plus.sweep [n]   sweeps the n board, default 15.
 """

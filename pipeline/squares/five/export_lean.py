@@ -1,7 +1,7 @@
 """Export the 5 x 5 strategy table as a Lean data file.
 
 python3 -m squares.five.export_lean [data-dir] writes Table5.lean (the
-n=5 table with quiet forks) into the Lean library's Five directory, by
+n=5 table with branch points) into the Lean library's Five directory, by
 default the formalization next to this pipeline in the repository.
 """
 

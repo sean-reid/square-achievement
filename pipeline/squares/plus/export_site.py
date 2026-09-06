@@ -1,7 +1,7 @@
 """Export the plus rule's lines as a fixture for the site's TypeScript rule.
 
 The fixture lists, for every reply pair on the 6 board and for a set of
-far pairs on larger boards, the second move, the latent corner, the
+far pairs on larger boards, the second move, the hidden corner, the
 line as the rule commits to it, and how many of its moves are tempo
 moves. The site's unit tests replay their own implementation of the
 rule against it, so the three implementations, Lean, Python, and
@@ -34,7 +34,7 @@ FAR_PAIRS = [
 
 
 def entry(n, o1, o2, hot=None):
-    """One fixture entry: the pair, the second move, the latent corner,
+    """One fixture entry: the pair, the second move, the hidden corner,
     and the line with its tempo count."""
     x2 = second_move(o1)
     a = abstract_of([OPENING, x2], [o1, o2], o1, o2)

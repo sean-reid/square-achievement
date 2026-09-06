@@ -446,7 +446,7 @@ export class SagBoard extends HTMLElement {
   }
 
   /** Mark the line's cells on the board: pending tempo moves and arms,
-   * the plus's centre, and the latent corner the rule never surrenders;
+   * the plus's centre, and the hidden corner the rule never surrenders;
    * and lay the line out as chips in the explainer. */
   private paintLine(): void {
     const layer = this.svg.querySelector(".sag-marks")!;
@@ -498,7 +498,7 @@ export class SagBoard extends HTMLElement {
       `side-${line.side} plus at ${fmt(line.centre)}`,
     ];
     if (hot)
-      parts.push(`· latent corner ${fmt(hot)}, never offered as a block`);
+      parts.push(`· hidden corner ${fmt(hot)}, never offered as a block`);
     this.querySelector<HTMLElement>(".sag-plan-note")!.textContent =
       parts.join(" ");
   }

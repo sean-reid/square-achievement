@@ -3,7 +3,7 @@
 The interactive page replays the same tables the checker verifies, so
 the export must be bit-exact: cell keys as "r,c", alignment classes as
 "row:r" and "col:c", farm keys as "farm:a,b", the default as "*", and
-quiet forks as {"q": move, "b": branches}.
+branch points as {"q": move, "b": branches}.
 
 python3 -m squares.five.export_site [dir], default the site's game
 directory. The two tables are separate files so the page loads only

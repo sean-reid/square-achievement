@@ -12,12 +12,12 @@ second move; take a win or a block by reflex; otherwise follow the line
 chosen at the second reply, the shortest sequence of at most three
 tempo moves followed by a plus of side 1 or 2, preferring fewer tempo
 moves, then the smaller plus, then cell order, and never making a
-threat whose only block is the latent corner of the opponent's two free
+threat whose only block is the hidden corner of the opponent's two free
 stones.
 
 The rule reads an abstraction of the position: our stones (in the 6 x 6
 corner), the opponent's stones inside the 17 x 17 base board, and the
-latent corner of the free pair.
+hidden corner of the free pair.
 """
 
 from itertools import permutations
@@ -149,7 +149,7 @@ def winning_pluses(a):
 
 
 def tempo_moves(a):
-    """Single forcing moves with the block forced and not on the latent
+    """Single forcing moves with the block forced and not on the hidden
     corner, in cell order."""
     out = []
     for r in range(BOX):

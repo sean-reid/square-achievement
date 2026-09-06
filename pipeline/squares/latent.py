@@ -1,4 +1,4 @@
-"""The latent corner of a far reply pair: the cell of the 6 x 6 corner
+"""The hidden corner of a far reply pair: the cell of the 6 x 6 corner
 region that forms three corners of a square with the two replies, when
 both replies have a coordinate at least 12. Mirrors farmKey in
 formalization/SquareAchievement/Compute/Table.lean.

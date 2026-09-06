@@ -12,9 +12,9 @@
  * shortest sequence of at most three tempo moves followed by a plus of
  * side 1 or 2, preferring fewer tempo moves, then fewer arms to play,
  * then the smaller plus, then cell order, and never making a threat
- * whose only block is the latent corner of the opponent's two free
+ * whose only block is the hidden corner of the opponent's two free
  * stones. The rule reads an abstraction of the position: our stones,
- * the opponent's stones inside the 17 x 17 base board, and the latent
+ * the opponent's stones inside the 17 x 17 base board, and the hidden
  * corner. The Python twin in pipeline/squares/plus and the fixture in
  * tests/fixtures/plus_lines.json pin this file to the Lean definition.
  */
@@ -270,7 +270,7 @@ function winningPluses(a: Abs): Candidate[] {
   return out.sort((x, y) => cmpKey(x.key, y.key) || cmpOrder(x.order, y.order));
 }
 
-/** Single forcing moves with the block forced and not on the latent
+/** Single forcing moves with the block forced and not on the hidden
  * corner, in cell order, with the position after the block. */
 function tempoMoves(a: Abs): [Cell, Abs][] {
   const out: [Cell, Abs][] = [];
@@ -333,7 +333,7 @@ function cells(pos: Position, stones: Set<number>): Cell[] {
 }
 
 /** The abstraction of the position: our stones, the opponent's stones
- * inside the base board, and the latent corner of the free pair. */
+ * inside the base board, and the hidden corner of the free pair. */
 export function abstractOf(pos: Position): Abs {
   const p2 = cells(pos, pos.p2).filter((x) => x[0] < BASE && x[1] < BASE);
   let hot: Cell | null = null;
