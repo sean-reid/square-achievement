@@ -18,10 +18,10 @@ when n >= 5, by a machine-checked strategy.
   PDF. `papers/threshold/` is the paper on the winning threshold and
   `papers/plus/` the paper on the plus rule, a winning strategy with
   no lookup table.
-- `formalization/` the Lean 4 development: a core library with the
-  game semantics and the checkers with machine-checked soundness, and
-  a library per result, the first holding the strategy tables as
-  data and the simulation theorem covering every board size. See
+- `formalization/` the Lean 4 development: one library with the game
+  semantics, the checkers with machine-checked soundness, the plus
+  rule and its certificates, the 5 x 5 table as data, the simulation
+  theorem covering every board size, and the outcome theorems. See
   [formalization/README.md](formalization/README.md).
 - `pipeline/` the Python side: table generation, the exhaustive
   reference verifier, exporters, and analysis tools. See
@@ -93,9 +93,8 @@ A new one needs:
 
 - `papers/<slug>/main.tex`, citing from `papers/shared/refs.bib`, and
   the slug added to the paper matrix in `.github/workflows/ci.yml`.
-- A Lean library `formalization/<Slug>/` with a root `<Slug>.lean`,
-  importing the `SquareAchievement` core, listed as a `lean_lib` in
-  `formalization/lakefile.toml` and among its default targets.
+- Lean theorems in a subdirectory of `formalization/SquareAchievement/`,
+  imported from the library root `SquareAchievement.lean`.
 - A pipeline subpackage `pipeline/squares/<slug>/` with its tests
   beside it, if the result has generated data.
 - An entry in `site/src/results.ts`, with `site/src/pages/<slug>/index.astro`
