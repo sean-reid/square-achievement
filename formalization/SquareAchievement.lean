@@ -8,3 +8,7 @@ import SquareAchievement.Compute.CheckerSound
 import SquareAchievement.Compute.Refute
 import SquareAchievement.Compute.Uniform
 import SquareAchievement.Compute.ForcedSound
+import SquareAchievement.General.Invariance
+import SquareAchievement.General.Coverage
+import SquareAchievement.General.Simulation
+import SquareAchievement.General.Dispatch

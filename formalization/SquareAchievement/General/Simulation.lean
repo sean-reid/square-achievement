@@ -1,6 +1,6 @@
 import SquareAchievement.Compute.ForcedSound
-import Threshold.General.Invariance
-import Threshold.General.Coverage
+import SquareAchievement.General.Invariance
+import SquareAchievement.General.Coverage
 
 /-!
 # The simulation argument
@@ -376,7 +376,7 @@ theorem inBox_iff {k : ℕ} {c : Cell} : inBox k c = true ↔ c ∈ board k := b
 set_option maxHeartbeats 3200000 in
 /-- Replaying a forced base run on the target board, from any forced
 position whose histories differ only at the two reply slots. -/
-theorem simulate (t : Table) (hbox : t.box = 6) {B n : ℕ}
+theorem simulate (σ : Strategy) {B n : ℕ}
     (hot : Option Cell) (hn17 : 17 ≤ n) (hB17 : 17 ≤ B)
     {opc x2c o1b o1r o2b o2r : Cell}
     (hop : opc ∈ board 6) (hx2 : x2c ∈ board 6)
@@ -384,7 +384,7 @@ theorem simulate (t : Table) (hbox : t.box = 6) {B n : ℕ}
     ∀ (fuel : ℕ) (tail : List Cell),
       tail.length % 2 = 0 →
       (∀ y ∈ tail, y ∈ board 6) →
-      goForced t (squaresList B) B hot fuel
+      goForcedS σ 6 (squaresList B) B hot fuel
         (opc :: o1b :: x2c :: o2b :: tail) = true →
       ¬ HasSquare (o1b :: o2b :: stonesOf false tail).toFinset →
       ¬ HasSquare (opc :: x2c :: stonesOf true tail).toFinset →
@@ -406,7 +406,7 @@ theorem simulate (t : Table) (hbox : t.box = 6) {B n : ℕ}
     omega
   intro fuel
   induction fuel with
-  | zero => intro tail _ _ h _ _ _; simp [goForced, goForcedS] at h
+  | zero => intro tail _ _ h _ _ _; simp [goForcedS] at h
   | succ fuel ih =>
     intro tail hlen htail h hnoB hp1no hpair
     set TT := stonesOf true tail with hTT
@@ -460,7 +460,7 @@ theorem simulate (t : Table) (hbox : t.box = 6) {B n : ℕ}
         · exact hzb.2 (heq ▸ List.mem_cons_of_mem _ (List.mem_cons_self ..))
         · exact h12 (hb612 _ hz6)
       · exact hzb.2 (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ hz))
-    simp only [goForced, goForcedS] at h
+    simp only [goForcedS] at h
     rw [hstT, hstF] at h
     split at h
     · exact absurd h (by simp)
@@ -506,7 +506,6 @@ theorem simulate (t : Table) (hbox : t.box = 6) {B n : ℕ}
           · rename_i hmbox
             have hm6 : m ∈ board 6 := by
               rw [← inBox_iff (k := 6)]
-              rw [hbox] at hmbox
               revert hmbox
               cases inBox 6 m <;> simp
             split at h
@@ -544,13 +543,12 @@ theorem simulate (t : Table) (hbox : t.box = 6) {B n : ℕ}
                         simp at hthne
                       obtain ⟨z₀, hz₀⟩ := List.exists_mem_of_ne_nil _ hthne'
                       have hthsbox : ∀ z ∈ ths, z ∈ board 6 := by
-                        have : ths.all (inBox t.box) = true := by
+                        have : ths.all (inBox 6) = true := by
                           revert hthbox
-                          cases ths.all (inBox t.box) <;> simp
+                          cases ths.all (inBox 6) <;> simp
                         rw [List.all_eq_true] at this
                         intro z hz
                         have := this z hz
-                        rw [hbox] at this
                         exact inBox_iff.mp this
                       -- each threat is a live two-move win on both boards
                       have hthdata := fun z (hz : z ∈ ths) =>
@@ -698,7 +696,7 @@ theorem simulate (t : Table) (hbox : t.box = 6) {B n : ℕ}
                             rw [stonesOf_snoc_odd_false
                               (by rw [List.length_append]; simp; omega),
                               stonesOf_snoc_even_false hlen]
-                          have hbase' : goForced t (squaresList B) B hot fuel
+                          have hbase' : goForcedS σ 6 (squaresList B) B hot fuel
                               (opc :: o1b :: x2c :: o2b ::
                                 ((tail ++ [m]) ++ [r])) = true := by
                             have : (opc :: o1b :: x2c :: o2b :: tail)
@@ -767,5 +765,29 @@ theorem simulate (t : Table) (hbox : t.box = 6) {B n : ℕ}
                           rwa [e1, e2] at hind
                       · -- not a block: the standing threat wins now
                         exact hnow z₀ hz₀ (fun he => hrths (he ▸ hz₀))
+
+/-- The table instance: a forced base run of a table with box `6`. -/
+theorem simulate_table (t : Table) (hbox : t.box = 6) {B n : ℕ}
+    (hot : Option Cell) (hn17 : 17 ≤ n) (hB17 : 17 ≤ B)
+    {opc x2c o1b o1r o2b o2r : Cell}
+    (hop : opc ∈ board 6) (hx2 : x2c ∈ board 6)
+    (hs1 : SlotOk B n o1b o1r) (hs2 : SlotOk B n o2b o2r) :
+    ∀ (fuel : ℕ) (tail : List Cell),
+      tail.length % 2 = 0 →
+      (∀ y ∈ tail, y ∈ board 6) →
+      goForced t (squaresList B) B hot fuel
+        (opc :: o1b :: x2c :: o2b :: tail) = true →
+      ¬ HasSquare (o1b :: o2b :: stonesOf false tail).toFinset →
+      ¬ HasSquare (opc :: x2c :: stonesOf true tail).toFinset →
+      (o1r ∉ board 17 ∨ o2r ∉ board 17 →
+        PairMode hot o1r o2r (o1r :: o2r :: stonesOf false tail)) →
+      P1CanWin n (opc :: x2c :: stonesOf true tail).toFinset
+        (o1r :: o2r :: stonesOf false tail).toFinset := by
+  intro fuel tail hlen htail hrun
+  have hrun' : goForcedS (strategyMove t) 6 (squaresList B) B hot fuel
+      (opc :: o1b :: x2c :: o2b :: tail) = true := by
+    rw [goForced, hbox] at hrun
+    exact hrun
+  exact simulate (strategyMove t) hot hn17 hB17 hop hx2 hs1 hs2 fuel tail hlen htail hrun'
 
 end SquareAchievement
