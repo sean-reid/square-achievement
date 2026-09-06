@@ -39,3 +39,22 @@ def test_wins_every_game_on_six():
     result = verify(strategy, 6)
     assert result.proven
     assert result.stats.max_ply == 16
+
+
+def test_measure_agrees_with_the_rule_on_six():
+    from squares.plus.measure import line_with_key, measure
+
+    cells = [(r, c) for r in range(6) for c in range(6)]
+    for o1 in cells:
+        if o1 == OPENING:
+            continue
+        x2 = second_move(o1)
+        for o2 in cells:
+            if o2 in (OPENING, o1, x2):
+                continue
+            a = abstract_of([OPENING, x2], [o1, o2], o1, o2)
+            assert line_with_key(a)[0] == best_line(a)
+    m = measure(6)
+    assert (m["roots"], m["lines"], m["max_plies"]) == (1155, 79, 17)
+    assert m["tempo"] == {0: 985, 1: 91, 2: 54, 3: 25}
+    assert m["sides"] == {1: 985, 2: 170}

@@ -5,18 +5,47 @@ import Threshold.ExactFarm
 import SquareAchievement.Compute.Fast
 import Threshold.Data.TableGen
 import Threshold.Data.Table5
+import Plus.Anchors
 
 /-! Command-line entry: `lake exe checker <n> [five] [trace]` runs the
 exhaustive verification of a generated table on the `n` board, or
-extracts the first failing line. -/
+extracts the first failing line. `lake exe checker <n> plus` runs the
+forced checker on the plus rule, and `lake exe checker plus anchors`
+runs its anchored far-pair families. -/
 
 open SquareAchievement
+
+/-- The plus rule's three anchored families, iterated from `lo`
+instead of `0` so that the compiler evaluates them at the call rather
+than at program start; `lo = 0` is the certificate. -/
+def plusAnchors (lo : Nat) : Bool :=
+  let cells := (List.range Plus.box).drop lo
+  (cells.all fun h1 => cells.all fun h2 =>
+    Plus.anchorRun (h1 + 17, h2 + 17) (h1 + 17, h2) (h1, h2)) &&
+  (cells.all fun a => (List.range 17).all fun w => cells.all fun h =>
+    if 2 * Plus.box ≤ w && 17 ≤ a + w - h then
+      Plus.anchorRun (a, w) (a + w - h, w) (a, h) &&
+        Plus.anchorRun (w, a) (w, a + w - h) (h, a) &&
+        Plus.anchorRun (a + w - h, w) (a, w) (a, h) &&
+        Plus.anchorRun (w, a + w - h) (w, a) (h, a)
+    else true)
 
 def main (args : List String) : IO Unit := do
   let n := (args.head?.bind String.toNat?).getD 6
   let table := if args.contains "five" then fiveTable else genTable
   let start ← IO.monoMsNow
-  if args.contains "exactfarm" then
+  if args.contains "plus" && args.contains "anchors" then
+    let lo := args.length - args.length
+    let ok ← IO.lazyPure fun _ => plusAnchors lo
+    let ms := (← IO.monoMsNow) - start
+    let verdict := if ok then "SAFE" else "UNSAFE"
+    IO.println s!"plus rule, anchored pairs: {verdict} ({ms}ms)"
+  else if args.contains "plus" then
+    let ok ← IO.lazyPure fun _ => checkForcedS Plus.plusMove Plus.box n
+    let ms := (← IO.monoMsNow) - start
+    let verdict := if ok then "FORCED-PROVEN" else "FORCED-REFUTED"
+    IO.println s!"plus rule, n={n}: {verdict} ({ms}ms)"
+  else if args.contains "exactfarm" then
     let ok ← IO.lazyPure fun _ =>
       farFarmSafe table && exactFarmSafe table && farNearFarmSafe table
     let ms := (← IO.monoMsNow) - start
@@ -43,4 +72,5 @@ def main (args : List String) : IO Unit := do
     let ok ← IO.lazyPure fun _ =>
       if slow then check table n else checkFast table n
     let ms := (← IO.monoMsNow) - start
-    IO.println s!"n={n}: {if ok then "PROVEN" else "REFUTED"} ({ms}ms{if slow then ", slow" else ""})"
+    let verdict := if ok then "PROVEN" else "REFUTED"
+    IO.println s!"n={n}: {verdict} ({ms}ms{if slow then ", slow" else ""})"
