@@ -34,7 +34,7 @@ function rootOf(e: Entry): Position {
 
 /** True if the rule wins against every reply sequence from pos. */
 function verifyAll(pos: Position): boolean {
-  const move = botMove(pos, "plus");
+  const move = botMove(pos);
   const won = winningSquare(pos, new Set([...pos.p1, pos.idx(move)]), move);
   pos.play(move);
   try {
