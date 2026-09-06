@@ -109,10 +109,10 @@ two such squares at once, and no single block answers both. A
 \emph{single forcing move} makes exactly one threat, which the
 opponent must block; it adds a stone to the position at no cost in
 tempo, and the rule uses at most three of them to prepare a plus. The
-\emph{latent corner} of the opponent's two free stones is the one
-cell of the $6 \times 6$ corner that completes three corners of a
-square with them when such a square exists; Section~\ref{sec:defs}
-recalls the definition from \cite{reid-threshold}.
+\emph{latent corner} of the opponent's two free stones, when both lie
+far from the corner region, is the one cell of the $6 \times 6$ corner
+that forms three corners of a square with them, if there is one;
+Section~\ref{sec:defs} has the definition.
 
 \begin{theorem}\label{thm:main}
 For every $n \ge 6$, the first player following the rule wins the
@@ -239,7 +239,7 @@ are the same up to symmetry.
 \end{proof}
 
 So from a centre and one arm, three moves win against an opponent who
-has no threat of their own: the two arms perpendicular to the held arm
+has no threat of their own and whose blocks make none: the two arms perpendicular to the held arm
 each force a block on a diagonal, and the opposite arm then threatens
 at two diagonals at once. Blocks land on diagonals, never on arms, so
 they do not get in the way. Figure~\ref{fig:basic} plays this out. The
@@ -363,56 +363,72 @@ abstract position defined next.
 \subsection{Far stones and the latent corner}
 
 \begin{definition}[latent corner, abstraction]\label{def:latent}
-Two cells $x, y$ have a \emph{latent square} with corner $b$ if
-$b \in \Board_6$, the three cells $b, x, y$ are corners of one square,
-and that square is not contained in $\Board_{17}$; $b$ is the
-\emph{latent corner} of the pair. The \emph{abstraction} of a position
-in which we have moved at least twice consists of our stones, the
-opponent's stones inside $\Board_{17}$, and the latent corner of the
-opponent's first two stones, if they have one.
+Let $x$ and $y$ be two cells each having a coordinate at least $12$.
+Their \emph{latent corner} is a cell $b \in \Board_6$ such that
+$b$, $x$, $y$ are three corners of one square. The \emph{abstraction}
+of a position in which we have moved at least twice consists of our
+stones, the opponent's stones inside $\Board_{17}$, and the latent
+corner of the opponent's first two stones, if they have one.
 \end{definition}
+
+A pair has at most one latent corner. If $x$ and $y$ share a column,
+the square has side $|x_1 - y_1|$ and $b$ is the cell of the region in
+the row of the member with row below $6$, at that distance to the
+left; if they share a row, symmetrically; and if they are diagonally
+opposite, the two remaining corners are $(x_1, y_2)$ and $(y_1, x_2)$,
+of which at most one lies in $\Board_6$, since otherwise all four
+coordinates of $x$ and $y$ would be below $6$. The square has side at
+least $7$, since it joins a coordinate below $6$ to one of at least
+$12$, and it often leaves $\Board_{17}$; Figure~\ref{fig:latent} shows
+one that does.
 
 \begin{figure}[ht]
 \centering
-\begin{tikzpicture}[scale=0.32]
+\begin{tikzpicture}[scale=0.3]
   \fill[gray!25] (0,0) rectangle (6,-6);
-  \draw[gray!60] (0,0) grid (17,-17);
-  \draw[thick,dashed] (3.5,-0.5) rectangle (16.5,-13.5);
-  \foreach \r/\c in {0/16, 13/3}
+  \draw[gray!60] (0,0) grid (18,-18);
+  \draw[thick] (0,0) rectangle (17,-17);
+  \draw[thick,dashed] (3.5,-0.5) rectangle (17.5,-14.5);
+  \foreach \r/\c in {0/17, 14/3}
     \draw[thick] (\c+0.5,-\r-0.5) circle (0.3);
   \draw[thick,dashed] (3.5,-0.5) circle (0.38);
-  \draw[thick,dashed] (16.5,-13.5) circle (0.38);
+  \draw[thick,dashed] (17.5,-14.5) circle (0.38);
   \node[above=1pt] at (3.5,-0.1) {$b$};
-  \node[above=1pt] at (16.5,-0.1) {$o_1$};
-  \node[left=2pt] at (3.1,-13.5) {$o_2$};
-  \node[right=2pt] at (17.0,-13.5) {$z$};
+  \node[above=1pt] at (17.5,-0.1) {$o_1$};
+  \node[left=2pt] at (3.1,-14.5) {$o_2$};
+  \node[right=2pt] at (18.0,-14.5) {$z$};
 \end{tikzpicture}
-\caption{A latent square, drawn on $\Board_{17}$. The opponent's free
-replies $o_1 = (0,16)$ and $o_2 = (13,3)$ are two corners of the dashed
-square, whose third corner $b = (0,3)$ lies in the region (shaded)
-and whose fourth corner $z = (13,16)$ lies just outside $\Board_{17}$.
-The rule never threatens at $b$: if the opponent had to block there
-they would threaten at $z$.}
+\caption{A latent corner, drawn on $\Board_{18}$; the solid outline is
+$\Board_{17}$ and the shaded block is the region $\Board_6$. The
+opponent's free replies $o_1 = (0,17)$ and $o_2 = (14,3)$ are two
+corners of the dashed square, whose third corner $b = (0,3)$ is their
+latent corner and whose fourth corner $z = (14,17)$ lies outside
+$\Board_{17}$. The rule never threatens at $b$: if the opponent had to
+block there they would threaten at $z$, a cell the rule does not see.}
 \label{fig:latent}
 \end{figure}
 
-Two facts from \cite[Section~6]{reid-threshold} explain the
-abstraction. First, two stones in $\Board_6$ lie in a common square
-only if that square lies in $\Board_{12}$. In a position the rule
-reaches, the opponent's stones are the two free replies and forced
-blocks, and the blocks lie in $\Board_6$. So a stone beyond
-$\Board_{17}$ shares no square with two blocks, and a square through
-such a stone and one block has both free replies as its other corners:
-it is a latent square. Second, a pair of cells has at most one latent
-corner, and only pairs whose members both have a coordinate at least
-$12$ have one. Hence the stones the rule cannot see, the opponent's
-stones beyond $\Board_{17}$, can affect the game only through the
-latent corner, and the rule records exactly that cell. The clause of
+Why this is the right thing to record comes from two facts of
+\cite[Section~6]{reid-threshold}. First, two stones in $\Board_6$ lie
+in a common square only if that square lies in $\Board_{12}$. In a
+position the rule reaches, the opponent's stones are the two free
+replies and forced blocks, and the blocks lie in $\Board_6$. So a
+stone beyond $\Board_{17}$ shares no square with two blocks, and a
+square through such a stone and one block has both free replies as
+its other corners, with the block as their latent corner. Second, no
+square with two corners in $\Board_6$ leaves $\Board_{12}$, so every
+opponent square that leaves $\Board_{17}$ is of this kind. Hence the
+stones the rule cannot see, the opponent's stones beyond
+$\Board_{17}$, can affect the game only through the latent corner,
+and the rule records exactly that cell. The clause of
 Definition~\ref{def:tempo} that keeps blocks off the latent corner is
 what prevents a far pair from ever coming into play: if the opponent
 were forced to block on $b$ in Figure~\ref{fig:latent}, they would
-hold three corners of the latent square and threaten at $z$, and we
-would have to answer instead of continuing our line.
+hold three corners of the dashed square and threaten at $z$, and we
+would have to answer instead of continuing our line. The rule applies
+the clause to every pair with a latent corner, including pairs whose
+square stays inside $\Board_{17}$, where the opponent's stones are
+visible anyway; the clause costs nothing there.
 
 \begin{table}[ht]
 \centering
@@ -428,7 +444,7 @@ arm, diagonal & a cell of the plus on an axis; a cell of the plus off the axes \
 tempo move & a forcing move in $\Board_6$ whose block leaves the opponent without a threat and misses the latent corner \\
 line & tempo moves, then the arms of one plus, the last arm making two threats \\
 key & (tempo moves, arms to play, side); smaller is preferred \\
-latent corner & the region cell completing three corners of a square with the two free replies, when the square leaves $\Board_{17}$ \\
+latent corner & the region cell forming three corners of a square with the two free replies, when both have a coordinate at least $12$ \\
 abstraction & our stones, the opponent's stones in $\Board_{17}$, the latent corner \\
 \bottomrule
 \end{tabular}
@@ -464,6 +480,14 @@ gives the move.
 \EndIf
 \end{algorithmic}
 \end{algorithm}
+
+In lines 1 to 4 of Algorithm~\ref{alg:move} the squares scanned are
+those of the abstraction: our squares, which all lie in $\Board_6$,
+and the opponent's squares with all corners inside $\Board_{17}$. An
+opponent square with a corner beyond $\Board_{17}$ would have to be
+one through the latent corner, which the rule never surrenders
+(Section~\ref{sec:defs}); the checker of Section~\ref{sec:verify}
+confirms at every node that the opponent has no threat at all.
 
 \begin{algorithm}[ht]
 \caption{The line search, from an abstract position $A$.}\label{alg:line}
@@ -643,13 +667,16 @@ fourth tempo move is never used, though the rule would allow it if we
 raised the bound. Pluses of side $3$ do not fit in the region, so
 sides $1$ and $2$ are all there is. Finally the base board of the
 abstraction was set at $17$ after a smaller choice failed: reading
-only the opponent's stones inside $\Board_{12}$ loses on
-$\Board_{13}$ and above, because a stone with a coordinate between
-$12$ and $16$ can complete a square with one stone of the region and
-one near stone, a square of side at least $7$ that lies inside
-$\Board_{17}$. The base $17$ is also the least board on which the
-dichotomy of Definition~\ref{def:latent} holds \cite{reid-threshold},
-so the two uses of the constant agree.
+only the opponent's stones inside $\Board_{12}$ still gives every
+reply pair a line, but fails the forced-tree check, because a stone
+with a coordinate between $12$ and $16$ can complete a square with one
+stone of the region and one near stone, a square of side at least $7$
+inside $\Board_{17}$, and a rule that does not see the stone does not
+block the threat. The base $17$ is also the constant of the dichotomy
+in \cite{reid-threshold}: a square with a corner in the region that
+leaves $\Board_{17}$ has the two free replies as its other corners,
+and $17$ is the least board with this property, so the two uses of
+the constant agree.
 
 Compiling the rule into a table of the old format gives $237$
 branches with $2{,}330$ plan entries and $140$ latent entries, against
@@ -697,7 +724,8 @@ Lean file \texttt{Plus/Threats.lean}, and the rule's part of the
 proposition is the theorem \texttt{plusMove\_takesWins}. The
 proposition itself is \texttt{checkForcedS\_winsWith}. The table
 strategy of \cite{reid-threshold} also satisfies the hypothesis, so
-its theorem is strengthened as well, though we do not use that here.
+the same strengthening is available for it, though we do not use that
+here.
 
 The rule passes the forced tree on every board from $6$ to $17$.
 Table~\ref{tab:runs} gives the number of reply pairs at the root of
@@ -790,8 +818,10 @@ definition mentions them.
 The base board $23$, the stand-ins $(22,22)$ and $(22,21)$, and the
 anchor cells at coordinates $17$ and above are choices of the proof,
 not of the rule. Any board of size at least $17$ that holds the
-anchors would do. The rule itself has two constants, the region $6$
-and the base $17$.
+anchors would do. The rule itself has two board constants, the
+region $6$ and the base $17$, with $12 = 2 \cdot 6$ marking the stones
+that can have a latent corner, and one search constant, the three
+tempo moves.
 \end{remark}
 
 Theorem~\ref{thm:main} follows from the runs of
@@ -950,7 +980,8 @@ pairs no purely forcing continuation wins. A short rule for
 $\Board_5$, with quiet moves allowed, is open.
 
 Finally, the constants. The region $6$ cannot shrink for a purely
-forcing strategy from $(2,2)$ \cite{reid-threshold}. The base $17$ is
+forcing strategy from $(2,2)$ with the second moves searched in
+\cite{reid-threshold}. The base $17$ is
 least for the dichotomy of latent squares, and the abstraction that
 reads $\Board_{17}$ verbatim is what the proof needs; whether a rule
 can read less, for instance only the opponent's stones inside
