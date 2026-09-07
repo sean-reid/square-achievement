@@ -757,14 +757,33 @@ agrees too because every reply beyond $\Board_6$ has the default second
 move. A case analysis over the reply pairs assembles Theorem~\ref{thm:uniform}
 from this agreement and the simulation theorem.
 
-\begin{remark}
+\begin{remark}\label{rem:anchors}
 The base board $23$, the stand-ins $(22,22)$ and $(22,21)$, and the
 anchor cells at coordinates $17$ and above are choices of the proof,
-not of the rule; any board of size at least $17$ holding the anchors
-would do. The rule has two board constants, the region $6$ and the base
-$17$, with $12 = 2 \cdot 6$ marking the stones that can have a hidden
-corner, and one search constant, the three tempo moves.
+not of the rule (Figure~\ref{fig:anchors}). An anchor for the hidden
+corner $(h_1,h_2)$ of a far pair sits at $(h_1+17, h_2+17)$ and
+$(h_1+17, h_2)$, so it reaches coordinate $22$ at most; the anchors of
+the two other families reach $a + w - h \le 21$; and the stand-ins are
+placed at $22$, beyond every anchor. So $23$ is the least board that
+holds them all, and any larger board would serve as the base. The rule
+itself has two board constants, the region $6$ and the base $17$, with
+$12 = 2 \cdot 6$ marking the stones that can have a hidden corner, and
+one search constant, the three tempo moves.
 \end{remark}
+
+\begin{figure}[ht]
+\centering
+\input{fig-anchors}
+\caption{The anchor board $\Board_{23}$. The region $\Board_6$ is
+shaded and the base board $\Board_{17}$ outlined. The far pair with
+hidden corner $b = (2,3)$ is replaced in the base run by its anchors
+$o_1' = (19,20)$ and $o_2' = (19,3)$, two corners of the dashed square
+through $b$, both beyond $\Board_{17}$; a pair with no hidden corner is
+replaced by the two grey stand-ins at $(22,22)$ and $(22,21)$, which
+farm nothing with any near stone. Every anchor has coordinates at most
+$22$, which is why the base board is $23$.}
+\label{fig:anchors}
+\end{figure}
 
 Theorem~\ref{thm:rule} follows from Table~\ref{tab:runs} for
 $6 \le n \le 17$ and Theorem~\ref{thm:uniform} for $n \ge 17$, and
