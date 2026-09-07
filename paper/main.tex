@@ -359,7 +359,7 @@ nearest the origin, is $(r,c)$; the corner opposite $b$ has both
 coordinates at least $6 + s$, and the square leaves $\Board_{17}$ only
 if a coordinate reaches $17$, so $s \ge 12$. Each of $x$, $y$ has a
 coordinate equal to $r + s$ or $c + s$, hence at least $12$. The formal
-statement is \texttt{escape\_farm}.
+statement is in \texttt{General/Coverage.lean}.
 \end{proof}
 
 \begin{figure}[ht]
@@ -780,7 +780,7 @@ hidden corner $b = (2,3)$ is replaced in the base run by its anchors
 $o_1' = (19,20)$ and $o_2' = (19,3)$, two corners of the dashed square
 through $b$, both beyond $\Board_{17}$; a pair with no hidden corner is
 replaced by the two grey stand-ins at $(22,22)$ and $(22,21)$, which
-farm nothing with any near stone. Every anchor has coordinates at most
+lie on no square through the region. Every anchor has coordinates at most
 $22$, which is why the base board is $23$.}
 \label{fig:anchors}
 \end{figure}
@@ -933,7 +933,7 @@ Theorem~\ref{thm:main} (outcome) & proved in Lean & the certificates below, \tex
 Theorem~\ref{thm:rule} (the rule wins, \texttt{WinsWith}) & proved in Lean & runs at $6$ to $17$ and $23$, three anchored families \\
 Theorem~\ref{thm:uniform} (every board from $17$) & proved in Lean & Lemma~\ref{lem:dichotomy}, \texttt{simulate}, \texttt{plusMove\_agree} \\
 Lemma~\ref{lem:arms} (arms force) & proved on paper & elementary; not needed by the formal proof, which checks the lines \\
-Lemma~\ref{lem:span}, Lemma~\ref{lem:dichotomy} & proved in Lean & \texttt{escape\_farm} \\
+Lemma~\ref{lem:span}, Lemma~\ref{lem:dichotomy} & proved in Lean & the proof in \texttt{General/Coverage.lean} \\
 Lemma~\ref{lem:stealing} (strategy stealing) & proved in Lean & \texttt{P1CanWin.insert\_left} \\
 Proposition~\ref{prop:small} (draws) & proved in Lean & refutations at $1$ to $4$, determinacy \\
 Proposition~\ref{prop:five} ($5 \times 5$) & proved in Lean & the $5 \times 5$ table, one full-tree run \\
