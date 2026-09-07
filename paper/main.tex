@@ -96,17 +96,12 @@ the game is drawn under optimal play: each player can secure at least a
 draw.
 \end{theorem}
 
-The strategy that wins for $n \ge 6$ is a rule. Its free moves are
-chosen around one shape, the \emph{plus}: a stone together with the
-four cells at a common distance from it along the axes. Once the centre
-and one arm are held, each further arm makes three corners of a square
-whose fourth corner is a diagonal cell, so the opponent must block
-there, and the last arm threatens two squares at once. The rule opens
-at $(2,2)$, answers the first reply with a fixed second move, and then
-follows a line of at most three single forcing moves, each of which
-places a stone the opponent must answer, ending in the arms of a plus.
+The strategy that wins for $n \ge 6$ is a rule built around one shape,
+the \emph{plus}: a stone together with the four cells at a common
+distance from it along the axes. Its arms force the opponent's replies
+one at a time, and the last arm threatens two squares at once.
 Section~\ref{sec:defs} defines the terms and Section~\ref{sec:rule}
-states the rule in full.
+states the rule.
 
 \begin{theorem}\label{thm:rule}
 For every $n \ge 6$, the first player following the plus rule wins the
@@ -137,30 +132,28 @@ $\latestPly$th ply at the latest.
   game, the checkers with their soundness theorems, strategy stealing,
   determinacy, the simulation theorem, and the rule are formalized in
   Lean~4, so Theorems~\ref{thm:main} and~\ref{thm:rule} are
-  kernel-checked declarations. The theorem for the rule is stated with
-  the predicate \texttt{WinsWith}: the tree in which the first player
-  plays the rule's move at every node is winning, not merely some tree
-  the checker found.
+  kernel-checked declarations, the latter in the form
+  $\texttt{plus\_wins\_with} : 6 \le n \to
+  \texttt{WinsWith}\ \texttt{plusMove}\ n\ [\,]$: the tree in which the
+  first player plays the rule's move at every node is winning, not
+  merely some tree the checker found.
 \item \emph{Measurements} (Section~\ref{sec:measure}). The lines the
   rule plays, their lengths, and the cost of every certificate,
   produced by the accompanying code.
 \end{enumerate}
 
-Theorem~\ref{thm:main} is proved in three ranges. For $n \le 4$ an
-exhaustive refutation shows the first player cannot win. For $n = 5$ a
-strategy table extracted from a full solution of that game is verified
-by exhaustive search; this board needs quiet moves, and no purely
-forcing strategy from the rule's opening exists there. For $n \ge 6$
-the plus rule is verified by a forced-tree checker at every size up to
-$17$, and the simulation theorem carries the run at $23$ to every
-larger board. Searches are only as trustworthy as the programs running
-them, and this game is a case in point: the first version of the search
-in \cite{jenrich} contained an error and was corrected later. We
-therefore formalize the whole argument in Lean~4 \cite{lean4}, building
-on mathlib \cite{mathlib}: the game, the checkers that replay a
-strategy against every reply, the refuter, their soundness theorems,
-and the simulation theorem. Every search then discharges a statement
-about the abstract game rather than about a program.
+Theorem~\ref{thm:main} is proved in three ranges: an exhaustive
+refutation for $n \le 4$ (Section~\ref{sec:small}), a strategy table
+verified by exhaustive search for $n = 5$, where no purely forcing
+strategy exists (Section~\ref{sec:small}), and the rule for $n \ge 6$,
+checked at every size up to $17$ (Section~\ref{sec:verify}) and carried
+to every larger board by the simulation theorem
+(Section~\ref{sec:uniform}). Searches are only as trustworthy as the
+programs running them, and this game is a case in point: the first
+version of the search in \cite{jenrich} contained an error and was
+corrected later. The formalization in Lean~4 \cite{lean4}, on mathlib
+\cite{mathlib}, makes every search discharge a statement about the
+abstract game rather than about a program.
 
 \section{Definitions}\label{sec:defs}
 
@@ -328,9 +321,11 @@ all four corners lie in $\Board_B$.
 
 With $B = 6$: two stones of the region lie in a common square only if
 that square lies in $\Board_{12}$. Hence an opponent stone beyond
-$\Board_{17}$ shares no square with two forced blocks, and an opponent
-square through such a stone and a block has the two free replies as its
-other corners. The next definition names the block in that situation.
+$\Board_{17}$, which the rule does not read, shares no square with two
+forced blocks, and an opponent square through such a stone and a block
+has the two free replies as its other corners. The next definition
+names the block in that situation; it is the one cell through which
+the stones the rule does not see can affect the game.
 
 \begin{definition}[hidden corner, abstraction]\label{def:latent}
 Let $x$ and $y$ be two cells each having a coordinate at least $12$.
@@ -380,16 +375,13 @@ block there they would threaten at $z$, a cell the rule does not see.}
 \label{fig:latent}
 \end{figure}
 
-So the stones the rule does not see, the opponent's stones beyond
-$\Board_{17}$, can affect the game only through the hidden corner, and
-the rule records exactly that cell. The clause of
-Definition~\ref{def:tempo} keeping blocks off that cell is what stops a
-far pair from ever coming into play: were the opponent forced to block
-on $b$ in Figure~\ref{fig:latent}, they would hold three corners of the
-dashed square and threaten at $z$, and we would have to answer instead
-of continuing our line. The rule applies the clause to every pair with
-a hidden corner, also when the square stays inside $\Board_{17}$ and
-the opponent's stones are visible anyway; there it costs nothing.
+The clause of Definition~\ref{def:tempo} keeping blocks off the hidden
+corner is what stops a far pair from ever coming into play: were the
+opponent forced to block on $b$ in Figure~\ref{fig:latent}, they would
+hold three corners of the dashed square and threaten at $z$, and we
+would have to answer instead of continuing our line. The rule applies
+the clause whenever the pair has a hidden corner, also when the square
+stays inside $\Board_{17}$; there it costs nothing.
 
 \begin{remark}
 The base $17 = 6 + 2 \cdot 6 - 1$ is least for Lemma~\ref{lem:dichotomy}.
@@ -636,9 +628,8 @@ tree} of $\sigma$ on $\Board_n$ is the game tree in which the first
 player's moves are given by $\sigma$ and the second player's moves
 range over all empty cells; $\sigma$ \emph{verifies} on $\Board_n$ if
 every branch ends in a first-player square. If $\sigma$ verifies then
-the first player wins, and the $5 \times 5$ table is checked this way:
-its checker walks the tree in full, and its soundness theorem is
-\texttt{check\_sound}.
+the first player wins, and the $5 \times 5$ table is checked this way,
+its checker walking the tree in full.
 
 The rule is verified on a smaller tree. The \emph{forced tree} of
 $\sigma$ on $\Board_n$ is the game tree in which we play $\sigma$'s
@@ -663,24 +654,22 @@ against every reply is winning.
 The hypothesis is what the two-ply argument needs: if the winning tree
 is to be $\sigma$'s own, $\sigma$ must be the one to complete the
 standing threat. The rule satisfies it by its first clause, once the
-executable scan it uses is known to agree with the checker's; that is
-the theorem \texttt{plusMove\_takesWins}. The proposition is
-\texttt{checkForcedS\_winsWith}, and Section~\ref{sec:lean} says what
-\texttt{WinsWith} is.
+executable scan it uses is known to agree with the checker's, which is
+proved. Section~\ref{sec:lean} defines \texttt{WinsWith} and names the
+theorems.
 
 The rule passes the forced tree on every board from $6$ to $17$;
 Table~\ref{tab:runs} gives the number of reply pairs at the root and
 the time of the compiled checker, together with the full-tree check of
-the $5 \times 5$ table. The search exists three times: a Python twin
-used while finding the rule and the table, the Lean definitions, and
-the compiled Lean checkers that the proof cites; a TypeScript copy of
-the rule drives the interactive page that accompanies the paper. The
-Python and TypeScript copies are compared with the Lean rule on the
-line it commits to for every reply pair of the $6 \times 6$ board and
-for the anchored positions of Section~\ref{sec:uniform}, and the Python
-verifier, which walks the full tree rather than the forced skeleton,
-confirms the win on $\Board_6$ with the same longest game. Only the
-Lean runs enter the proof.
+the $5 \times 5$ table. The rule and the checkers exist three times: a Python twin used while
+finding the rule and the table, the Lean definitions, and a TypeScript
+copy of the rule that drives the interactive page accompanying the
+paper. The Python and TypeScript copies are compared with the Lean rule
+on the line it commits to for every reply pair of the $6 \times 6$
+board and for the anchored positions of Section~\ref{sec:uniform}, and
+the Python verifier, which walks the full tree rather than the forced
+skeleton, confirms the win on $\Board_6$ with the same longest game.
+Only the Lean runs enter the proof.
 
 \begin{table}[ht]
 \centering
@@ -748,10 +737,9 @@ anchored runs, one per placement of the pair on the corners of its
 square, over all coordinates: $\anchoredPositions$ positions, each a
 run of the checker with the hidden corner as an additional guard.
 
-The formal simulation theorem, \texttt{simulate}, takes the strategy
-$\sigma$ as a parameter and concludes
-$\texttt{WinsWith}\ \sigma\ n\ h$ for the real history $h$. Beyond the
-runs it has two hypotheses about $\sigma$: that $\sigma$ takes its
+The formal simulation theorem is stated for any strategy $\sigma$ and
+concludes that $\sigma$'s own play wins from the real history. Beyond
+the runs it has two hypotheses about $\sigma$: that $\sigma$ takes its
 completions, as in Proposition~\ref{prop:forced}, and agreement,
 \[
   \sigma\,(\text{real history}) \;=\; \sigma\,(\text{base history})
@@ -766,9 +754,8 @@ the anchored run checks and for the keyless stand-ins is a short
 computation. So the abstractions agree, and the rule's move is a
 function of the abstraction and of the first reply's second move, which
 agrees too because every reply beyond $\Board_6$ has the default second
-move. This is the theorem \texttt{plusMove\_agree}; the case analysis
-over the reply pairs that assembles Theorem~\ref{thm:uniform} from it
-and from \texttt{simulate} is \texttt{plus\_wins\_with\_of\_seventeen\_le}.
+move. A case analysis over the reply pairs assembles Theorem~\ref{thm:uniform}
+from this agreement and the simulation theorem.
 
 \begin{remark}
 The base board $23$, the stand-ins $(22,22)$ and $(22,21)$, and the
@@ -780,95 +767,74 @@ corner, and one search constant, the three tempo moves.
 \end{remark}
 
 Theorem~\ref{thm:rule} follows from Table~\ref{tab:runs} for
-$6 \le n \le 17$ and Theorem~\ref{thm:uniform} for $n \ge 17$; the
-formal assembly is \texttt{plus\_wins\_with}. Theorem~\ref{thm:main}
-follows from Proposition~\ref{prop:small}, Proposition~\ref{prop:five},
-and Theorem~\ref{thm:rule} with the moves forgotten; the formal
-statement is \texttt{outcome}, whose first half is
-\texttt{p1\_wins\_iff}.
+$6 \le n \le 17$ and Theorem~\ref{thm:uniform} for $n \ge 17$, and
+Theorem~\ref{thm:main} from Propositions~\ref{prop:small}
+and~\ref{prop:five} and Theorem~\ref{thm:rule} with the moves
+forgotten.
 
 \section{Formalization}\label{sec:lean}
 
-The Lean development defines cells in the quarter-plane, boards as
-finite subsets, squares as in Section~\ref{sec:defs}, and the winning
-predicate \texttt{P1CanWin} as an inductive family: the first player
-can win from a position if some legal move completes one of their
-squares, or some legal move admits at least one reply and every reply
-both fails to complete an opponent square and leads to a position from
-which the first player can win. A derivation of the predicate is
-precisely a strategy tree, one first-player move per node with all
-replies covered, and draws are failures by construction. These
-definitions, a few dozen lines, are the whole specification: a reader
-audits them by eye, and everything else is proved against them. The
-second player's win, and each player's ability to secure at least a
-draw, are defined from the same predicate by swapping roles after a
-move. Strategy stealing and determinacy are proved against these
-definitions with no computation, so the outcome theorem inherits its
-axioms from the searches alone.
+The Lean development defines cells, boards, and squares as in
+Section~\ref{sec:defs}, and the winning predicate \texttt{P1CanWin} as
+an inductive family whose derivations are exactly strategy trees: one
+first-player move per node, every reply covered, draws failures by
+construction. The second player's win and each player's ability to
+secure a draw are defined from it by swapping roles after a move, and
+strategy stealing and determinacy are proved against these definitions
+with no computation. These definitions, a few dozen lines, are the
+whole specification; everything else is proved against them.
 
-\begin{remark}\label{rem:terminal}
-The predicate is read on positions reachable from the empty board,
-where a game ends at its first square. On a position in which a player
-already holds a square it does not say ``the game is over'': a mover
-holding a square with no empty cell left cannot win in the predicate's
-sense, since every constructor demands a move. Encoding the end of the
-game explicitly would cost an extra hypothesis on every constructor and
-every soundness proof, and buy nothing at the empty board, so we keep
-the lean form and prove the outcome theorems there. The one place the
-convention shows is Lemma~\ref{lem:stealing}: the monotonicity step
-returns a disjunction, a win or a completed square, because the surplus
-stone may end the game.
-\end{remark}
-
-The second predicate is \texttt{WinsWith}. For a strategy $\sigma$, a
-board size $n$, and a history $h$ with the first player to move,
-$\texttt{WinsWith}\ \sigma\ n\ h$ holds if $\sigma$'s move at $h$ is
-legal and completes a square, or is legal, admits a reply, and every
-reply completes nothing and leads to a history at which
-\texttt{WinsWith} holds again. It has the constructors of
+The predicate behind Theorem~\ref{thm:rule} is \texttt{WinsWith}. For a
+strategy $\sigma$, a board size $n$, and a history $h$ with the first
+player to move, $\texttt{WinsWith}\ \sigma\ n\ h$ holds if $\sigma$'s
+move at $h$ is legal and completes a square, or is legal, admits a
+reply, and every reply completes nothing and leads to a history at
+which \texttt{WinsWith} holds again. It has the constructors of
 \texttt{P1CanWin} with one extra premise on each, that the move is the
 one $\sigma$ returns, and implies \texttt{P1CanWin} by forgetting that
-premise. A checker that searched for a win and found one proves
-\texttt{P1CanWin}; a checker that plays $\sigma$ at every node proves
-\texttt{WinsWith} only if the soundness proof never invents a move, and
-the one place it did, the two-ply win against a reply that blocks
-nothing, is where Proposition~\ref{prop:forced} needs its hypothesis.
+premise. A checker that plays $\sigma$ at every node proves
+\texttt{WinsWith} only if its soundness proof never invents a move; the
+one place the forced checker's proof did, the two-ply win against a
+reply that blocks nothing, is where Proposition~\ref{prop:forced} needs
+its hypothesis.
 
-Three executable checkers are proved sound against this semantics:
-\texttt{check}, which replays a strategy table against all reply
-sequences, with \texttt{check\_sound}; the forced checker of
-Section~\ref{sec:verify}, generic over strategies, with
-\texttt{checkForcedS\_winsWith}; and \texttt{refute}, the dual search
-of Section~\ref{sec:small}, with \texttt{refute\_sound}. Each proof is
-an induction over the checker's recursion, and at every node the guards
-supply exactly the premises of the corresponding constructor; soundness
-never inspects the strategy. The recursion of each checker descends on
-an explicit bound, $n^2 + 1$, on the number of moves in a game;
-exhausting the bound returns failure, so the bound can cost
-completeness of the search, never soundness of the theorem. The rule
-itself is the Lean definition \texttt{plusMove}, $\ruleLeanLines$ lines,
-with the same type as the table strategy, a function from the squares
-of the board and the history to a move; the rule's threat scan is
-proved to agree with the checker's, the agreement lemma is proved, and
-the anchored runs are defined, in about $\plusLeanLines$ further lines.
-No table appears in the statement or the proof of Theorem~\ref{thm:rule}.
+Three executable checkers are proved sound: \texttt{check}, which
+replays a table against all reply sequences (\texttt{check\_sound});
+the forced checker, generic over strategies
+(\texttt{checkForcedS\_winsWith}, Proposition~\ref{prop:forced}); and
+\texttt{refute} (\texttt{refute\_sound}). Each proof is an induction
+over the checker's recursion, whose guards supply the premises of the
+constructors, so soundness never inspects the strategy; the recursion
+descends on the bound $n^2 + 1$ on the length of a game, and
+exhausting it returns failure, which can cost completeness but never
+soundness. The rule is the definition \texttt{plusMove},
+$\ruleLeanLines$ lines; its threat scan agrees with the checker's
+(\texttt{plusMove\_takesWins}), the agreement lemma is
+\texttt{plusMove\_agree}, the simulation theorem is \texttt{simulate},
+and Theorem~\ref{thm:uniform} is
+\texttt{plus\_wins\_with\_of\_seventeen\_le}, in about $\plusLeanLines$
+further lines. Theorem~\ref{thm:rule} is \texttt{plus\_wins\_with} and
+Theorem~\ref{thm:main} is \texttt{outcome}, whose first half is
+\texttt{p1\_wins\_iff}. No table appears in the statement or the proof
+of Theorem~\ref{thm:rule}.
 
-Concrete board sizes are discharged by native evaluation
+Concrete boards are discharged by native evaluation
 (\texttt{native\_decide}): the refutations at $1$ to $4$, the
-$5 \times 5$ run of \texttt{check}, one evaluation for the rule's runs
-at sizes $6$ to $16$, one for size $17$, one for the anchor board, and
-one for each of the three anchored families. The axiom footprint of
-\texttt{outcome} and \texttt{plus\_wins\_with} is \texttt{propext},
-\texttt{Classical.choice}, \texttt{Quot.sound}, and one instance of
-Lean's evaluation axiom for compiled reduction per evaluated
-certificate. That last item is a genuine addition to the trust base:
-the kernel checks the soundness theorems but not the evaluations, which
-the Lean compiler and runtime perform. Kernel reduction of the same
-runs is out of reach by orders of magnitude, and a proof term recording
-every node of the search would be larger than the runs by a similar
-factor, so we accept the standard trust base of large computer-assisted
-proofs in Lean, and report it. The development builds in about
-$\buildMinutes$ minutes on a laptop, almost all of it the evaluations.
+$5 \times 5$ run, one evaluation for the rule's runs at sizes $6$ to
+$16$, one for $17$, one for the anchor board, and one per anchored
+family. The axioms of \texttt{outcome} and \texttt{plus\_wins\_with} are
+therefore \texttt{propext}, \texttt{Classical.choice},
+\texttt{Quot.sound}, and one instance of Lean's evaluation axiom per
+certificate: the kernel checks the soundness theorems but not the
+evaluations, which the Lean compiler and runtime perform, the standard
+trust base of large computer-assisted proofs in Lean. The development
+builds in about $\buildMinutes$ minutes on a laptop, almost all of it
+the evaluations, and accompanies the paper as supplementary material
+with the Python code: the $5 \times 5$ solver and its table, the twin of
+the rule, and the scripts that produce Table~\ref{tab:lines}, the
+numbers in this paper, and the board diagrams. The checker executable
+reproduces the runs of Table~\ref{tab:runs}, and the interactive page
+plays the rule and shows at each move the line it is following.
 
 \section{How the rule was found}\label{sec:how}
 
@@ -934,10 +900,9 @@ using no tempo move grow with the board.}
 
 Table~\ref{tab:status} records, for each statement, whether it is
 proved in Lean, proved on paper only, computed, or measured, and what
-it depends on. The numbers in this paper are outputs of the
-accompanying code, written into the source of the paper by the
-pipeline, and the board diagrams are generated from the same positions
-the rule computes.
+it depends on. The numbers in this paper are written into its source by
+the accompanying code, and the board diagrams are generated from the
+positions the rule computes.
 
 \begin{table}[ht]
 \centering\small
@@ -963,26 +928,6 @@ Table~\ref{tab:lines} (lines) & computed, reproducible & the Python twin, compar
 \caption{What is proved and what is not.}
 \label{tab:status}
 \end{table}
-
-\section{Reproducibility}\label{sec:repro}
-
-The supplementary material contains the Lean development.
-Theorem~\ref{thm:main} is \texttt{outcome}, Theorem~\ref{thm:rule} is
-\texttt{plus\_wins\_with}, Theorem~\ref{thm:uniform} is
-\texttt{plus\_wins\_with\_of\_seventeen\_le}, and
-Proposition~\ref{prop:forced} is \texttt{checkForcedS\_winsWith}, all
-in the namespace \texttt{SquareAchievement} with the rule's theorems
-under \texttt{Plus}; the supporting layer is named above. The build evaluates every
-certificate. The checker executable reproduces the runs of
-Table~\ref{tab:runs}: \texttt{lake exe checker $n$} runs the
-certificate for one board and reports its time, and
-\texttt{lake exe checker anchors} runs the three anchored families.
-The Python side holds the $5 \times 5$ solver and its table, the twin
-of the rule, and the scripts that produce Table~\ref{tab:lines}, the
-numbers in this paper, and the board diagrams; its tests compare the
-twin with the Lean rule and run the full verifier on $\Board_6$. The
-interactive page accompanying the paper plays the rule and shows, at
-each move, the line it is following.
 
 \section{Open questions}\label{sec:open}
 
