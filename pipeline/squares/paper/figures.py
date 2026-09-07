@@ -172,6 +172,40 @@ def fig_latent():
     )
 
 
+def fig_anchors():
+    """The anchor board: the region, the base board, the two stand-ins,
+    and one far pair replaced by its anchors, with the hidden square
+    they share."""
+    h = (2, 3)
+    o1, o2 = (h[0] + 17, h[1] + 17), (h[0] + 17, h[1])
+    assert farm_relation(o1, o2) == ("farm", h)
+    assert farm_relation((22, 22), (22, 21)) is None
+    s = 17
+    return "\n".join(
+        [
+            "\\begin{tikzpicture}[scale=0.26]",
+            "  \\fill[gray!25] (0,0) rectangle (6,-6);",
+            "  \\draw[gray!60] (0,0) grid (23,-23);",
+            "  \\draw[thick] (0,0) rectangle (17,-17);",
+            "  \\draw[thick] (0,0) rectangle (23,-23);",
+            f"  \\draw[thick,dashed] ({h[1] + 0.5},{-h[0] - 0.5}) rectangle "
+            f"({h[1] + s + 0.5},{-h[0] - s - 0.5});",
+            f"  \\foreach \\r/\\c in {{{o1[0]}/{o1[1]}, {o2[0]}/{o2[1]}}}",
+            "    \\draw[thick] (\\c+0.5,-\\r-0.5) circle (0.42);",
+            f"  \\draw[thick,dashed] ({h[1] + 0.5},{-h[0] - 0.5}) circle (0.5);",
+            "  \\foreach \\r/\\c in {22/22, 22/21}",
+            "    \\fill[gray!70] (\\c+0.5,-\\r-0.5) circle (0.42);",
+            f"  \\node[above left=0pt] at ({h[1] + 0.3},{-h[0] - 0.2}) {{$b$}};",
+            f"  \\node[right=3pt] at (23.2,{-o1[0] - 0.5}) {{$o_1'$}};",
+            f"  \\node[left=3pt] at (-0.2,{-o2[0] - 0.5}) {{$o_2'$}};",
+            "  \\node[below=2pt] at (21.5,-23.0) {\\small stand-ins};",
+            "  \\node at (14.5,-15.5) {$\\Board_{17}$};",
+            "  \\node[left=3pt] at (-0.2,-3) {$\\Board_6$};",
+            "\\end{tikzpicture}",
+        ]
+    )
+
+
 FIGURES = {
     "fig-anatomy": fig_anatomy,
     "fig-second": fig_second,
@@ -179,6 +213,7 @@ FIGURES = {
     "fig-tempo": fig_tempo,
     "fig-longest": fig_longest,
     "fig-latent": fig_latent,
+    "fig-anchors": fig_anchors,
 }
 
 
