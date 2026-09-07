@@ -526,3 +526,8 @@ ol.rule {
 ol.rule li {
   margin: 0.25rem 0;
 }
+
+figure.rule-pictures svg {
+  width: 100%;
+  max-width: 44rem;
+}

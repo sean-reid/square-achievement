@@ -1,11 +1,61 @@
 ---
 import Base from "../layouts/Base.astro";
 import katex from "katex";
+import { board6 } from "../lib/board6";
 
 const k = (tex: string) => katex.renderToString(tex, { throwOnError: true });
 const base = import.meta.env.BASE_URL.endsWith("/")
   ? import.meta.env.BASE_URL
   : `${import.meta.env.BASE_URL}/`;
+
+// the rule in three pictures: the plus, an arm forcing, the last arm winning
+const plusPicture = board6({
+  black: [
+    [2, 2],
+    [3, 2],
+  ],
+  labels: [
+    [1, 2, "a"],
+    [2, 1, "a"],
+    [2, 3, "a"],
+    [1, 1, "d"],
+    [1, 3, "d"],
+    [3, 1, "d"],
+    [3, 3, "d"],
+  ],
+});
+const armPicture = board6({
+  black: [
+    [2, 2],
+    [3, 2],
+    [2, 1],
+  ],
+  white: [
+    [0, 0],
+    [4, 4],
+  ],
+  threats: [[3, 1]],
+  squares: [[2, 1, 1]],
+});
+const lastArmPicture = board6({
+  black: [
+    [2, 2],
+    [3, 2],
+    [2, 1],
+    [1, 2],
+    [2, 3],
+  ],
+  white: [
+    [0, 0],
+    [4, 4],
+    [3, 1],
+    [1, 1],
+  ],
+  threats: [
+    [1, 3],
+    [3, 3],
+  ],
+});
 ---
 
 <Base
@@ -52,14 +102,47 @@ const base = import.meta.env.BASE_URL.endsWith("/")
       plus.
     </li>
   </ol>
+  <figure class="diagram rule-pictures">
+    <svg
+      viewBox="-4 -4 480 152"
+      role="img"
+      aria-label="Three 6 by 6 boards: the plus of side 1 at (2,2) with its arms and diagonals; an arm played, threatening the diagonal between it and the held arm; the last arm played, threatening two diagonals at once"
+    >
+      <defs>
+        <pattern
+          id="grid6p"
+          width="24"
+          height="24"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M24 0H0V24"
+            fill="none"
+            stroke="var(--rule)"
+            stroke-width="0.8"
+            opacity="0.5"></path>
+        </pattern>
+      </defs>
+      <g set:html={plusPicture} />
+      <g transform="translate(164 0)" set:html={armPicture} />
+      <g transform="translate(328 0)" set:html={lastArmPicture} />
+    </svg>
+    <figcaption>
+      The plus, in three pictures. Left: we hold the centre (2,2) and one arm
+      (3,2); the other arms are a, the diagonals d. Middle: playing an arm
+      beside the held one makes three corners of a small square, so the opponent
+      must block on the diagonal, dashed. Right: after two such arms, the last
+      arm threatens two diagonals at once, and no single block stops both. When
+      the opponent's stones spoil this, the rule first plays up to three forcing
+      moves, each answered by a forced block, to place the stones it needs.
+    </figcaption>
+  </figure>
+
   <p>
-    A <em>plus</em> is a stone with the four cells at equal distance above, below,
-    left, and right of it. Once you hold the centre and one arm, each further arm
-    makes three corners of a square, so the opponent must block on a diagonal cell;
-    the last arm threatens two squares at once, and no single block stops both. The
-    rule looks only at the 6 × 6 corner of the board and the opponent's stones near
-    it, so one rule serves every board. On 5 × 5 no forcing strategy exists and a
-    table with branch points plays instead.
+    The rule looks only at the 6 × 6 corner of the board and the opponent's
+    stones near it, so one rule serves every board, and it plays the same 79
+    lines on every board from 6 × 6 to 17 × 17. On 5 × 5 no forcing strategy
+    exists and a table with branch points plays instead.
   </p>
 
   <figure class="game">
