@@ -1,8 +1,8 @@
 /** The plus rule, mirroring formalization/Plus/Rule.lean move for move.
  *
- * A plus is a stone we hold with the four cells at distance s along the
+ * A plus is a held stone with the four cells at distance s along the
  * axes; each arm played makes three corners of a side-s square with the
- * centre and a neighbouring arm, so the opponent must block the
+ * centre and a neighbouring arm, so the second player must block the
  * diagonal cell, and the last arm threatens two squares at once. A
  * tempo move is a single forcing move.
  *
@@ -12,10 +12,10 @@
  * shortest sequence of at most three tempo moves followed by a plus of
  * side 1 or 2, preferring fewer tempo moves, then fewer arms to play,
  * then the smaller plus, then cell order, and never making a threat
- * whose only block is the hidden corner of the opponent's two free
- * stones. The rule reads an abstraction of the position: our stones,
- * the opponent's stones inside the 17 x 17 base board, and the hidden
- * corner. The Python twin in pipeline/squares/plus and the fixture in
+ * whose only block is the hidden corner of the second player's two
+ * free stones. The rule reads an abstraction of the position: the first
+ * player's stones, the second player's stones inside the 17 x 17 base
+ * board, and the hidden corner. The Python twin in pipeline/squares/plus and the fixture in
  * tests/fixtures/plus_lines.json pin this file to the Lean definition.
  */
 
@@ -250,7 +250,7 @@ function cmpOrder(a: Cell[], b: Cell[]): number {
   return a.length - b.length;
 }
 
-/** Every plus we can complete by force, keyed by (arms to play, side,
+/** Every plus the first player can complete by force, keyed by (arms to play, side,
  * centre), sorted by key then arm order. */
 function winningPluses(a: Abs): Candidate[] {
   const out: Candidate[] = [];
@@ -332,8 +332,8 @@ function cells(pos: Position, stones: Set<number>): Cell[] {
     });
 }
 
-/** The abstraction of the position: our stones, the opponent's stones
- * inside the base board, and the hidden corner of the free pair. */
+/** The abstraction of the position: the first player's stones, the
+ * second player's stones inside the base board, and the hidden corner of the free pair. */
 export function abstractOf(pos: Position): Abs {
   const p2 = cells(pos, pos.p2).filter((x) => x[0] < BASE && x[1] < BASE);
   let hot: Cell | null = null;
@@ -377,7 +377,7 @@ export interface PlusDecision extends Decision {
   reason: string;
   /** The committed line, once there is one. */
   line: Line | null;
-  /** How many of the line's cells we already hold. */
+  /** How many of the line's cells the first player already holds. */
   played: number;
   hot: Cell | null;
 }
