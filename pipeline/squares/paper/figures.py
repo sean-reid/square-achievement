@@ -156,7 +156,7 @@ def fig_anatomy():
 
 
 def fig_second():
-    marks = {(2, 1): "a", (2, 3): "b", (1, 2): "c"}
+    marks = {(2, 1): "1", (2, 3): "2", (1, 2): "3"}
     cells = []
     for r in range(6):
         for c in range(6):
