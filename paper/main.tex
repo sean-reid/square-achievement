@@ -10,6 +10,7 @@
 \usepackage{tikz}
 \usepackage{xcolor}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\usepackage{xurl}
 \hypersetup{pdftitle={The square achievement game on n x n boards},
   pdfauthor={Sean Reid}}
 
@@ -145,7 +146,7 @@ $(r,c)$ with side $s$ is
 $\Sq(r,c,s) = \{(r,c), (r,c+s), (r+s,c), (r+s,c+s)\}$; a set of cells
 contains a square if it contains some $\Sq(r,c,s)$. The case $s = 1$ is
 allowed, so the smallest winning shape is a $2 \times 2$ block, the
-convention of \cite{jenrich, bacher-eliahou}; tilted squares do not
+convention of \cite{bacher-eliahou, jenrich}; tilted squares do not
 count. A \emph{position} is a pair of disjoint subsets of $\Board_n$,
 the stones of the two players. The game is finite with perfect
 information, so exactly one of three holds: the first player can force
