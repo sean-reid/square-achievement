@@ -52,6 +52,19 @@ def dashed_square(corner, side):
     )
 
 
+def label(text, cell, side, r=BIG):
+    """A label against a marker of radius r on the given side of cell."""
+    x, y = cell[1] + 0.5, -cell[0] - 0.5
+    gap = r + 0.12
+    anchor, (px, py) = {
+        "right": ("west", (x + gap, y)),
+        "left": ("east", (x - gap, y)),
+        "above": ("south", (x, y + gap)),
+        "below": ("north", (x, y - gap)),
+    }[side]
+    return f"  \\node[anchor={anchor},inner sep=1pt] at ({px:g},{py:g}) {{{text}}};"
+
+
 def board(black, white, threats, n=6, label=None):
     """An n x n board with our stones black, the opponent's white, and
     threat cells dashed."""
@@ -196,10 +209,10 @@ def fig_latent():
         + [
             mark(b, BIG),
             mark(z, BIG),
-            "  \\node[above=1pt] at (3.5,-0.1) {$b$};",
-            "  \\node[above=1pt] at (17.5,-0.1) {$o_1$};",
-            "  \\node[left=2pt] at (3.1,-14.5) {$o_2$};",
-            "  \\node[right=2pt] at (18.0,-14.5) {$z$};",
+            label("$b$", b, "above"),
+            label("$o_1$", o1, "above"),
+            label("$o_2$", o2, "left"),
+            label("$z$", z, "right"),
             "\\end{tikzpicture}",
         ]
     )
