@@ -186,6 +186,7 @@ theorem farm_near_snd {o1 o2 h : Cell}
     omega
 
 set_option maxHeartbeats 6400000 in
+-- the case split over the corner assignments exceeds the default budget
 /-- In an escaping square whose corners come from a reply, the two
 reply stones, and box cells, the box cell is unique and the reply
 stones are both corners: two box corners would confine the square,
@@ -266,12 +267,6 @@ theorem escape_pick {a b s : ℕ} (hs : 0 < s)
       | (rw [← hB, ← hC]; first | exact dBC | exact dBC.symm)
       | (rw [← hB, ← hE]; first | exact dBE | exact dBE.symm)
       | (rw [← hC, ← hE]; first | exact dCE | exact dCE.symm)
-      | (rw [← hB, ← hA]; first | exact dAB | exact dAB.symm)
-      | (rw [← hC, ← hA]; first | exact dAC | exact dAC.symm)
-      | (rw [← hE, ← hA]; first | exact dAE | exact dAE.symm)
-      | (rw [← hC, ← hB]; first | exact dBC | exact dBC.symm)
-      | (rw [← hE, ← hB]; first | exact dBE | exact dBE.symm)
-      | (rw [← hE, ← hC]; first | exact dCE | exact dCE.symm)
 
 /-- An escaping square whose corners hold a box cell and the two
 reply stones is a farm square keyed by the box cell. -/

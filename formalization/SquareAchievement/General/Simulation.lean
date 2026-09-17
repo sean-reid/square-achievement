@@ -43,13 +43,13 @@ theorem three_corners_confine {B r c s : ℕ} {x y z : Cell}
   rcases hx with rfl | rfl | rfl | rfl <;>
     rcases hy with rfl | rfl | rfl | rfl <;>
     rcases hz with rfl | rfl | rfl | rfl <;>
-    simp_all <;> omega
+    simp_all
 
 /-- A listed square with three of its four (distinct) corners in a
 smaller board's cells is listed on the smaller board. Stated through
 the one-missing filter: everything the filter drops is a `mine`
 stone. -/
-theorem square_filter_confine {n B : ℕ} (hB : 0 < B) (hBn : B ≤ n)
+theorem square_filter_confine {n B : ℕ} (_hB : 0 < B) (_hBn : B ≤ n)
     {mine : List Cell} (hmine : ∀ x ∈ mine, x ∈ board B)
     {sq : List Cell} (hsq : sq ∈ squaresList n) {z : Cell}
     (hfil : sq.filter (fun x => !mine.contains x) = [z]) :
@@ -171,7 +171,7 @@ including a reply landing on a stand-in cell. -/
 theorem simulate_safe {B n : ℕ} (hB : 17 ≤ B) (hot : Option Cell)
     {o1b o1r o2b o2r : Cell} {P D : List Cell}
     (hs1 : SlotOk B n o1b o1r) (hs2 : SlotOk B n o2b o2r)
-    (hP : ∀ y ∈ P, y ∈ board 6) (hD : ∀ y ∈ D, y ∈ board 6)
+    (_hP : ∀ y ∈ P, y ∈ board 6) (hD : ∀ y ∈ D, y ∈ board 6)
     (hnoB : ¬ HasSquare (o1b :: o2b :: D).toFinset)
     (hpair : o1r ∉ board 17 ∨ o2r ∉ board 17 →
       PairMode hot o1r o2r (o1r :: o2r :: D))
@@ -375,6 +375,7 @@ theorem inBox_iff {k : ℕ} {c : Cell} : inBox k c = true ↔ c ∈ board k := b
   simp [inBox, mem_board]
 
 set_option maxHeartbeats 3200000 in
+-- the replay unfolds the checker one level per forced move; the default budget runs out
 /-- Replaying a forced base run on the target board, from any forced
 position whose histories differ only at the two reply slots. -/
 theorem simulate (σ : Strategy) {B n : ℕ}
@@ -476,8 +477,7 @@ theorem simulate (σ : Strategy) {B n : ℕ}
       split at h
       · exact absurd h (by simp)
       · rename_i hguard
-        simp only [Bool.or_eq_true, not_or, Bool.not_eq_true',
-          Bool.not_eq_true, List.contains_iff_mem] at hguard
+        simp only [Bool.or_eq_true, not_or, Bool.not_eq_true', List.contains_iff_mem] at hguard
         obtain ⟨⟨hmB, hm1⟩, hm2⟩ := hguard
         have hmB' : m ∈ board B := by
           rw [← onBoard_iff]
@@ -728,7 +728,7 @@ theorem simulate (σ : Strategy) {B n : ℕ}
                             rw [hrhot]
                             simpa using hc
                           rw [List.all_eq_true] at this
-                          push_neg at this
+                          push Not at this
                           obtain ⟨z', hz', hz'r⟩ := this
                           exact hnow z' hz' (by simpa using hz'r)
                         · -- an ordinary block: follow the base branch
@@ -801,7 +801,7 @@ theorem simulate (σ : Strategy) {B n : ℕ}
                                   insert r p2B.toFinset := by
                                 ext w
                                 rw [hp2Bdef]
-                                simp [List.toFinset_append, or_comm]
+                                simp [List.toFinset_append]
                                 tauto
                               rwa [this] at hc)
                             (by
@@ -812,7 +812,7 @@ theorem simulate (σ : Strategy) {B n : ℕ}
                                   insert m p1.toFinset := by
                                 ext w
                                 rw [hp1def]
-                                simp [List.toFinset_append, or_comm]
+                                simp [List.toFinset_append]
                                 tauto
                               rwa [this] at hc)
                             (by
