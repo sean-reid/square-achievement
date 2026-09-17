@@ -2,14 +2,15 @@
 \begin{tikzpicture}[scale=0.3]
   \fill[gray!25] (0,0) rectangle (6,-6);
   \draw[gray!60] (0,0) grid (18,-18);
-  \draw[thick] (0,0) rectangle (17,-17);
+  \draw[semithick] (0,0) rectangle (17,-17);
+  \draw[very thick] (0,0) rectangle (18,-18);
   \draw[thick,dashed] (3.5,-0.5) rectangle (17.5,-14.5);
   \foreach \r/\c in {0/17, 14/3}
-    \draw[thick] (\c+0.5,-\r-0.5) circle (0.3);
-  \draw[thick,dashed] (3.5,-0.5) circle (0.38);
-  \draw[thick,dashed] (17.5,-14.5) circle (0.38);
-  \node[above=1pt] at (3.5,-0.1) {$b$};
-  \node[above=1pt] at (17.5,-0.1) {$o_1$};
-  \node[left=2pt] at (3.1,-14.5) {$o_2$};
-  \node[right=2pt] at (18.0,-14.5) {$z$};
+    \filldraw[fill=white,thick] (\c+0.5,-\r-0.5) circle (0.42);
+  \draw[thick,dashed] (3.5,-0.5) circle (0.42);
+  \draw[thick,dashed] (17.5,-14.5) circle (0.42);
+  \node[anchor=south,inner sep=1pt] at (3.5,0.04) {$b$};
+  \node[anchor=south,inner sep=1pt] at (17.5,0.04) {$o_1$};
+  \node[anchor=east,inner sep=1pt] at (2.96,-14.5) {$o_2$};
+  \node[anchor=west,inner sep=1pt] at (18.04,-14.5) {$z$};
 \end{tikzpicture}
