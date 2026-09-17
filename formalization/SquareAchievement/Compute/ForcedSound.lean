@@ -5,12 +5,12 @@ import SquareAchievement.Compute.WinsWith
 /-!
 # Soundness of the forced-tree checker
 
-`goForced` recurses only on block replies; soundness covers the rest.
+`goForcedS` recurses only on block replies; soundness covers the rest.
 At each forced node the strategy threatens, so a reply that blocks no
 threat leaves one standing, and the threat cell wins on the next
 move. The per-node scan `threatsL squares p2 = []` replaces the
 per-reply completion checks of `go`: it says no empty cell finishes a
-square for the opponent, which is the safety obligation of
+square for the second player, which is the safety obligation of
 `P1CanWin.step`.
 -/
 
@@ -102,7 +102,7 @@ theorem threat_wins {n : ℕ} {mine occ : List Cell} {z : Cell}
     rw [this]
     exact Finset.mem_insert_self z _
 
-/-- With the opponent's scan empty, no empty cell completes for them. -/
+/-- With the second player's scan empty, no empty cell completes for them. -/
 theorem completesL_eq_false_of_threats_nil {n : ℕ} {mine occ : List Cell}
     {r : Cell} (hnil : threatsL (squaresList n) mine occ = [])
     (hro : occ.contains r = false) (hrm : r ∉ mine) :

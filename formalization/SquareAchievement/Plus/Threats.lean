@@ -141,7 +141,7 @@ theorem mem_threatsIn_iff {k : ℕ} {mine occ : List Cell} (hmine : ∀ x ∈ mi
     simp only [hocc, Bool.false_eq_true, if_false]
 
 /-- The rule takes its wins: with its stones in the corner and the
-opponent's near stones the only ones that can occupy a corner cell, its
+second player's near stones the only ones that can occupy a corner cell, its
 first reflex plays a completion whenever the board offers one. -/
 theorem plusMove_takesWins {n : ℕ} (hn : 6 ≤ n) : TakesWinsOn plusMove box n [] := by
   intro tail hlen hp1box hboard hne

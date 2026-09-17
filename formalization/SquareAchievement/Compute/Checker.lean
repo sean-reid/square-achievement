@@ -3,19 +3,17 @@ import SquareAchievement.Compute.Table
 /-!
 # The executable checker
 
-An independent implementation of the exhaustive verification: replay
-the table strategy against every reply sequence. The strategy semantics
-mirror the generating pipeline exactly, reflexes first with
-lexicographically least targets, then the table lookup, then the first
-unplayed plan cell; `check` returns `true` only if every line ends in a
-P1 square. The soundness theorem connecting `check` to `P1CanWin` is
-the certificate step of the formal proof.
+The exhaustive verification of a strategy table: replay the table
+strategy against every reply sequence. The strategy plays reflexes
+first, the least completion for either side, then the table lookup,
+then the first unplayed plan cell; `check` returns `true` only if
+every line ends in a first-player square. `check_sound` connects it to
+`P1CanWin`.
 -/
 
 namespace SquareAchievement
 
-/-- Corner lists of every winning square on the `n` board, generation
-order matching the pipeline. -/
+/-- Corner lists of every winning square on the `n` board. -/
 def squaresList (n : ℕ) : List (List Cell) :=
   (List.range n).flatMap fun s =>
     (List.range n).flatMap fun r =>
@@ -67,8 +65,8 @@ def resolveEntry (box : ℕ) (p1 hist : List Cell) : ℕ → Entry → Option Ce
       let e ← lookup box branches reply
       resolveEntry box p1 hist fuel e
 
-/-- The table strategy's move for the position after `hist` (P1 to
-move), mirroring reflexes, lookup chain, and plan-following. -/
+/-- The table strategy's move for the position after `hist` (first
+player to move): reflexes, the lookup, then plan-following. -/
 def strategyMove (t : Table) (squares : List (List Cell)) (hist : List Cell) :
     Option Cell :=
   let p1 := stonesOf true hist
@@ -98,8 +96,8 @@ def onBoard (n : ℕ) (c : Cell) : Bool := c.1 < n && c.2 < n
 def allCells (n : ℕ) : List Cell :=
   (List.range n).flatMap fun r => (List.range n).map fun c => (r, c)
 
-/-- Exhaustive search: P1 to move after `hist`; true iff every P2
-continuation loses. -/
+/-- Exhaustive search: first player to move after `hist`; true iff
+every second-player continuation loses. -/
 def go (t : Table) (squares : List (List Cell)) (n : ℕ) :
     ℕ → List Cell → Bool
   | 0, _ => false

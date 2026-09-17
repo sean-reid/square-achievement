@@ -4,14 +4,14 @@ import SquareAchievement.General.Simulation
 # Shared facts for the uniform wrappers
 
 Small lemmas every wrapper of the simulation theorem needs, whatever
-the strategy: what a fired farm key says, that small positions are
-square-free and leave empty cells, and the finset shapes of the first
-two stones of each side.
+the strategy: what a fired `farmKey` returns, that small positions are
+square-free and leave empty cells, and a bound on the stones of the
+first two moves.
 -/
 
 namespace SquareAchievement
 
-/-- A fired farm key names a farm cell. -/
+/-- A fired `farmKey` returns a `Key.farm`. -/
 theorem farmKey_farm {box : ℕ} {o1 o2 : Cell} {k : Key}
     (h : farmKey box o1 o2 = some k) : ∃ hc, k = Key.farm hc := by
   unfold farmKey at h
@@ -34,7 +34,7 @@ theorem farmKey_farm {box : ℕ} {o1 o2 : Cell} {k : Key}
       exact ⟨hc, (Option.some_inj.mp h).symm⟩
     · exact hcase _ _ _ h
 
-/-- A farm cell lies in the box. -/
+/-- The hidden corner lies in the box. -/
 theorem farmKey_hot_box {box : ℕ} {o1 o2 hc : Cell}
     (h : farmKey box o1 o2 = some (.farm hc)) :
     hc.1 < box ∧ hc.2 < box := by

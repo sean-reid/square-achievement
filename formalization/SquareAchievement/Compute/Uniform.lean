@@ -3,21 +3,17 @@ import SquareAchievement.Compute.Checker
 /-!
 # The forced-tree checker
 
-The game under a forcing table is narrow: past the second reply,
-every strategy move threatens, so the opponent either blocks or loses
-to the threat on the next move. `goForced` verifies exactly that
-shape. The two reply levels are enumerated in full; beyond them each
-node makes two whole-board scans, one to collect the strategy's
-threat cells and one to confirm the opponent can complete nothing,
-and recurses only on the blocks. `goForcedS_sound` covers every
-non-blocking reply with a single two-move argument, so the checker
-never has to visit them.
+`goForcedS` checks that a strategy wins by pure forcing. The two reply
+levels are enumerated in full; past them every strategy move must win
+or threaten from the corner box, the second player must have no
+completion, and only the block replies recurse: a reply that blocks
+nothing loses to the standing threat at once, which the soundness
+theorem `goForcedS_winsWith` covers without visiting it.
 
-The node guards double as the uniform theorem's hypotheses: every
-non-winning move and every threat cell must lie in the corner box,
-which keeps the opponent's forced blocks in the box, and the optional
-`hot` cell must never be the only block, which is the farm-safety
-condition checked from anchored positions.
+The node guards are the simulation theorem's hypotheses: every
+non-winning move and every threat cell lies in the box, so the forced
+blocks stay in the box, and the optional `hot` cell, the hidden corner
+of an anchored reply pair, is never the only block.
 -/
 
 namespace SquareAchievement
@@ -40,8 +36,8 @@ abbrev Strategy := List (List Cell) → List Cell → Option Cell
 
 /-- The forced-tree checker for any strategy. Full enumeration at the
 two reply levels; past them the strategy must win or threaten from the
-box, the opponent must have no completion, and only the block replies
-recurse. `hot`, when given, must never be the only block. -/
+box, the second player must have no completion, and only the block
+replies recurse. `hot`, when given, must never be the only block. -/
 def goForcedS (σ : Strategy) (box : ℕ) (squares : List (List Cell)) (n : ℕ)
     (hot : Option Cell) : ℕ → List Cell → Bool
   | 0, _ => false

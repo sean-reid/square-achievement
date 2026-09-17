@@ -1,22 +1,21 @@
 import SquareAchievement.Compute.ForcedSound
 
 /-!
-# Farm coverage of escaping squares
+# Escaping squares and the hidden corner
 
-The heart of the uniform theorem's safety argument. A square that
-does not fit inside the base board `17`, three of whose corners are a
-box cell and the opponent's two reply stones, is always a farm
-square: `farmKey` fires on the replies and names exactly the box
-corner. Consequently a base-board run plus farm safety rules out
-every opponent square on every board: squares inside the base are
-checked by the run, and squares outside it need the box corner the
-farm entry never surrenders.
+A square that does not fit inside `board 17`, three of whose corners
+are a box cell and the second player's two reply stones, has that box
+cell as the pair's hidden corner: `farmKey` fires on the replies and
+returns exactly it (`escape_farm`). So a base-board run plus the
+anchored runs rule out every second-player square on every board:
+squares inside the base are checked by the run, and squares outside
+it need the hidden corner, which the anchored run's guard keeps from
+the second player.
 
-The geometry: the box corner of an escaping square must be its
-northwest corner (any other position forces the whole square inside
-low coordinates, contradicting escape), the side is at least 12, and
-whichever two of the remaining corners the replies occupy, one of
-`farmCase`'s three orientations pins the northwest corner.
+The geometry: the box corner of an escaping square is its northwest
+corner, the side is at least 12, and whichever two of the remaining
+corners the replies occupy, one of `farmCase`'s three orientations
+returns the northwest corner.
 -/
 
 namespace SquareAchievement
@@ -189,9 +188,10 @@ theorem farmKey_corners {box : ℕ} {o1 o2 h : Cell}
       mem_corners_of (Or.inr (Or.inr (Or.inl ⟨by omega, by omega⟩))),
       mem_corners_of (Or.inr (Or.inl ⟨by omega, by omega⟩))⟩
 
-/-- The near member of a farm pair reaching beyond the base board is
-box-aligned with one far coordinate, the farm cell shares its
-box-aligned coordinate, and the pair's square escapes the base. -/
+/-- The near member of a pair with a hidden corner, the other member
+beyond the base board: it is box-aligned with one far coordinate, the
+hidden corner shares its box-aligned coordinate, and the pair's square
+escapes the base. -/
 theorem farm_near_fst {o1 o2 h : Cell}
     (hk : farmKey 6 o1 o2 = some (.farm h))
     (h1b : o1 ∈ board 17) (h2b : o2 ∉ board 17) :
@@ -313,7 +313,7 @@ theorem escape_pick {a b s : ℕ} (hs : 0 < s)
       | (rw [← hC, ← hE]; first | exact dCE | exact dCE.symm)
 
 /-- An escaping square whose corners hold a box cell and the two
-reply stones is a farm square keyed by the box cell. -/
+reply stones has that box cell as the pair's hidden corner. -/
 theorem escape_farm {r c s : ℕ} {blk o1 o2 : Cell}
     (hs : 0 < s) (hesc : 17 ≤ r + s ∨ 17 ≤ c + s)
     (hblk : blk ∈ corners r c s) (ho1 : o1 ∈ corners r c s)

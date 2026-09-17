@@ -6,11 +6,11 @@ import SquareAchievement.Plus.Rule
 # The rule reads the same move from a real history and its base view
 
 The rule depends on a history only through its abstraction (the first
-player's stones, the opponent's stones inside the base board, the
-latent corner of the free pair) and through the first reply's second
+player's stones, the second player's stones inside the base board, the
+hidden corner of the free pair) and through the first reply's second
 move. A real reply beyond the base board and its stand-in are both
 dropped by the abstraction; a reply inside it is read verbatim; and the
-wrapper chooses stand-ins with the same farm key and the same second
+wrapper chooses stand-ins with the same `farmKey` and the same second
 move. So the rule's move on the real board is its move on the base
 history, at every node of the simulation.
 -/
@@ -87,7 +87,8 @@ theorem farmKey_eq_none {o1 o2 : Cell}
   · obtain ⟨hc, rfl⟩ := farmKey_farm hk
     exact (h hc hk).elim
 
-/-- A near first reply farms nothing with the stand-in for a far second. -/
+/-- A near first reply has no hidden corner with the stand-in for a far
+second. -/
 theorem farmKey_standin_snd {o1 : Cell} (h : o1 ∈ board 17) :
     farmKey box o1 (22, 21) = none := by
   rw [mem_board] at h
@@ -95,7 +96,8 @@ theorem farmKey_standin_snd {o1 : Cell} (h : o1 ∈ board 17) :
   obtain ⟨-, -, hcase | hcase⟩ := farmKey_spec hk <;>
     rcases farmCase_spec hcase with hf | hf | hf <;> simp only [box] at hf <;> omega
 
-/-- The stand-in for a far first reply farms nothing with a near second. -/
+/-- The stand-in for a far first reply has no hidden corner with a near
+second. -/
 theorem farmKey_standin_fst {o2 : Cell} (h : o2 ∈ board 17) :
     farmKey box (22, 22) o2 = none := by
   rw [mem_board] at h
@@ -103,7 +105,7 @@ theorem farmKey_standin_fst {o2 : Cell} (h : o2 ∈ board 17) :
   obtain ⟨-, -, hcase | hcase⟩ := farmKey_spec hk <;>
     rcases farmCase_spec hcase with hf | hf | hf <;> simp only [box] at hf <;> omega
 
-/-- The two stand-ins farm nothing together. -/
+/-- The two stand-ins have no hidden corner together. -/
 theorem farmKey_standins : farmKey box (22, 22) (22, 21) = none := by decide
 
 end SquareAchievement.Plus
