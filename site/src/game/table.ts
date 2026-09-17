@@ -47,8 +47,8 @@ function classKey(box: number, cell: [number, number]): string | null {
   return null;
 }
 
-/** The hot cell a far reply pair can farm through, mirroring the
- * pipeline's farm_relation: one member is aligned with the corner
+/** The hidden corner of a far reply pair, mirroring the pipeline's
+ * farm_relation: one member is aligned with the corner
  * region, and the pair pins the square's box corner exactly. */
 export function farmCell(
   box: number,
@@ -164,7 +164,7 @@ export function strategyDecision(
   const entries = lookup(table.box, table.scripts, o1);
   if (entries === undefined) return { move: null, source: "exhausted" };
   // an exact o2 entry is only pair-safe when o1 is exact too: an
-  // abstract o1 shifts the pair's farm cell away from the one the
+  // abstract o1 shifts the pair's hidden corner away from the one the
   // exact entry was generated against
   const o1Exact = table.scripts[cellKey(o1)] !== undefined;
   const farm = farmKey(table.box, o1, o2);

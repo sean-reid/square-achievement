@@ -77,7 +77,7 @@ describe("bot reflexes", () => {
     expect(botMove(pos)).toEqual([2, 2]);
   });
 
-  it("blocks the opponent's completion", () => {
+  it("blocks the second player's completion", () => {
     const pos = new Position(6);
     place(pos, [
       [2, 2],
