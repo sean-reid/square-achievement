@@ -9,6 +9,9 @@ corner.
 python3 -m squares.paper.figures   writes paper/fig-*.tex
 """
 
+from ..five import strategy5
+from ..five.forcing import forcing_script
+from ..game import P1, P2, Game
 from ..latent import farm_relation
 from ..paths import REPO
 from ..plus.measure import line_with_key
@@ -66,13 +69,21 @@ def label(text, cell, side, r=BIG):
     return f"  \\node[anchor={anchor},inner sep=1pt] at ({px:g},{py:g}) {{{text}}};"
 
 
-def board(black, white, threats, n=6, label=None):
+def quiet_mark(cell):
+    """A hollow square on a cell, for a move that makes no threat."""
+    x, y = cell[1] + 0.5, -cell[0] - 0.5
+    d = 0.22
+    return f"  \\draw[thick] ({x - d:g},{y - d:g}) rectangle ({x + d:g},{y + d:g});"
+
+
+def board(black, white, threats, n=6, label=None, extra=()):
     """An n x n board with our stones black, the opponent's white, and
     threat cells dashed."""
     out = open_board(n, SMALL)
     out += stones(black, "black", STONE)
     out += stones(white, "white", STONE)
     out += [mark(t, MARK) for t in threats]
+    out += list(extra)
     if label:
         out.append(f"  \\node at ({n / 2:g},{-n - 0.6}) {{\\small {label}}};")
     out.append("\\end{tikzpicture}")
@@ -287,6 +298,21 @@ def fig_agreement():
     return "\n".join(left) + "\n\\hspace{1em}\n" + "\n".join(right)
 
 
+def fig_five():
+    """A branch point of the 5 x 5 table: a reply pair with no forcing
+    continuation, and the quiet move the table plays there."""
+    o1, o2 = (4, 4), (2, 3)
+    g = Game(5)
+    for player, cell in ((P1, OPENING), (P2, o1), (P1, strategy5.X2[o1]), (P2, o2)):
+        g.play(player, cell)
+    assert forcing_script(g, 8) is None
+    quiet = strategy5.strategy5(g)
+    g.play(P1, quiet)
+    assert quiet == (0, 2) and not g.threats(P1)
+    g.undo()
+    return board(sorted(g.p1), sorted(g.p2), [], n=5, extra=[quiet_mark(quiet)])
+
+
 FIGURES = {
     "fig-anatomy": fig_anatomy,
     "fig-second": fig_second,
@@ -296,6 +322,7 @@ FIGURES = {
     "fig-latent": fig_latent,
     "fig-anchors": fig_anchors,
     "fig-agreement": fig_agreement,
+    "fig-five": fig_five,
 }
 
 
