@@ -1,7 +1,8 @@
 """Write paper/claims.tex, every number the paper quotes, as LaTeX macros.
 
 Counts come from the pipeline itself: the rule's lines per board from
-squares.plus.measure, the anchored positions from squares.plus.sweep,
+squares.plus.measure, the lines on the anchor board and in the anchored
+positions from the same rule, the anchored positions from squares.plus.sweep,
 the 5 x 5 table's branches from its module, and line counts of the Lean
 sources. Values that come from long runs are read from
 paper/data/recorded.json and paper/data/timings.json, the latter
@@ -14,7 +15,8 @@ import json
 
 from ..five import strategy5
 from ..paths import REPO
-from ..plus.measure import measure
+from ..plus.measure import line_with_key, measure, played
+from ..plus.rule import OPENING, abstract_of, my_threats, second_move, their_threats
 from ..plus.sweep import anchors
 
 PAPER = REPO / "paper"
@@ -47,6 +49,77 @@ def seconds(x):
     return f"{x:.1f}" if x < 10 else f"{round(x)}"
 
 
+def line_played(a):
+    """The line the rule plays from the abstraction a against blocks."""
+    line, _, _ = line_with_key(a)
+    return tuple(played(a, line))
+
+
+def lines_by_abstraction(n):
+    """Every distinct abstraction of a reply pair on the n board, with its line."""
+    cells = [(r, c) for r in range(n) for c in range(n)]
+    out = {}
+    for o1 in cells:
+        if o1 == OPENING:
+            continue
+        x2 = second_move(o1)
+        for o2 in cells:
+            if o2 in (OPENING, o1, x2):
+                continue
+            a = abstract_of([OPENING, x2], [o1, o2], o1, o2)
+            key = (tuple(sorted(a.p1)), tuple(sorted(a.p2)), a.hot)
+            if key not in out:
+                out[key] = line_played(a)
+    return out
+
+
+def anchored_lines():
+    """The line the rule plays from each anchored position."""
+    out = []
+    for o1, o2, hot in anchors():
+        a = abstract_of([OPENING, second_move(o1)], [o1, o2], o1, o2)
+        assert a.hot == hot
+        out.append(line_played(a))
+    return out
+
+
+def blocks_that_threaten(n):
+    """Reply pairs on the n board whose line has a block that gives the
+    second player a threat, which the next tempo move must then take."""
+    cells = [(r, c) for r in range(n) for c in range(n)]
+    count = 0
+    for o1 in cells:
+        if o1 == OPENING:
+            continue
+        x2 = second_move(o1)
+        for o2 in cells:
+            if o2 in (OPENING, o1, x2):
+                continue
+            a = abstract_of([OPENING, x2], [o1, o2], o1, o2)
+            line, tempo, _ = line_with_key(a)
+            p1, p2 = list(a.p1), list(a.p2)
+            hit = False
+            for j, m in enumerate(line):
+                p1 = [m] + p1
+                mine = my_threats(p1, p1 + p2)
+                if len(mine) >= 2:
+                    break
+                p2 = mine + p2
+                threats = their_threats(p2, p1 + p2)
+                if threats:
+                    assert j < tempo and threats == [line[j + 1]]
+                    hit = True
+            count += hit
+            if hit:
+                assert tempo == 3
+    return count
+
+
+def latest_ply(lines):
+    """The ply of the win when the double threat ends the longest line."""
+    return max(2 * len(line) + 5 for line in lines)
+
+
 def build_claims():
     """The macro table, name to LaTeX value."""
     recorded = json.loads((PAPER / "data" / "recorded.json").read_text())
@@ -66,6 +139,12 @@ def build_claims():
         # the paper says side-1 lines are exactly the lines with no tempo move
         assert m["sides"][1] == m["tempo"][0]
     out["pairsAnchor"] = group((23 * 23 - 1) * (23 * 23 - 3))
+    six_lines = set(lines_by_abstraction(6).values())
+    anchor = lines_by_abstraction(23)
+    assert len(six_lines) == six["lines"] and latest_ply(six_lines) == six["max_plies"]
+    assert set(anchor.values()) == six_lines and set(anchored_lines()) <= six_lines
+    out["anchorAbstractions"] = group(len(anchor))
+    out["blocksThatThreaten"] = str(blocks_that_threaten(6))
     out["distinctLines"] = str(six["lines"])
     for d in range(4):
         out[f"tempo{['Zero', 'One', 'Two', 'Three'][d]}"] = group(six["tempo"][d])

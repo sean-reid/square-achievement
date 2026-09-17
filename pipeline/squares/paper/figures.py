@@ -244,7 +244,7 @@ def fig_agreement():
             + stones(list(pair), "white", BIG)
             + [
                 mark(b, BIG),
-                label("$b$", b, "above"),
+                label("$b$", b, "left"),
                 label(names[0], pair[0], "below"),
                 label(names[1], pair[1], "below"),
                 "  \\node[anchor=south east,inner sep=2pt] at (17,-17) {$\\Board_{17}$};",
