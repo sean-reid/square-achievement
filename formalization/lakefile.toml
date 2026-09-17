@@ -7,6 +7,7 @@ defaultTargets = ["SquareAchievement"]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
+weak.linter.style.header = false # the code is MIT; the header linter wants mathlib's Apache header
 maxSynthPendingDepth = 3
 
 [[require]]
