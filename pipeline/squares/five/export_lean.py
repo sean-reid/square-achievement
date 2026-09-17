@@ -32,15 +32,26 @@ def entry_lean(e):
     return f"Entry.plan [{cells}]"
 
 
+def wrap(line, width=100, indent="    "):
+    """Break a list literal at item boundaries so no line exceeds width."""
+    out = []
+    while len(line) > width:
+        cuts = [
+            i for i in range(width) if line[i : i + 2] == ", " and not line[i + 2].isdigit()
+        ]
+        if not cuts:
+            break
+        out.append(line[: cuts[-1] + 1])
+        line = indent + line[cuts[-1] + 2 :]
+    return out + [line]
+
+
 def emit(name, defname, opening, box, x2_map, scripts, out_dir, chunk=4):
     lines = [
         "import SquareAchievement.Compute.Table",
         "",
         "/-! Machine-generated strategy table; regenerate with the table",
         "pipeline rather than edit. -/",
-        "",
-        "set_option maxHeartbeats 1000000",
-        "set_option maxRecDepth 8192",
         "",
         "namespace SquareAchievement",
         "",
@@ -56,12 +67,19 @@ def emit(name, defname, opening, box, x2_map, scripts, out_dir, chunk=4):
     ]
     chunks = [entries[i : i + chunk] for i in range(0, len(entries), chunk)]
     for i, ch in enumerate(chunks):
-        lines.append(f"def {defname}Scripts_{i} : List (Key × List (Key × Entry)) := [")
-        lines += ch
+        lines += [
+            "set_option maxHeartbeats 1000000 in",
+            "-- a chunk of the table is a literal too large for the default budget",
+            "set_option maxRecDepth 8192 in",
+            f"def {defname}Scripts_{i} : List (Key × List (Key × Entry)) := [",
+        ]
+        for entry in ch:
+            lines += wrap(entry)
         lines += ["]", ""]
     joined = " ++ ".join(f"{defname}Scripts_{i}" for i in range(len(chunks)))
     lines += [
-        f"def {defname}Scripts : List (Key × List (Key × Entry)) := {joined}",
+        f"def {defname}Scripts : List (Key × List (Key × Entry)) :=",
+        *wrap(f"  {joined}"),
         "",
         f"def {defname}Table : Table :=",
         f"  ⟨({opening[0]}, {opening[1]}), {box}, {defname}X2, {defname}Scripts⟩",
