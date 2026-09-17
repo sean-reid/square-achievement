@@ -12,13 +12,55 @@ test("the hub states the theorem, plays the rule, and routes onward", async ({
   await expect(page.locator("pre.lean")).toContainText("plus_wins_with");
 });
 
-test("the proof guide has its figures and references", async ({ page }) => {
+test("the hub's theorem carries no ply bound", async ({ page }) => {
+  await page.goto("./");
+  await expect(page.locator(".theorem")).toContainText(
+    "following the plus rule wins.",
+  );
+  await expect(page.locator(".theorem")).not.toContainText("ply");
+});
+
+test("the proof guide follows the paper's sections", async ({ page }) => {
   await page.goto("./");
   await page.locator('nav.routes a[href$="proof/"]').click();
   await expect(page.locator("h1")).toContainText("How the proof works");
-  await expect(page.locator("figure.diagram")).toHaveCount(3);
-  await expect(page.locator("ol.refs li")).toHaveCount(9);
+  await expect(page.locator("h2")).toHaveText([
+    "Introduction",
+    "Definitions",
+    "The plus rule",
+    "Small boards and the 5 × 5 board",
+    "Verification",
+    "Boards of size at least 17",
+    "Formalization",
+    "Open questions",
+    "References",
+  ]);
+  await expect(page.locator("h3")).toHaveText([
+    "Pluses",
+    "Far stones and the hidden corner",
+    "Tempo moves and lines",
+  ]);
+  await expect(page.locator(".theorem")).not.toContainText("ply");
+});
+
+test("the proof guide has its figures and references", async ({ page }) => {
+  await page.goto("./proof/");
+  await expect(page.locator("figure.diagram")).toHaveCount(4);
+  await expect(page.locator("figure.diagram svg rect[width='12']")).toHaveCount(
+    1,
+  );
+  await expect(page.locator("ol.refs li")).toHaveCount(11);
   await expect(page.locator("sag-board .sag-x")).toHaveCount(1);
+  await expect(page.locator("pre.lean")).toContainText("plus_wins_with");
+});
+
+test("the guide speaks of the first and second player", async ({ page }) => {
+  await page.goto("./proof/");
+  const text = await page.locator("main, body").first().innerText();
+  expect(text).not.toMatch(/\b(we|our|us|opponent|latent|farm)\b/i);
+  expect(text).toContain("hidden corner");
+  expect(text).toContain("branch point");
+  expect(text).toContain("anchor board");
 });
 
 test("the old result pages redirect", async ({ page }) => {
