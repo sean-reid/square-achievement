@@ -94,8 +94,14 @@ def play(o1, o2):
     return states, tempo
 
 
-def fmt(c):
-    return f"$({c[0]},{c[1]})$"
+def ply_labels(states):
+    """Panel labels by ply, as in the paper's game table: the first
+    panel shows our move, each later one the block and our next move."""
+    out = []
+    for i, (p1, _, _) in enumerate(states):
+        ply = 2 * len(p1) - 1
+        out.append(f"ply {ply}" if i == 0 else f"plies {ply - 1}--{ply}")
+    return out
 
 
 def panels(states, labels):
@@ -160,21 +166,15 @@ def fig_second():
 def fig_basic():
     states, tempo = play((0, 0), (4, 4))
     assert tempo == 0 and len(states) == 3
-    labels = ["after " + fmt(states[0][0][-1])] + [
-        "after " + fmt(p2[-1]) + ", " + fmt(p1[-1]) for p1, p2, _ in states[1:]
-    ]
-    return panels(states, labels)
+    assert [p1[-1] for p1, _, _ in states] == [(2, 1), (1, 2), (2, 3)]
+    return panels(states, ply_labels(states))
 
 
 def fig_tempo():
     states, tempo = play((0, 0), (3, 1))
     assert tempo == 2
-    labels = [
-        "tempo move " + fmt(states[0][0][-1]),
-        "tempo move " + fmt(states[1][0][-1]),
-        "first arm " + fmt(states[2][0][-1]),
-    ]
-    return panels(states[:3], labels)
+    assert [p1[-1] for p1, _, _ in states[:3]] == [(3, 3), (4, 3), (3, 4)]
+    return panels(states[:3], ply_labels(states[:3]))
 
 
 def fig_longest():
