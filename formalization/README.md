@@ -22,11 +22,12 @@ footprint is Lean's kernel plus the compiler-evaluation trust behind
 | `small_board_no_win` | no first-player win on boards up to 4 x 4 |
 | `small_board_drawn` | drawing strategies for both players on boards up to 4 x 4 |
 | `second_player_no_win` | strategy stealing: the second player never forces a win |
-| `P1CanWin.or_p2CanDraw` | determinacy: the player to move forces a win or the opponent can draw |
+| `P1CanWin.or_p2CanDraw` | determinacy: the player to move forces a win or the other player can draw |
 | `check_sound` | a successful run of the enumerating checker yields a `P1CanWin` tree |
 | `checkForcedS_winsWith` | a successful forced run of a strategy that takes its wins yields the strategy's own winning tree, `WinsWith` |
 | `refute_sound` | a successful refuter run refutes a first-player win |
-| `escape_farm` | a square escaping the base board is latent: box corner plus the reply pair |
+| `escape_farm` | a square escaping the base board through a box cell and the reply pair has that cell as the pair's hidden corner, the one `farmKey` returns |
+| `farmKey_corners` | the hidden corner lies in the box and is a corner of a square through both replies |
 | `simulate` | a forced base run of any strategy replays on every larger board as the strategy's own play |
 
 ## Building
@@ -43,8 +44,8 @@ lake build
 evaluating the certificates along the way: the refutations up to 4 x 4,
 the exhaustive check of the 5 x 5 table, the forced-tree runs of the
 plus rule at sizes 6 to 17 and on the anchor board 23, and the three
-anchored far-pair families. Expect about a quarter of an hour on a
-laptop, almost all of it the evaluations. On Linux the precompiled
+anchored far-pair families. Expect about 17 minutes on a laptop,
+almost all of it the evaluations. On Linux the precompiled
 modules load the toolchain's shared libraries through
 `LD_LIBRARY_PATH`; set it to `$(lean --print-libdir)` if the checker
 executable fails to start.
@@ -102,7 +103,8 @@ output with the Python rule, and its tests keep a saved copy at
 
 ## Layout
 
-One library, `SquareAchievement/`, with a root `SquareAchievement.lean`
+One library, `SquareAchievement/`, every declaration in the
+`SquareAchievement` namespace, with a root `SquareAchievement.lean`
 importing every module:
 
 - `Core/` cells, squares, positions; the quarter-plane model makes
@@ -114,11 +116,11 @@ importing every module:
   forced-tree checker, generic over strategies; `WinsWith`, the
   predicate that a strategy's own play wins, which the forced checker's
   soundness theorem concludes.
-- `General/` the simulation argument any forced strategy can use: span
-  and invariance geometry (`Invariance`), the latency dichotomy
-  (`Coverage`), the replay of a forced base run on every larger board
-  (`Simulation`), and the small facts every wrapper of it needs
-  (`Dispatch`).
+- `General/` the simulation argument any forced strategy can use: the
+  hidden corner of a reply pair (`FarmKey`), the dichotomy for squares
+  escaping the base board (`Coverage`), the replay of a forced base run
+  on every larger board (`Simulation`), and the small facts every
+  wrapper of it needs (`Dispatch`).
 - `Plus/` the plus rule: `Rule` defines it as executable code;
   `Threats` proves its pair-based threat scan agrees with the
   checker's; `Agreement` proves it reads the same move from a real
@@ -130,4 +132,4 @@ importing every module:
 - `Results/` the outcome theorems assembled from the refutations, the
   5 x 5 certificate, and the plus rule.
 
-`Checker.lean` is the executable.
+`Main.lean` is the executable, `lake exe checker`.
