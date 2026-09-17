@@ -43,7 +43,7 @@ the four cells at a common distance along the axes. The rule wins every
 game by the seventeenth ply, plays the same $\distinctLines$ lines on
 every board, and reads only its own stones, the opponent's stones inside
 a $17 \times 17$ region, and one derived cell. Boards of size $5$ to $17$
-are verified by exhaustive search, and a simulation theorem carries a
+are checked by machine, and a simulation theorem carries a
 checked run on the $23 \times 23$ board to every larger board. The
 argument is formalized in Lean~4, and the formal theorem for the rule
 states that the tree of its own moves is a winning tree, not only that
@@ -144,8 +144,8 @@ $\latestPly$th ply at the latest.
 
 Theorem~\ref{thm:main} is proved in three ranges: an exhaustive
 refutation for $n \le 4$ (Section~\ref{sec:small}), a strategy table
-verified by exhaustive search for $n = 5$, where no purely forcing
-strategy exists (Section~\ref{sec:small}), and the rule for $n \ge 6$,
+checked by machine for $n = 5$, where no purely forcing strategy from
+the opening $(2,2)$ exists (Section~\ref{sec:small}), and the rule for $n \ge 6$,
 checked at every size up to $17$ (Section~\ref{sec:verify}) and carried
 to every larger board by the simulation theorem
 (Section~\ref{sec:uniform}). Searches are only as trustworthy as the
@@ -267,7 +267,8 @@ $2$.
 \centering
 \input{fig-tempo}
 \caption{Against the replies $(0,0)$ and $(3,1)$ both side-$1$ pluses
-are spoiled, since $(3,1)$ is a diagonal of each. Left: the tempo move
+are spoiled, since $(3,1)$ is a diagonal of the plus at $(2,2)$ and an
+arm of the plus at $(3,2)$. Left: the tempo move
 $(3,3)$ threatens at $(2,3)$ through $\Sq(2,2,1)$. Middle: after the
 block, $(4,3)$ threatens at $(4,2)$ through $\Sq(3,2,1)$. Right: after
 that block, the stones $(3,3)$ and $(4,3)$ let the first arm $(3,4)$ of
@@ -279,8 +280,8 @@ Figure~\ref{fig:longest} shows the end.}
 
 \begin{definition}[line, key]\label{def:line}
 A \emph{line} from a position consists of some tempo moves, each
-followed by its block, and then the arms of one plus in the region that
-we do not yet hold, in some order, such that each arm before the last
+followed by its block, and then the arms we do not yet hold of one plus
+in the region whose centre we hold, in some order, such that each arm before the last
 makes exactly one threat whose block is not the hidden corner, the last
 arm makes at least two threats, and the opponent never has a threat.
 The \emph{key} of a line is the triple
@@ -331,13 +332,13 @@ the stones the rule does not see can affect the game.
 Let $x$ and $y$ be two cells each having a coordinate at least $12$.
 Their \emph{hidden corner} is a cell $b \in \Board_6$ such that
 $b$, $x$, $y$ are three corners of one square. The \emph{abstraction}
-of a position in which we have moved at least twice consists of our
+of a position reached after the opponent's second move consists of our
 stones, the opponent's stones inside $\Board_{17}$, and the hidden
 corner of the opponent's first two stones, if they have one.
 \end{definition}
 
 \begin{lemma}[dichotomy]\label{lem:dichotomy}
-A pair has at most one hidden corner. If $\Sq(r,c,s)$ has a corner
+Two cells $x \ne y$ have at most one hidden corner. If $\Sq(r,c,s)$ has a corner
 $b \in \Board_6$, has $x$ and $y$ among its other corners, and is not
 contained in $\Board_{17}$, then $b = (r,c)$, $s \ge 12$, each of $x$,
 $y$ has a coordinate at least $12$, and $b$ is the hidden corner of
@@ -346,17 +347,20 @@ $\{x, y\}$.
 
 \begin{proof}
 Uniqueness: if $x$ and $y$ share a column, the square has side
-$|x_1 - y_1|$ and $b$ lies in the row of the member with row below $6$,
-at that distance to the left, since the cell at that distance to the
-right would put both coordinates of that member below $6$; a shared row
+$s = |x_1 - y_1|$ and $b$ lies in the row of a member with row below
+$6$, at distance $s$ to the left, since the cell at that distance to
+the right would put both coordinates of that member below $6$; only
+one member can have row below $6$, since if both did then $s < 6$ and
+the shared column, being the coordinate at least $12$ of either, would
+put both candidates for $b$ at column $7$ or more; a shared row
 is symmetric; if $x$ and $y$ are diagonally opposite, the two remaining
 corners are $(x_1, y_2)$ and $(y_1, x_2)$, of which at most one lies in
 $\Board_6$, since otherwise all four coordinates of $x$ and $y$ would
 be below $6$. For the second claim, a second corner in $\Board_6$ would
-put the square inside $\Board_{11}$ by Lemma~\ref{lem:span}, against
+put the square inside $\Board_{12}$ by Lemma~\ref{lem:span}, against
 the hypothesis; so $b$ is alone in the region and, being the corner
 nearest the origin, is $(r,c)$; the corner opposite $b$ has both
-coordinates at least $6 + s$, and the square leaves $\Board_{17}$ only
+coordinates at most $5 + s$, and the square leaves $\Board_{17}$ only
 if a coordinate reaches $17$, so $s \ge 12$. Each of $x$, $y$ has a
 coordinate equal to $r + s$ or $c + s$, hence at least $12$. The formal
 statement is in \texttt{General/Coverage.lean}.
@@ -369,7 +373,7 @@ statement is in \texttt{General/Coverage.lean}.
 $\Board_{17}$ and the shaded block is the region $\Board_6$. The
 opponent's free replies $o_1 = (0,17)$ and $o_2 = (14,3)$ are two
 corners of the dashed square, whose third corner $b = (0,3)$ is their
-hidden corner and whose fourth corner $z = (14,17)$ lies outside
+hidden corner; $o_1$ and the fourth corner $z = (14,17)$ lie outside
 $\Board_{17}$. The rule never threatens at $b$: if the opponent had to
 block there they would threaten at $z$, a cell the rule does not see.}
 \label{fig:latent}
@@ -385,9 +389,10 @@ stays inside $\Board_{17}$; there it costs nothing.
 
 \begin{remark}
 The base $17 = 6 + 2 \cdot 6 - 1$ is least for Lemma~\ref{lem:dichotomy}.
-With base $15$, the replies $(0,16)$ and $(11,5)$ span a square through
-the region cell $(0,5)$ completing at $(11,16)$: it fits no board of
-size $15$, and $(11,5)$ has no coordinate at $12$.
+With base $15$ or $16$, the replies $(0,16)$ and $(11,5)$ span a square
+through the region cell $(0,5)$ completing at $(11,16)$: it fits no
+board of size $15$ or $16$, and $(11,5)$ has no coordinate at least
+$12$.
 \end{remark}
 
 \begin{table}[ht]
@@ -585,7 +590,8 @@ Lemma~\ref{lem:stealing}, these games are drawn under optimal play:
 each player can secure at least a draw.
 \end{proposition}
 
-For $n \le 2$ no square fits the board. For $n = 3, 4$ the claim is a
+For $n \le 2$ the board has at most four cells, so neither player ever
+holds four. For $n = 3, 4$ the claim is a
 statement about a finite game tree, verified by an exhaustive search
 that is part of the formal development: the search shows that the
 player to move cannot force a win by exhibiting, for every first-player
@@ -661,10 +667,10 @@ theorems.
 The rule passes the forced tree on every board from $6$ to $17$;
 Table~\ref{tab:runs} gives the number of reply pairs at the root and
 the time of the compiled checker, together with the full-tree check of
-the $5 \times 5$ table. The rule and the checkers exist three times: a Python twin used while
-finding the rule and the table, the Lean definitions, and a TypeScript
-copy of the rule that drives the interactive page accompanying the
-paper. The Python and TypeScript copies are compared with the Lean rule
+the $5 \times 5$ table. The rule exists three times and the checkers
+twice: a Python twin used while finding the rule and the table, the
+Lean definitions, and a TypeScript copy of the rule that drives the
+interactive page accompanying the paper. The Python and TypeScript copies are compared with the Lean rule
 on the line it commits to for every reply pair of the $6 \times 6$
 board and for the anchored positions of Section~\ref{sec:uniform}, and
 the Python verifier, which walks the full tree rather than the forced
@@ -758,7 +764,7 @@ move. A case analysis over the reply pairs assembles Theorem~\ref{thm:uniform}
 from this agreement and the simulation theorem.
 
 \begin{remark}\label{rem:anchors}
-The base board $23$, the stand-ins $(22,22)$ and $(22,21)$, and the
+The anchor board $23$, the stand-ins $(22,22)$ and $(22,21)$, and the
 anchor cells at coordinates $17$ and above are choices of the proof,
 not of the rule (Figure~\ref{fig:anchors}). An anchor for the hidden
 corner $(h_1,h_2)$ of a far pair sits at $(h_1+17, h_2+17)$ and
@@ -781,12 +787,13 @@ $o_1' = (19,20)$ and $o_2' = (19,3)$, two corners of the dashed square
 through $b$, both beyond $\Board_{17}$; a pair with no hidden corner is
 replaced by the two grey stand-ins at $(22,22)$ and $(22,21)$, which
 lie on no square through the region. Every anchor has coordinates at most
-$22$, which is why the base board is $23$.}
+$22$, which is why the anchor board is $23$.}
 \label{fig:anchors}
 \end{figure}
 
-Theorem~\ref{thm:rule} follows from Table~\ref{tab:runs} for
-$6 \le n \le 17$ and Theorem~\ref{thm:uniform} for $n \ge 17$, and
+Theorem~\ref{thm:rule} follows from the checked runs at $6$ to $17$
+with Proposition~\ref{prop:forced} and from Theorem~\ref{thm:uniform}
+for $n \ge 17$, and
 Theorem~\ref{thm:main} from Propositions~\ref{prop:small}
 and~\ref{prop:five} and Theorem~\ref{thm:rule} with the moves
 forgotten.
@@ -888,18 +895,16 @@ line depends only on its abstraction. Most pairs need no preparation:
 on $\Board_{17}$, $\sideOneSeventeen$ of $\pairsSeventeen$ pairs are won
 by a side-$1$ plus with no tempo move, the other $\sideTwoSeventeen$ by
 a side-$2$ plus behind one to three tempo moves, and only
-$\distinctLines$ pairs on any board, all with both replies in
-$\Board_6$, need two or three. And the rule wins by ply $\latestPly$
-against $\tableLatestPly$ for the table of Section~\ref{sec:how}, in
-the same measure, the ply of the winning move against an opponent who
-always blocks.
+$\tempoTwoThree$ pairs on any board, all with both replies in
+$\Board_6$, need two or three. The rule wins by ply $\latestPly$, the
+ply of the winning move against an opponent who always blocks.
 
 \begin{table}[ht]
 \centering
 \begin{tabular}{lr}
 \toprule
 distinct lines & \distinctLines \\
-lines with $0$, $1$, $2$, $3$ tempo moves (pairs on $\Board_6$)
+pairs on $\Board_6$ whose line has $0$, $1$, $2$, $3$ tempo moves
   & \tempoZero, \tempoOne, \tempoTwo, \tempoThree \\
 pairs using a plus of side $1$, side $2$ (on $\Board_6$) & \sideOne, \sideTwo \\
 longest line, in first-player moves after the opening pair & \longestLineMoves \\
@@ -910,8 +915,8 @@ latest winning ply & \latestPly \\
 \caption{The rule's lines. The distinct lines, the longest line, and
 the latest winning ply are the same on every board from $6$ to $17$,
 as are the $\tempoTwo$ and $\tempoThree$ pairs using two or three tempo
-moves, since those pairs have both replies in $\Board_6$; the pairs
-using no tempo move grow with the board.}
+moves, since those pairs have both replies in $\Board_6$; the other
+counts grow with the board.}
 \label{tab:lines}
 \end{table}
 
@@ -933,7 +938,7 @@ Theorem~\ref{thm:main} (outcome) & proved in Lean & the certificates below, \tex
 Theorem~\ref{thm:rule} (the rule wins, \texttt{WinsWith}) & proved in Lean & runs at $6$ to $17$ and $23$, three anchored families \\
 Theorem~\ref{thm:uniform} (every board from $17$) & proved in Lean & Lemma~\ref{lem:dichotomy}, \texttt{simulate}, \texttt{plusMove\_agree} \\
 Lemma~\ref{lem:arms} (arms force) & proved on paper & elementary; not needed by the formal proof, which checks the lines \\
-Lemma~\ref{lem:span}, Lemma~\ref{lem:dichotomy} & proved in Lean & the proof in \texttt{General/Coverage.lean} \\
+Lemma~\ref{lem:span}, Lemma~\ref{lem:dichotomy} & proved in Lean & \texttt{corners\_span\_bounded} in \texttt{General/Invariance.lean}, \texttt{escape\_farm} in \texttt{General/Coverage.lean} \\
 Lemma~\ref{lem:stealing} (strategy stealing) & proved in Lean & \texttt{P1CanWin.insert\_left} \\
 Proposition~\ref{prop:small} (draws) & proved in Lean & refutations at $1$ to $4$, determinacy \\
 Proposition~\ref{prop:five} ($5 \times 5$) & proved in Lean & the $5 \times 5$ table, one full-tree run \\
