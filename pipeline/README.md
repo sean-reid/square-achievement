@@ -41,7 +41,11 @@ figures.
   table, stated to mirror `formalization/SquareAchievement/Plus/Rule.lean`
   move for move; `sweep.py` runs it over every opening of a board and
   over the anchored far-pair positions; `measure.py` reports its lines
-  per board; `export_site.py` writes the site's test fixture.
+  per board; `export_site.py` writes the site's test fixture;
+  `crosscheck.py` compares the rule's line at every reply pair of the
+  6 x 6 board and every anchored position with the output of
+  `lake exe checker lines`, a copy of which the tests keep at
+  `squares/plus/tests/fixtures/lean_lines.txt`.
 - `squares/paper/`: the paper's generated inputs: `claims.py` writes
   `paper/claims.tex` with every number the paper quotes, `figures.py`
   writes `paper/fig-*.tex` from the rule's own play, and `timings.py`
@@ -58,6 +62,7 @@ python3 -m squares.five.crosscheck            # the three copies of the table ag
 python3 -m squares.plus.sweep 15              # the plus rule over every opening of the 15 board
 python3 -m squares.plus.measure               # the rule's lines per board: count, longest, tempo split
 python3 -m squares.plus.export_site           # write the site's plus_lines.json fixture
+python3 -m squares.plus.crosscheck [lines.txt] # the Python and Lean rules commit to the same lines
 python3 -m squares.paper.timings              # record certificate times (needs lake build checker)
 python3 -m squares.paper.claims               # write paper/claims.tex
 python3 -m squares.paper.figures              # write paper/fig-*.tex

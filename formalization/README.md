@@ -80,6 +80,7 @@ this is the trust base of every large computer-assisted proof in Lean.
 ```sh
 lake exe checker <n>        # the certificate for the n board, with its time
 lake exe checker anchors    # the plus rule's three anchored far-pair families
+lake exe checker lines      # the line the plus rule commits to after every reply pair
 lake exe checker 5 trace    # the first failing line of the 5 x 5 table, if any
 ```
 
@@ -87,6 +88,17 @@ Below 5 the checker runs the refuter, at 5 the exhaustive check of the
 5 x 5 table, and from 6 up the forced-tree checker on the plus rule.
 The executable demonstrates the same runs interactively but is not the
 proof; the runs the theorems cite happen inside the build.
+
+`lines` prints one position per line, machine-readable:
+`6 o1r o1c o2r o2c x2r x2c : r c r c ...` for each of the 1,155 reply
+pairs of the 6 x 6 board, where `o1` and `o2` are the second player's
+replies and `x2` the first player's second move, and
+`anchor h1 h2 o1r o1c o2r o2c x2r x2c : ...` for each of the 176
+anchored positions, where `(h1, h2)` is the hidden corner the rule
+reads. After the colon come the cells of the rule's line in play order,
+or `none`. The pipeline's `squares.plus.crosscheck` compares this
+output with the Python rule, and its tests keep a saved copy at
+`pipeline/squares/plus/tests/fixtures/lean_lines.txt`.
 
 ## Layout
 
