@@ -1,22 +1,25 @@
-/** A 6 by 6 board diagram as inline SVG, in the paper's idiom: black
- * stones ours, white the opponent's, dashed circles the cells where we
- * would complete a square, letters for labels, dashed squares for the
- * squares of a plus. The caller wraps the markup in an <svg> whose
- * <defs> declare the grid pattern `grid6p`. */
+/** A board diagram as inline SVG, in the paper's idiom: black stones
+ * the first player's, white the second player's, dashed circles the
+ * threat cells, hollow squares the quiet moves, letters for labels,
+ * dashed squares for the squares of a plus. The caller wraps the markup
+ * in an <svg> whose <defs> declare the grid pattern `grid6p`. */
 
 export type Cell = [number, number];
 
-/** A 6 by 6 diagram in the paper's idiom: black stones ours, white the
- * opponent's, dashed cells the threats, letters for labels. */
+/** Cell side in SVG units; a board of size n spans n * UNIT. */
+export const UNIT = 24;
+
 export function board6(opts: {
+  size?: number;
   black?: Cell[];
   white?: Cell[];
   threats?: Cell[];
+  quiet?: Cell[];
   labels?: [number, number, string][];
   squares?: [number, number, number][];
 }): string {
-  const U = 24;
-  const size = 6 * U;
+  const U = UNIT;
+  const size = (opts.size ?? 6) * U;
   const parts: string[] = [];
   parts.push(
     `<rect width="${size}" height="${size}" fill="url(#grid6p)"></rect>`,
@@ -40,6 +43,11 @@ export function board6(opts: {
   for (const [r, c] of opts.threats ?? []) {
     parts.push(
       `<circle cx="${c * U + 12}" cy="${r * U + 12}" r="7" fill="none" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="3 2.5"></circle>`,
+    );
+  }
+  for (const [r, c] of opts.quiet ?? []) {
+    parts.push(
+      `<rect x="${c * U + 6}" y="${r * U + 6}" width="12" height="12" fill="none" stroke="var(--ink)" stroke-width="1.4"></rect>`,
     );
   }
   for (const [r, c, text] of opts.labels ?? []) {

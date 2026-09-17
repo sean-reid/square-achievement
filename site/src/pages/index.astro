@@ -69,37 +69,40 @@ const lastArmPicture = board6({
 
   <p class="lead">
     Two players take turns claiming cells of an
-    <span set:html={k("n \\times n")} /> grid. The first to hold all four corners
-    of an axis-aligned square wins; a full board with no square is a draw. Erickson
-    asked who wins. The answer: the first player wins exactly when
+    <span set:html={k("n \\times n")} /> grid. The first to hold all four
+    corners of an axis-parallel square wins; a full board with no square is a
+    draw. Erickson asked who wins. The first player wins exactly when
     <span set:html={k("n \\ge 5")} />, and from 6 × 6 up a rule of one paragraph
-    wins by the seventeenth ply. The whole argument, every board size at once,
-    is checked in Lean 4.
+    wins, with no lookup table. The whole argument, every board size at once, is
+    checked in Lean 4.
   </p>
 
   <div class="theorem">
-    <span class="label">Theorem.</span> The first player has a winning strategy in
-    the square achievement game on the
-    <span set:html={k("n \\times n")} /> board if and only if
-    <span set:html={k("n \\ge 5")} />. For <span set:html={k("n \\le 4")} /> the game
-    is a draw under optimal play. For <span set:html={k("n \\ge 6")} /> the first
-    player following the plus rule wins by the seventeenth ply.
+    <span class="label">Theorem.</span> In the square achievement game on the
+    <span set:html={k("n \\times n")} /> board, the first player has a winning
+    strategy if and only if <span set:html={k("n \\ge 5")} />. For
+    <span set:html={k("n \\le 4")} /> the game is drawn under optimal play: each
+    player can secure at least a draw. For every
+    <span set:html={k("n \\ge 6")} />, the first player following the plus rule
+    wins.
   </div>
 
   <p>The rule, for every board from 6 × 6 up:</p>
   <ol class="rule">
     <li>
-      Open at (2,2). Answer the first reply at (3,2), except against seven
-      replies next to the opening, where a small diagram gives the second move.
+      Open at (2,2). Answer the first reply at (3,2), except against seven first
+      replies near the opening, where a small diagram in the paper gives the
+      second move.
     </li>
     <li>
-      If you can complete a square, do it. Otherwise, if the opponent could
-      complete one on their next move, block it.
+      If some empty cell completes a square of the first player, play it.
+      Otherwise, if some empty cell completes a square of the second player,
+      block it.
     </li>
     <li>
-      Otherwise follow the line you chose after the second reply: at most three
-      forcing moves, each answered by a forced block, and then the arms of a
-      plus.
+      Otherwise follow the line chosen after the second reply: at most three
+      tempo moves, single forcing moves each answered by a forced block, and
+      then the arms of a plus.
     </li>
   </ol>
   <figure class="diagram rule-pictures">
@@ -120,7 +123,8 @@ const lastArmPicture = board6({
             fill="none"
             stroke="var(--rule)"
             stroke-width="0.8"
-            opacity="0.5"></path>
+            opacity="0.5"
+          ></path>
         </pattern>
       </defs>
       <g set:html={plusPicture} />
@@ -128,21 +132,25 @@ const lastArmPicture = board6({
       <g transform="translate(328 0)" set:html={lastArmPicture} />
     </svg>
     <figcaption>
-      The plus, in three pictures. Left: we hold the centre (2,2) and one arm
-      (3,2); the other arms are a, the diagonals d. Middle: playing an arm
-      beside the held one makes three corners of a small square, so the opponent
-      must block on the diagonal, dashed. Right: after two such arms, the last
-      arm threatens two diagonals at once, and no single block stops both. When
-      the opponent's stones spoil this, the rule first plays up to three forcing
-      moves, each answered by a forced block, to place the stones it needs.
+      The plus, in three pictures. Left, the first player holds the centre (2,2)
+      and one arm (3,2); the other arms are a, the diagonals d. Middle, playing
+      an arm perpendicular to the held one makes three corners of a small
+      square, so the second player must block on the diagonal, dashed. Right,
+      after two such arms, the last arm threatens two diagonals at once, and no
+      single block stops both. When the second player holds an arm or a
+      diagonal, the rule first plays up to three tempo moves, each answered by a
+      forced block, to place the stones it needs.
     </figcaption>
   </figure>
 
   <p>
-    The rule looks only at the 6 × 6 corner of the board and the opponent's
-    stones near it, so one rule serves every board, and it plays the same 79
-    lines on every board from 6 × 6 to 17 × 17. On 5 × 5 no forcing strategy
-    exists and a table with branch points plays instead.
+    The rule reads only its own stones, the second player's stones inside the 17
+    × 17 base board, and one derived cell, the hidden corner, so one rule serves
+    every board, and it plays the same 79 lines on every board from 6 × 6 to 17
+    × 17. Against a second player who always blocks every line ends by ply 17;
+    that bound is computed from the lines and is not part of the formal theorem.
+    On 5 × 5 no purely forcing strategy from (2,2) exists, and a table with
+    quiet moves at branch points plays instead.
   </p>
 
   <figure class="game">
@@ -160,17 +168,19 @@ const lastArmPicture = board6({
       <span class="route-title">Read the paper</span>
       <span class="route-body">
         The outcome theorem, the rule in full, why plus arms force, the
-        verification runs, the simulation argument that carries one checked
-        board to all larger ones, and the formal theorem that the rule's own
-        play wins. PDF, built from this repository.
+        verification runs, the simulation theorem that carries one checked board
+        to all larger ones, and the formal theorem that the rule's own play
+        wins. PDF, built from this repository.
       </span>
     </a>
     <a class="route" href={`${base}proof/`}>
       <span class="route-title">See how the proof works</span>
       <span class="route-body">
-        An illustrated guide: pluses and tempo moves, the hidden corner, the
-        draws and the 5 × 5 board, what a computer search has to be trusted
-        with, and how one run on the 23 × 23 board covers every larger board.
+        An illustrated guide that follows the paper section by section: pluses,
+        the hidden corner, tempo moves and lines, the small boards and the 5 × 5
+        branch point, the forced checker and its guards, and the simulation
+        theorem that carries one run on the 23 × 23 anchor board to every larger
+        board.
       </span>
     </a>
     <a
@@ -179,9 +189,9 @@ const lastArmPicture = board6({
     >
       <span class="route-title">Check it yourself</span>
       <span class="route-body">
-        The Lean 4 development. The rule is the definition <code>plusMove</code
-        >, 250 lines with no data; a successful <code>lake build</code> is the proof,
-        and the README shows how to print the theorems and their axioms.
+        The Lean 4 development. The rule is <code>plusMove</code>, a definition
+        of 250 lines with no data; a successful <code>lake build</code> is the
+        proof, and the README shows how to print the theorems and their axioms.
       </span>
     </a>
   </nav>
@@ -189,14 +199,14 @@ const lastArmPicture = board6({
   <h2>What you have to trust</h2>
   <p>
     The headline statements in the development read as follows, with
-    <code>P1CanWin</code> the first player forcing a win, the two draw predicates
-    each player securing at least a draw, and <code>WinsWith σ n h</code> the tree
-    in which the first player plays the move of the strategy <code>σ</code> at every
-    node after the history <code>h</code>, against every legal reply, ending in
-    a first-player square on every branch.
+    <code>P1CanWin</code> the first player forcing a win, the two draw
+    predicates each player securing at least a draw, and{" "}
+    <code>WinsWith σ n h</code> the tree in which the first player plays the
+    move of the strategy <code>σ</code> at every node after the history{" "}
+    <code>h</code>, against every legal reply, ending in a first-player square
+    on every branch.
   </p>
-  <pre
-    class="lean"><code>theorem outcome (n : ℕ) :
+  <pre class="lean"><code>theorem outcome (n : ℕ) :
     (P1CanWin n ∅ ∅ ↔ 5 ≤ n) ∧
       ((P1CanDraw n ∅ ∅ ∧ P2CanDraw n ∅ ∅) ↔ n ≤ 4)
 
@@ -208,19 +218,24 @@ theorem plus_wins_with {"{"}n : ℕ{"}"} (h : 6 ≤ n) :
     a skeptic has to read. Beyond them the trust is Lean's kernel, mathlib, and
     <code>native_decide</code>, which lets the Lean compiler evaluate the
     exhaustive checks instead of the kernel. The 5 × 5 table was found by a
-    Python search, but nothing about that search enters the proof: a wrong table
-    fails the check. The bot on this page is a TypeScript copy of the rule,
-    compared with the Lean definition on every reply pair of the 6 × 6 board and
-    on the anchored positions of the proof.
+    Python search, but nothing about that search enters the proof, since a wrong
+    table fails the check. The bot on this page is a TypeScript copy of the
+    rule. The site's tests replay it against the lines the Python implementation
+    commits to on every reply pair of the 6 × 6 board and on the anchored
+    positions of the proof, and the paper reports that those lines agree with
+    the Lean definition.
   </p>
 
   <h2>Open questions</h2>
   <p>
-    The rule wins by ply 17: how quickly can the first player force a win on the
-    <span set:html={k("n \\times n")} /> board, and can one rule of comparable length
-    be fastest for every <span set:html={k("n")} />? The rule's second move has
-    seven exceptions; is there an opening that needs none? Are the constants of
-    the proof, the 6 × 6 plan region and the 17 × 17 base board, least? And 5 ×
-    5, where no purely forcing strategy exists, still has no short rule.
+    The rule wins by ply 17, a bound computed from its lines. How quickly can
+    the first player force a win on the
+    <span set:html={k("n \\times n")} /> board, and can one rule of comparable
+    length be fastest for every <span set:html={k("n")} />? The rule's second
+    move has seven exceptions; is there an opening that needs none? The 6 × 6
+    region and the 17 × 17 base board are least in the senses the paper makes
+    precise, but whether a rule can read less than the second player's stones
+    inside the base board is open. And 5 × 5, where no purely forcing strategy
+    from (2,2) exists, still has no short rule.
   </p>
 </Base>
