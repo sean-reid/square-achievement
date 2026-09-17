@@ -4,6 +4,7 @@
 \usepackage[margin=1.2in]{geometry}
 \usepackage{microtype}
 \usepackage{booktabs}
+\usepackage{needspace}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 \usepackage{tikz}
@@ -580,7 +581,7 @@ computation of the solver and is not formalized; the win of the table
 is.
 \end{proof}
 
-\begin{figure}[ht]
+\begin{figure}[b]
 \centering
 \input{fig-five}
 \caption{A branch point of the $5 \times 5$ table. The first player
@@ -601,6 +602,7 @@ all empty cells; $\sigma$ \emph{verifies} on $\Board_n$ if every branch
 ends in a first-player square, and then the first player wins. The
 $5 \times 5$ table is checked on its full tree.
 
+\Needspace*{10\baselineskip}
 The rule is checked on a smaller tree. The \emph{forced tree} of
 $\sigma$ on $\Board_n$ has the first player playing $\sigma$'s move,
 the second player's replies ranging over all empty cells at the first
