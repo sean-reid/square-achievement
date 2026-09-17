@@ -1,22 +1,22 @@
 """The plus rule: its lines, its sweep, and its exhaustive verification."""
 
+import pathlib
+
 from squares import verify
+from squares.plus.crosscheck import mismatches, parse_lines
 from squares.plus.rule import OPENING, abstract_of, best_line, second_move, strategy
 from squares.plus.sweep import anchors_safe, sweep
 
-
-def line(o1, o2):
-    x2 = second_move(o1)
-    return best_line(abstract_of([OPENING, x2], [o1, o2], o1, o2))
+LEAN_LINES = pathlib.Path(__file__).with_name("fixtures") / "lean_lines.txt"
 
 
-def test_lines_match_the_lean_rule():
-    # the same openings evaluated in formalization/Plus/Rule.lean
-    assert line((0, 0), (4, 4)) == [(2, 1), (1, 2), (2, 3)]
-    assert line((0, 0), (2, 1)) == [(2, 3), (1, 2), (3, 0), (5, 2), (3, 4)]
-    assert line((1, 3), (4, 3)) == [(1, 1), (3, 1), (2, 0)]
-    assert line((3, 3), (2, 1)) == [(1, 1), (3, 1), (2, 0)]
-    assert line((14, 14), (14, 13)) == [(2, 1), (1, 2), (2, 3)]
+def test_lines_match_the_lean_rule_on_every_pair():
+    # the saved output of `lake exe checker lines` in the formalization
+    text = LEAN_LINES.read_text()
+    lean = parse_lines(text)
+    assert sum(tag == "6" for tag, _, _ in lean) == 1155
+    assert sum(tag == "anchor" for tag, _, _ in lean) == 176
+    assert mismatches(text) == []
 
 
 def test_second_move_diagram():

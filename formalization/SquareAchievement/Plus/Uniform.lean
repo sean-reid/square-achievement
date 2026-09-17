@@ -125,6 +125,7 @@ theorem farNearAnchors_run (hf : farNearAnchorsSafe = true) {a w h : ℕ}
 /-! ## The wrapper -/
 
 set_option maxHeartbeats 3200000 in
+-- opening the base run at three levels exceeds the default budget
 set_option maxRecDepth 4096 in
 /-- The rule's forced run on the anchor board and its three anchored
 families win every board from the base up. -/
@@ -152,7 +153,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
   have hno12 : ∀ w : Cell, w ∉ board 17 → w ∉ board 12 := by
     intro w hw hc
     rw [mem_board] at hc
-    exact hw (by rw [mem_board]; (try rw [hab]); omega)
+    exact hw (by rw [mem_board]; omega)
   -- open the base run at the first level
   rw [checkForcedS] at hbase
   obtain ⟨fuel, hfuel⟩ : ∃ f, anchorBoard * anchorBoard + 1 = f + 1 :=
@@ -189,7 +190,9 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                 have hbr1 := hbase r1 (by
                   rw [List.mem_filter]
                   refine ⟨mem_allCells.mpr hr1b, ?_⟩
-                  simp [List.contains_iff_mem, stonesOf]
+                  simp only [List.nil_append, List.contains_eq_mem, List.mem_cons,
+                    List.not_mem_nil, or_false, Bool.not_eq_eq_eq_not, Bool.not_true,
+                    decide_eq_false_iff_not]
                   exact fun he => hr1op (by simp [he]))
                 rcases fuel with _ | fuel1
                 · simp [goForcedS] at hbr1
@@ -220,7 +223,10 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                             have hbr2 := hbr1 o2c (by
                               rw [List.mem_filter]
                               refine ⟨mem_allCells.mpr ho2cb, ?_⟩
-                              simp [List.contains_iff_mem]
+                              simp only [List.cons_append, List.nil_append,
+                                List.contains_eq_mem, List.mem_cons, List.not_mem_nil, or_false,
+                                Bool.decide_or, Bool.not_or, Bool.and_eq_true,
+                                Bool.not_eq_eq_eq_not, Bool.not_true, decide_eq_false_iff_not]
                               exact ⟨fun he => ho2op (by simp [he]),
                                 fun he => ho2r1 (by simp [he]),
                                 fun he => ho2x2 (by simp [he])⟩)
@@ -362,7 +368,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                         ho2n, hno12 _ ho217, ho217⟩)
                       (plusMove_agree (Or.inl rfl) (slotSame_far (by rw [mem_board]; decide) ho217)
                         (by
-                          show farmKey 6 _ _ = farmKey 6 _ _
+                          change farmKey 6 _ _ = farmKey 6 _ _
                           rw [hfk]; exact farmKey_standin_snd ho117) rfl _ _)
                       htake
                       fuel1 [] (by simp) (by simp)
@@ -425,7 +431,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                       (plusMove_agree
                         (slotSame_far (by rw [ho1b22, mem_board]; decide) ho117) (Or.inl rfl)
                         (by
-                          show farmKey 6 _ _ = farmKey 6 _ _
+                          change farmKey 6 _ _ = farmKey 6 _ _
                           rw [hfk, ho1b22]; exact farmKey_standin_fst ho217)
                         hx2eq _ _) htake
                       fuel1 [] (by simp) (by simp)
@@ -443,7 +449,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                       (plusMove_agree (slotSame_far (by rw [ho1b22, mem_board]; decide) ho117)
                         (slotSame_far (by rw [mem_board]; decide) ho217)
                         (by
-                          show farmKey 6 _ _ = farmKey 6 _ _
+                          change farmKey 6 _ _ = farmKey 6 _ _
                           rw [hfk, ho1b22]; exact farmKey_standins)
                         hx2eq _ _) htake
                       fuel1 [] (by simp) (by simp)

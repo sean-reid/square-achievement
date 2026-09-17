@@ -113,7 +113,7 @@ theorem minThreat_congr {squares : List (List Cell)}
       sqs.foldl
         (fun best sq => threatStep occ' (sq.filter (fun x => !mine'.contains x)) best)
         init by
-    simp only [minThreat, minThreat_eq_foldl]
+    simp only [minThreat]
     exact hgen squares none hm ho
   intro sqs
   induction sqs with

@@ -8,8 +8,10 @@ first player holds together with the four cells at distance `s` from
 it along the axes; playing an arm makes three corners of a side-`s`
 square with the centre and a neighbouring arm, so the opponent must
 block the diagonal cell, and the last arm makes three corners of two
-squares at once. A *tempo move* is a single forcing move: it threatens
-exactly one square, and the block does not hand the opponent a threat.
+squares at once. A *tempo move* is a single forcing move: once it is
+played the second player has no threat and the first player threatens
+exactly one square. The block may leave the second player with a
+threat, which the next move of the line takes.
 
 The rule. Open at `(2, 2)`. Reply below it at `(3, 2)`, except against
 seven first replies touching the opening pair, where a fixed diagram

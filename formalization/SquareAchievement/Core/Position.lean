@@ -16,7 +16,7 @@ def empties (n : ℕ) (p1 p2 : Finset Cell) : Finset Cell :=
 
 theorem mem_empties {n : ℕ} {p1 p2 : Finset Cell} {x : Cell} :
     x ∈ empties n p1 p2 ↔ x ∈ board n ∧ x ∉ p1 ∧ x ∉ p2 := by
-  simp [empties, and_assoc]
+  simp [empties]
 
 theorem empties_insert_left_ssubset {n : ℕ} {p1 p2 : Finset Cell} {m : Cell}
     (hm : m ∈ empties n p1 p2) :
