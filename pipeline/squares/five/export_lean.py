@@ -16,11 +16,7 @@ def key_lean(k):
         return "Key.dflt"
     if isinstance(k[0], int):
         return f"Key.cell ({k[0]}, {k[1]})"
-    if k[0] == "row":
-        return f"Key.row {k[1]}"
-    if k[0] == "col":
-        return f"Key.col {k[1]}"
-    return f"Key.farm ({k[1][0]}, {k[1][1]})"
+    raise ValueError(f"the Lean table carries exact and default keys only, not {k!r}")
 
 
 def entry_lean(e):

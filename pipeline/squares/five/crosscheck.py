@@ -66,12 +66,6 @@ class _Parser:
         self.take()
         if tok == "Key.cell":
             return self.value()
-        if tok == "Key.row":
-            return ("row", self.value())
-        if tok == "Key.col":
-            return ("col", self.value())
-        if tok == "Key.farm":
-            return ("farm", self.value())
         if tok == "Key.dflt":
             return None
         if tok == "Entry.plan":

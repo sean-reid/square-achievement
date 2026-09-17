@@ -54,7 +54,7 @@ def stonesOf (first : Bool) : List Cell → List Cell
 /-- Resolve an entry in the position after `hist`: follow a plan, or
 play a quiet move and fork on the reply to it. Fueled recursion; the
 guards in `go` validate whatever comes out, so running dry is safe. -/
-def resolveEntry (box : ℕ) (p1 hist : List Cell) : ℕ → Entry → Option Cell
+def resolveEntry (p1 hist : List Cell) : ℕ → Entry → Option Cell
   | 0, _ => none
   | _, .plan cells => cells.find? fun c => !p1.contains c
   | fuel + 1, .quiet move branches =>
@@ -62,8 +62,8 @@ def resolveEntry (box : ℕ) (p1 hist : List Cell) : ℕ → Entry → Option Ce
       some move
     else do
       let reply ← hist[hist.idxOf move + 1]?
-      let e ← lookup box branches reply
-      resolveEntry box p1 hist fuel e
+      let e ← lookup branches reply
+      resolveEntry p1 hist fuel e
 
 /-- The table strategy's move for the position after `hist` (first
 player to move): reflexes, the lookup, then plan-following. -/
@@ -81,15 +81,14 @@ def strategyMove (t : Table) (squares : List (List Cell)) (hist : List Cell) :
   if hist.isEmpty then some t.opening
   else do
     let o1 ← hist[1]?
-    let x2 ← lookup t.box t.x2 o1
+    let x2 ← lookup t.x2 o1
     if !p1.contains x2 then
       some x2
     else do
       let o2 ← hist[hist.idxOf x2 + 1]?
-      let table ← lookup t.box t.scripts o1
-      let entry ← lookupO2 t.box table
-        (t.scripts.lookup (.cell o1)).isSome o1 o2
-      resolveEntry t.box p1 hist (hist.length + 1) entry
+      let table ← lookup t.scripts o1
+      let entry ← lookup table o2
+      resolveEntry p1 hist (hist.length + 1) entry
 
 def onBoard (n : ℕ) (c : Cell) : Bool := c.1 < n && c.2 < n
 

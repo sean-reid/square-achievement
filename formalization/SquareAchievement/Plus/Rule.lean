@@ -1,4 +1,5 @@
 import SquareAchievement.Compute.Checker
+import SquareAchievement.General.FarmKey
 
 /-!
 # The plus rule

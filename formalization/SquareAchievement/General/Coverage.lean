@@ -1,4 +1,5 @@
 import SquareAchievement.Compute.ForcedSound
+import SquareAchievement.General.FarmKey
 
 /-!
 # Escaping squares and the hidden corner
