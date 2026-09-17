@@ -13,6 +13,8 @@ A winning square is the four-corner set of an axis-aligned square with
 side length at least 1, so the smallest winner is a 2x2 block of cells.
 -/
 
+namespace SquareAchievement
+
 abbrev Cell := ℕ × ℕ
 
 /-- The `n × n` board in the quarter-plane. -/
@@ -68,3 +70,5 @@ theorem not_hasSquare_of_card_lt {S : Finset Cell} (h : S.card < 4) :
       Finset.card_singleton]
   have := Finset.card_le_card hsub
   omega
+
+end SquareAchievement

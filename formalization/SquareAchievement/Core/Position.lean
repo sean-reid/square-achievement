@@ -10,6 +10,8 @@ partial positions and hypothetical placements stay easy to manipulate.
 each stone placed.
 -/
 
+namespace SquareAchievement
+
 /-- Cells of the `n × n` board not held by either player. -/
 def empties (n : ℕ) (p1 p2 : Finset Cell) : Finset Cell :=
   board n \ (p1 ∪ p2)
@@ -51,3 +53,5 @@ theorem card_empties_insert_right_lt {n : ℕ} {p1 p2 : Finset Cell} {m : Cell}
     (hm : m ∈ empties n p1 p2) :
     (empties n p1 (insert m p2)).card < (empties n p1 p2).card :=
   Finset.card_lt_card (empties_insert_right_ssubset hm)
+
+end SquareAchievement

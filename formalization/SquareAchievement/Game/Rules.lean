@@ -15,6 +15,8 @@ winning strategies are finite objects: a proof tree is exactly a
 strategy tree, with one P1 move per node and all P2 replies covered.
 -/
 
+namespace SquareAchievement
+
 inductive P1CanWin (n : ℕ) : Finset Cell → Finset Cell → Prop
   /-- P1 completes a square right now. -/
   | now {p1 p2 : Finset Cell} (m : Cell) (hm : m ∈ empties n p1 p2)
@@ -43,3 +45,5 @@ theorem not_p1CanWin_zero : ¬ P1CanWin 0 ∅ ∅ := by
   have := (mem_empties.mp hm).1
   have := (mem_board.mp this).1
   omega
+
+end SquareAchievement
