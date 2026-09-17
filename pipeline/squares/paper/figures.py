@@ -195,13 +195,6 @@ def fig_basic():
     return panels(states, ply_labels(states))
 
 
-def fig_tempo():
-    states, tempo = play((0, 0), (3, 1))
-    assert tempo == 2
-    assert [p1[-1] for p1, _, _ in states[:3]] == [(3, 3), (4, 3), (3, 4)]
-    return panels(states[:3], ply_labels(states[:3]))
-
-
 def fig_longest():
     states, _ = play((0, 0), (3, 1))
     p1, p2, th = states[-1]
@@ -283,7 +276,6 @@ FIGURES = {
     "fig-anatomy": fig_anatomy,
     "fig-second": fig_second,
     "fig-basic": fig_basic,
-    "fig-tempo": fig_tempo,
     "fig-longest": fig_longest,
     "fig-latent": fig_latent,
     "fig-agreement": fig_agreement,

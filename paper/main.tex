@@ -5,7 +5,7 @@
 \usepackage{microtype}
 \usepackage{booktabs}
 \usepackage{algorithm}
-\usepackage{algpseudocode}
+\usepackage[noend]{algpseudocode}
 \usepackage{tikz}
 \usepackage{xcolor}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
@@ -13,7 +13,6 @@
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
 \theoremstyle{definition}
 \newtheorem{definition}[theorem]{Definition}
 \theoremstyle{remark}
@@ -30,29 +29,24 @@
 
 \begin{abstract}
 Two players alternately claim cells of an $n \times n$ grid; the first
-to hold all four corners of an axis-aligned square wins, and a full
-board without one is a draw. We prove that the first player has a
-winning strategy if and only if $n \ge 5$, every smaller board being
-drawn under optimal play, which answers a question of Erickson. The
-winning strategy for boards of size at least $6$ is stated as a rule
-with no lookup table: open at $(2,2)$, answer the first reply with a
-fixed second move, take a completion or a block whenever one is
-available, and otherwise play the shortest line of at most three single
-forcing moves followed by the arms of a \emph{plus}, a held stone with
-the four cells at a common distance along the axes. The rule wins every
-game by the seventeenth ply, plays the same $\distinctLines$ lines on
-every board, and reads only its own stones, the opponent's stones inside
-a $17 \times 17$ region, and one derived cell. Boards of size $5$ to $17$
-are checked by machine, and a simulation theorem carries a
-checked run on the $23 \times 23$ board to every larger board. The
-argument is formalized in Lean~4, and the formal theorem for the rule
-states that the tree of its own moves is a winning tree, not only that
-a winning tree exists.
+to hold all four corners of an axis-parallel square wins, and a full
+board without one is a draw. The first player has a winning strategy
+if and only if $n \ge 5$, which answers a question of Erickson. For
+$n \ge 6$ the strategy is a rule with no lookup table, built around the
+\emph{plus}, a held stone with the four cells at a common distance from
+it along the axes: open at $(2,2)$, take a completion or a block
+whenever one exists, and otherwise play at most three single forcing
+moves and then the arms of a plus. The rule reads only its own stones,
+the second player's stones inside a $17 \times 17$ region, and one
+derived cell, and a simulation theorem carries a checked run on the
+$23 \times 23$ board to every larger board. The proofs are formalized
+in Lean~4, and the theorem for the rule states that the tree of its
+own moves is winning.
 \end{abstract}
 
 \maketitle
 
-\section{Introduction}\label{sec:intro}
+\section{Introduction}
 
 Two players alternately claim empty cells of an $n \times n$ grid, the
 first player moving first. A player wins upon holding all four corners
@@ -64,10 +58,10 @@ Erickson posed the game and asked for the outcome under optimal play
 \cite{erickson-pearls, opg}. It is an achievement game in the sense of
 Harary \cite{harary}, played in the Maker--Maker convention: both
 players pursue the same goal, and a player who loses the race may still
-hold out for a draw. The convention goes back to the positional games
-of Hales and Jewett \cite{hales-jewett}; a recent unified treatment of
+secure a draw. The convention goes back to the positional games of
+Hales and Jewett \cite{hales-jewett}; a recent unified treatment of
 achievement conventions, with the strategy-stealing theory in the
-generality we use, is \cite{galliot-senizergues}, and the general
+generality used here, is \cite{galliot-senizergues}, and the general
 theory of positional games is in Beck \cite{beck}.
 
 Two boundary results were known. Jenrich \cite{jenrich} reported
@@ -75,7 +69,7 @@ computer searches showing that the second player can secure a draw for
 $n = 3, 4$ and that the first player can force a win for $n = 5$.
 Bacher and Eliahou \cite{bacher-eliahou} proved that every two-coloring
 of the $15 \times 15$ grid contains four equal-colored cells at the
-corners of an axis-aligned square, and that $15$ is least with this
+corners of an axis-parallel square, and that $15$ is least with this
 property. Since no completed game on a board of size $15$ or more is
 square-free, strategy stealing gives the first player a win there.
 Between these results nothing was published: for $6 \le n \le 14$
@@ -96,66 +90,43 @@ the game is drawn under optimal play: each player can secure at least a
 draw.
 \end{theorem}
 
-The strategy that wins for $n \ge 6$ is a rule built around one shape,
-the \emph{plus}: a stone together with the four cells at a common
-distance from it along the axes. Its arms force the opponent's replies
-one at a time, and the last arm threatens two squares at once.
-Section~\ref{sec:defs} defines the terms and Section~\ref{sec:rule}
-states the rule.
+Relative to Adler's announcement, what is new is a single strategy
+that wins every board from $6 \times 6$ up, stated in a paragraph, and
+a proof checked by a proof assistant. The strategy is a rule built
+around one shape, the plus of Definition~\ref{def:plus}: the arms of a
+plus force the second player's replies one at a time, and the last arm
+threatens two squares at once.
 
 \begin{theorem}\label{thm:rule}
-For every $n \ge 6$, the first player following the plus rule wins the
-square achievement game on the $n \times n$ board, by the
-$\latestPly$th ply at the latest.
+For every $n \ge 6$, the first player following the plus rule of
+Section~\ref{sec:rule} wins the square achievement game on the
+$n \times n$ board.
 \end{theorem}
 
-\subsection*{Contributions}
-\begin{enumerate}
-\item \emph{The outcome} (Theorem~\ref{thm:main}). The first player
-  wins exactly on the boards of size at least $5$, and the smaller
-  boards are drawn in the strong sense that each player can secure a
-  draw. This answers Erickson's question.
-\item \emph{A rule that wins} (Theorem~\ref{thm:rule},
-  Section~\ref{sec:rule}). One explicit strategy, stated in a paragraph
-  and defined in $\ruleLeanLines$ lines of Lean with no data beyond
-  seven exceptional second moves, wins every board from $6 \times 6$ up.
-  It plays the same $\distinctLines$ lines on every board and wins by
-  the $\latestPly$th ply.
-\item \emph{Every board at once} (Theorem~\ref{thm:uniform}). A
-  simulation theorem, stated for any strategy, transports a checked run
-  on the $23 \times 23$ board to every larger board. Its hypotheses are
-  finitely many decidable properties of the strategy, each discharged
-  by evaluation, so the range $n \ge 15$, previously reached only by
-  strategy stealing from the theorem of Bacher and Eliahou, is covered
-  by the explicit strategy.
-\item \emph{A machine-checked proof} (Section~\ref{sec:lean}). The
-  game, the checkers with their soundness theorems, strategy stealing,
-  determinacy, the simulation theorem, and the rule are formalized in
-  Lean~4, so Theorems~\ref{thm:main} and~\ref{thm:rule} are
-  kernel-checked declarations, the latter in the form
-  $\texttt{plus\_wins\_with} : 6 \le n \to
-  \texttt{WinsWith}\ \texttt{plusMove}\ n\ [\,]$: the tree in which the
-  first player plays the rule's move at every node is winning, not
-  merely some tree the checker found.
-\item \emph{Measurements} (Section~\ref{sec:measure}). The lines the
-  rule plays, their lengths, and the cost of every certificate,
-  produced by the accompanying code.
-\end{enumerate}
+Theorem~\ref{thm:rule} is proved by checking the rule's forced tree on
+every board from $6$ to $17$ (Section~\ref{sec:verify}) and by a
+simulation theorem, stated for any strategy, that carries a checked run
+on the $23 \times 23$ board to every larger board
+(Section~\ref{sec:uniform}). Theorem~\ref{thm:main} follows with an exhaustive
+refutation for $n \le 4$ and a strategy table for $n = 5$, whose play
+from the opening $(2,2)$ is not purely forcing
+(Section~\ref{sec:small}). Everything is formalized in Lean~4
+\cite{lean4} on mathlib \cite{mathlib} (Section~\ref{sec:lean}). The
+formal theorem for the rule states that the tree of the rule's own
+moves is winning, not only that a winning tree exists; the runs of the
+checkers are discharged by evaluation, and the two properties of the
+rule that the simulation theorem needs are proved as lemmas about its
+definition. The rule was extracted from an earlier lookup-table
+strategy, almost all of whose forcing plans were arms of a side-$1$
+plus at $(2,2)$ or $(3,2)$, the rest preparing the side-$2$ plus at
+$(3,2)$.
 
-Theorem~\ref{thm:main} is proved in three ranges: an exhaustive
-refutation for $n \le 4$ (Section~\ref{sec:small}), a strategy table
-checked by machine for $n = 5$, where no purely forcing strategy from
-the opening $(2,2)$ exists (Section~\ref{sec:small}), and the rule for $n \ge 6$,
-checked at every size up to $17$ (Section~\ref{sec:verify}) and carried
-to every larger board by the simulation theorem
-(Section~\ref{sec:uniform}). Searches are only as trustworthy as the
-programs running them, and this game is a case in point: the first
-version of the search in \cite{jenrich} contained an error and was
-corrected later. The formalization in Lean~4 \cite{lean4}, on mathlib
-\cite{mathlib}, makes every search discharge a statement about the
-abstract game rather than about a program.
+Searches are only as trustworthy as the programs running them, and the
+first version of the search in \cite{jenrich} contained an error that
+was corrected later. The formalization makes every search discharge a
+statement about the game rather than about a program.
 
-\section{Definitions}\label{sec:defs}
+\section{Definitions}
 
 Cells are pairs $(r,c)$ of non-negative integers, row then column,
 with row $0$ at the top and column $0$ at the left in the figures, and
@@ -170,35 +141,36 @@ the stones of the two players. The game is finite with perfect
 information, so exactly one of three holds: the first player can force
 a win, the second can, or both can force at least a draw.
 
-We call the first player \emph{we} and the second player \emph{the
-opponent}. We \emph{threaten} at a cell $z$ if $z$ is empty and $z$
-together with three of our stones is a square; the opponent
-\emph{blocks} by playing $z$. A move that makes exactly one threat is
-\emph{forcing}; a move that makes two threats wins, since one block
-leaves the other. $\Board_6$ is the corner region in which the rule
-plays and $\Board_{17}$ the base board whose stones it reads verbatim.
-Table~\ref{tab:terms} collects the terms of this section.
+The first player \emph{threatens} at a cell $z$ if $z$ is empty and $z$
+together with three of the first player's stones is a square; the
+second player \emph{blocks} by playing $z$. A move that makes exactly
+one threat is \emph{forcing}; a move that makes two threats wins, since
+one block leaves the other. A \emph{ply} is one move of either player,
+so the first player moves at the odd plies. The rule of
+Section~\ref{sec:rule} plays inside the \emph{region} $\Board_6$ and
+reads the second player's stones inside the \emph{base board}
+$\Board_{17}$.
 
 \subsection{Pluses}
 
 \begin{definition}[plus]\label{def:plus}
 The \emph{plus} of side $s$ at the \emph{centre} $c = (r,k)$ has four
 \emph{arms}, the cells $(r-s,k)$, $(r+s,k)$, $(r,k-s)$, $(r,k+s)$, and
-four \emph{diagonals}, the cells $(r \pm s, k \pm s)$. Two arms are
-\emph{perpendicular} if one is above or below the centre and the other
-to its left or right; the diagonal between them is the cell in the row
-of one and the column of the other. A plus lies in the region if its
-arms and diagonals do, that is, $s \le r, k$ and $r+s, k+s \le 5$.
+four \emph{diagonals}, the cells $(r \pm s, k \pm s)$
+(Figure~\ref{fig:anatomy}). Two arms are \emph{perpendicular} if one
+is above or below the centre and the other to its left or right; the
+diagonal between them is the cell in the row of one and the column of
+the other. A plus lies in the region if its arms and diagonals do, that
+is, $s \le r, k$ and $r+s, k+s \le 5$.
 \end{definition}
 
 \begin{figure}[ht]
 \centering
 \input{fig-anatomy}
 \caption{Left: the plus of side $1$ at $c = (2,2)$, with its arms $a$
-and diagonals $d$. Right: the plus of side $2$ at $c = (3,2)$. The
-dashed outline encloses one of the four squares of the plus: its
-corners are the centre, two perpendicular arms, and the diagonal
-between them.}
+and diagonals $d$. Right: the plus of side $2$ at $c = (3,2)$; the
+dashed outline is one of its four squares, whose corners are the
+centre, two perpendicular arms, and the diagonal between them.}
 \label{fig:anatomy}
 \end{figure}
 
@@ -206,105 +178,49 @@ The region holds $16$ pluses of side $1$, with centres in
 $\{1,\dots,4\}^2$, and four of side $2$, with centres in $\{2,3\}^2$;
 side $3$ does not fit.
 
-\begin{lemma}[arms force]\label{lem:arms}
-Suppose we hold the centre $c$ and one arm $a$ of a plus of side $s$,
-and the opponent holds none of its arms and none of its diagonals.
-Playing an arm $b$ perpendicular to $a$ threatens at the diagonal
-between $a$ and $b$. If we also hold the arm $a'$ opposite to $a$,
-playing $b$ threatens at two cells, the diagonals between $a$ and $b$
-and between $a'$ and $b$.
+\begin{lemma}\label{lem:arms}
+Suppose the first player holds the centre $c$ and one arm $a$ of a plus
+of side $s$, and the second player holds none of its arms and none of
+its diagonals. Playing an arm $b$ perpendicular to $a$ threatens at the
+diagonal between $a$ and $b$. If the first player also holds the arm
+$a'$ opposite to $a$, playing $b$ threatens at two cells, the diagonals
+between $a$ and $b$ and between $a'$ and $b$.
 \end{lemma}
 
 \begin{proof}
 Say $a = (r-s,k)$ and $b = (r,k-s)$. Then $c$, $a$, $b$ and
 $d = (r-s,k-s)$ are the corners of $\Sq(r-s,k-s,s)$, so with $c, a, b$
-held and $d$ empty we threaten at $d$. With $a' = (r+s,k)$ also held,
-$c$, $a'$, $b$ and $(r+s,k-s)$ are the corners of $\Sq(r,k-s,s)$, and
-$(r+s,k-s) \ne d$. The other placements are symmetric.
+held and $d$ empty the first player threatens at $d$. With
+$a' = (r+s,k)$ also held, $c$, $a'$, $b$ and $(r+s,k-s)$ are the
+corners of $\Sq(r,k-s,s)$, and $(r+s,k-s) \ne d$. The other placements
+are symmetric.
 \end{proof}
 
-So from a centre and one arm, three moves win against an opponent who
-has no threat and whose blocks make none: the two arms perpendicular to
-the held arm each force a block on a diagonal, and the opposite arm
-threatens at two diagonals at once. Blocks land on diagonals, never on
-arms. Figure~\ref{fig:basic} plays this out. The opening $(2,2)$ and
-the second move $(3,2)$ are the centre and an arm of the side-$1$ plus
-at $(2,2)$, and an arm and the centre of the side-$1$ plus at $(3,2)$,
-so most lines need no preparation.
+So from a centre and one arm the first player wins in three moves
+against a second player who has no threat and whose blocks make none.
+The two arms perpendicular to the held arm each force a block on a
+diagonal, and the opposite arm threatens at two diagonals at once
+(Figure~\ref{fig:basic}). The opening $(2,2)$ and the second move
+$(3,2)$ are the centre and an arm of the side-$1$ plus at $(2,2)$, and
+an arm and the centre of the side-$1$ plus at $(3,2)$.
 
 \begin{figure}[ht]
 \centering
 \input{fig-basic}
-\caption{The basic line, against the replies $(0,0)$ and $(4,4)$. We
-(black) hold the centre $(2,2)$ and the arm $(3,2)$. Left: the arm
-$(2,1)$ threatens at the diagonal $(3,1)$, dashed. Middle: the opponent
-(white) blocked there; the arm $(1,2)$ threatens at $(1,1)$. Right: the
-opponent blocked again; the last arm $(2,3)$ threatens at $(1,3)$ and
-$(3,3)$. The double threat comes on the ninth ply and the win on the
-eleventh.}
+\caption{The basic line against the replies $(0,0)$ and $(4,4)$. The
+first player (black) holds $(2,2)$ and $(3,2)$; each arm threatens at
+the dashed cell, the second player (white) blocks, and the last arm
+threatens twice.}
 \label{fig:basic}
 \end{figure}
 
-\subsection{Tempo moves and lines}
-
-When no plus can be completed directly, because the opponent holds an
-arm or a diagonal or because our arms would not force, the rule first
-plays moves that each force a block and so add a stone of ours.
-
-\begin{definition}[tempo move]\label{def:tempo}
-In a position where the opponent has no threat, a \emph{tempo move} is
-a cell in $\Board_6$ that makes exactly one threat, such that after the
-block the opponent still has no threat, and the block is not the hidden
-corner of Definition~\ref{def:latent}.
-\end{definition}
-
-A tempo move and its block add one stone to each side and return the
-move to us; our stone is where we chose, theirs where we forced it.
-Figure~\ref{fig:tempo} shows two tempo moves preparing a plus of side
-$2$.
-
-\begin{figure}[ht]
-\centering
-\input{fig-tempo}
-\caption{Against the replies $(0,0)$ and $(3,1)$ both side-$1$ pluses
-are spoiled, since $(3,1)$ is a diagonal of the plus at $(2,2)$ and an
-arm of the plus at $(3,2)$. Left: the tempo move
-$(3,3)$ threatens at $(2,3)$ through $\Sq(2,2,1)$. Middle: after the
-block, $(4,3)$ threatens at $(4,2)$ through $\Sq(3,2,1)$. Right: after
-that block, the stones $(3,3)$ and $(4,3)$ let the first arm $(3,4)$ of
-the side-$2$ plus at $(3,2)$ force, through $\Sq(3,3,1)$ with fourth
-corner $(4,4)$. From here the plus wins as in Lemma~\ref{lem:arms};
-Figure~\ref{fig:longest} shows the end.}
-\label{fig:tempo}
-\end{figure}
-
-\begin{definition}[line, key]\label{def:line}
-A \emph{line} from a position consists of some tempo moves, each
-followed by its block, and then the arms we do not yet hold of one plus
-in the region whose centre we hold, in some order, such that each arm before the last
-makes exactly one threat whose block is not the hidden corner, the last
-arm makes at least two threats, and the opponent never has a threat.
-The \emph{key} of a line is the triple
-\[
-  (\text{number of tempo moves},\ \text{number of arms to play},\
-  \text{side of the plus}).
-\]
-The rule prefers the smallest key in lexicographic order, then the
-smaller centre in cell order, then the line its search generates first.
-\end{definition}
-
-The rule searches for lines with at most three tempo moves. Whether a
-line exists, and which is preferred, depends only on the abstract
-position defined next.
-
 \subsection{Far stones and the hidden corner}
 
-The rule's stones never leave $\Board_6$, and the opponent's stones in
-a position the rule reaches are two free replies and forced blocks,
-the blocks in $\Board_6$ as well. Two containments say how far a
-square through such stones can reach.
+The rule's stones never leave $\Board_6$, and the second player's
+stones in a position the rule reaches are two free replies and forced
+blocks, the blocks in $\Board_6$ as well.
 
-\begin{lemma}[span]\label{lem:span}
+\begin{lemma}\label{lem:span}
 Let $x \ne y$ be distinct corners of a square $\Sq(r,c,s)$ with
 $x, y \in \Board_B$. Then $\Sq(r,c,s) \subseteq \Board_{2B}$, and every
 corner of $\Sq(r,c,s)$ has its row or its column indexed below $B$.
@@ -320,172 +236,189 @@ shared column is symmetric; and if $x$ and $y$ are diagonally opposite,
 all four corners lie in $\Board_B$.
 \end{proof}
 
-With $B = 6$: two stones of the region lie in a common square only if
-that square lies in $\Board_{12}$. Hence an opponent stone beyond
-$\Board_{17}$, which the rule does not read, shares no square with two
-forced blocks, and an opponent square through such a stone and a block
-has the two free replies as its other corners. The next definition
-names the block in that situation; it is the one cell through which
-the stones the rule does not see can affect the game.
+With $B = 6$, two stones of the region lie in a common square only if
+that square lies in $\Board_{12}$. Hence a second-player stone beyond
+$\Board_{17}$ shares no square with two blocks, and a second-player
+square through such a stone and a block has the two free replies as its
+other corners (Figure~\ref{fig:latent}). The block in that situation
+is the one cell through which stones beyond $\Board_{17}$ can affect
+the game.
 
 \begin{definition}[hidden corner, abstraction]\label{def:latent}
 Let $x$ and $y$ be two cells each having a coordinate at least $12$.
 Their \emph{hidden corner} is a cell $b \in \Board_6$ such that
 $b$, $x$, $y$ are three corners of one square. The \emph{abstraction}
-of a position reached after the opponent's second move consists of our
-stones, the opponent's stones inside $\Board_{17}$, and the hidden
-corner of the opponent's first two stones, if they have one.
+of a position reached after the second player's second move consists
+of the first player's stones, the second player's stones inside
+$\Board_{17}$, and the hidden corner of the second player's first two
+stones, if they have one.
 \end{definition}
 
-\begin{lemma}[dichotomy]\label{lem:dichotomy}
-Two cells $x \ne y$ have at most one hidden corner. If $\Sq(r,c,s)$ has a corner
-$b \in \Board_6$, has $x$ and $y$ among its other corners, and is not
-contained in $\Board_{17}$, then $b = (r,c)$, $s \ge 12$, each of $x$,
-$y$ has a coordinate at least $12$, and $b$ is the hidden corner of
-$\{x, y\}$.
+\begin{lemma}\label{lem:dichotomy}
+Two cells $x \ne y$ have at most one hidden corner. If $\Sq(r,c,s)$ has
+a corner $b \in \Board_6$, has $x$ and $y$ among its other corners, and
+is not contained in $\Board_{17}$, then $b = (r,c)$, $s \ge 12$, each
+of $x$, $y$ has a coordinate at least $12$, and $b$ is the hidden
+corner of $\{x, y\}$.
 \end{lemma}
 
 \begin{proof}
-Uniqueness: if $x$ and $y$ share a column, the square has side
-$s = |x_1 - y_1|$ and $b$ lies in the row of a member with row below
-$6$, at distance $s$ to the left, since the cell at that distance to
-the right would put both coordinates of that member below $6$; only
-one member can have row below $6$, since if both did then $s < 6$ and
-the shared column, being the coordinate at least $12$ of either, would
-put both candidates for $b$ at column $7$ or more; a shared row
-is symmetric; if $x$ and $y$ are diagonally opposite, the two remaining
-corners are $(x_1, y_2)$ and $(y_1, x_2)$, of which at most one lies in
-$\Board_6$, since otherwise all four coordinates of $x$ and $y$ would
-be below $6$. For the second claim, a second corner in $\Board_6$ would
-put the square inside $\Board_{12}$ by Lemma~\ref{lem:span}, against
-the hypothesis; so $b$ is alone in the region and, being the corner
-nearest the origin, is $(r,c)$; the corner opposite $b$ has both
-coordinates at most $5 + s$, and the square leaves $\Board_{17}$ only
-if a coordinate reaches $17$, so $s \ge 12$. Each of $x$, $y$ has a
-coordinate equal to $r + s$ or $c + s$, hence at least $12$. The formal
-statement is in \texttt{General/Coverage.lean}.
+Uniqueness. If $x$ and $y$ share a column, the square has side
+$s = |x_1 - y_1|$, and $b$ lies in the row of a member with row below
+$6$, at distance $s$ to its left or right. Only one member can have row
+below $6$: if both did, then $s < 6$ and the shared column, being the
+coordinate at least $12$ of either, would put both candidates for $b$
+at column $7$ or more. For that member the cell to the right is
+excluded too, since it lies in $\Board_6$ only if the member's column
+is below $6$. A shared row is symmetric. If $x$ and $y$ are diagonally
+opposite, the two remaining corners are $(x_1, y_2)$ and $(y_1, x_2)$,
+of which at most one lies in $\Board_6$, since otherwise all four
+coordinates of $x$ and $y$ would be below $6$.
+
+For the second claim, a second corner in $\Board_6$ would put the
+square inside $\Board_{12}$ by Lemma~\ref{lem:span}, against the
+hypothesis; so $b$ is alone in the region. Were $b$ not $(r,c)$, the
+corner $(r,c)$ would have both coordinates at most those of $b$ and
+would lie in $\Board_6$; so $b = (r,c)$. The corner opposite $b$ has
+both coordinates at most $5 + s$, and the square leaves $\Board_{17}$
+only if a coordinate reaches $17$, so $s \ge 12$. Each of $x$, $y$ has
+a coordinate equal to $r + s$ or $c + s$, hence at least $12$, and $b$
+is their hidden corner by definition.
 \end{proof}
 
 \begin{figure}[ht]
 \centering
 \input{fig-latent}
-\caption{A hidden corner, drawn on $\Board_{18}$; the solid outline is
-$\Board_{17}$ and the shaded block is the region $\Board_6$. The
-opponent's free replies $o_1 = (0,17)$ and $o_2 = (14,3)$ are two
-corners of the dashed square, whose third corner $b = (0,3)$ is their
-hidden corner; $o_1$ and the fourth corner $z = (14,17)$ lie outside
-$\Board_{17}$. The rule never threatens at $b$: if the opponent had to
-block there they would threaten at $z$, a cell the rule does not see.}
+\caption{A hidden corner, on $\Board_{18}$. The inner outline is
+$\Board_{17}$ and the shaded block the region $\Board_6$. The second player's free replies
+$o_1 = (0,17)$ and $o_2 = (14,3)$ are two corners of the dashed
+square; its third corner $b = (0,3)$ is their hidden corner, and $o_1$
+and the fourth corner $z = (14,17)$ lie beyond $\Board_{17}$. A second
+player forced to block at $b$ would threaten at $z$, a cell the rule
+does not read.}
 \label{fig:latent}
 \end{figure}
 
-The clause of Definition~\ref{def:tempo} keeping blocks off the hidden
-corner is what stops a far pair from ever coming into play: were the
-opponent forced to block on $b$ in Figure~\ref{fig:latent}, they would
-hold three corners of the dashed square and threaten at $z$, and we
-would have to answer instead of continuing our line. The rule applies
-the clause whenever the pair has a hidden corner, also when the square
-stays inside $\Board_{17}$; there it costs nothing.
+The rule therefore never makes a threat whose only block is the hidden
+corner (Definitions~\ref{def:tempo} and~\ref{def:line}). It applies the
+restriction whenever the pair has a hidden corner, also when the square
+through it stays inside $\Board_{17}$ and the restriction is not
+needed.
 
-\begin{remark}
-The base $17 = 6 + 2 \cdot 6 - 1$ is least for Lemma~\ref{lem:dichotomy}.
-With base $15$ or $16$, the replies $(0,16)$ and $(11,5)$ span a square
-through the region cell $(0,5)$ completing at $(11,16)$: it fits no
-board of size $15$ or $16$, and $(11,5)$ has no coordinate at least
-$12$.
+\begin{remark}\label{rem:base}
+The base $17 = 6 + 2 \cdot 6 - 1$ is least for
+Lemma~\ref{lem:dichotomy}. With base $15$ or $16$ in place of $17$, the
+replies $(0,16)$ and $(11,5)$ span the square $\Sq(0,5,11)$ through the
+region cell $(0,5)$, which fits in neither $\Board_{15}$ nor
+$\Board_{16}$, while $(11,5)$ has no coordinate at least $12$.
 \end{remark}
 
-\begin{table}[ht]
-\centering
-\begin{tabular}{lp{0.68\textwidth}}
-\toprule
-term & meaning \\
-\midrule
-threat & an empty cell that completes one of our squares \\
-block & the opponent's move on a threat cell \\
-forcing move & a move that makes exactly one threat \\
-plus & a centre with four arms at distance $s$ along the axes \\
-arm, diagonal & a cell of the plus on an axis; a cell of the plus off the axes \\
-tempo move & a forcing move in $\Board_6$ whose block leaves the opponent without a threat and misses the hidden corner \\
-line & tempo moves, then the arms of one plus, the last arm making two threats \\
-key & (tempo moves, arms to play, side); smaller is preferred \\
-hidden corner & the region cell forming three corners of a square with the two free replies, when both have a coordinate at least $12$ \\
-abstraction & our stones, the opponent's stones in $\Board_{17}$, the hidden corner \\
-\bottomrule
-\end{tabular}
-\medskip
-\caption{The terms of the rule.}
-\label{tab:terms}
-\end{table}
+\subsection{Tempo moves and lines}
 
-\section{The rule}\label{sec:rule}
+When no plus can be completed directly, because the second player holds
+an arm or a diagonal or because the arms would not force, the rule
+first plays moves that each force a block and so add a stone.
+
+\begin{definition}[tempo move]\label{def:tempo}
+In a position where the second player has no threat, a \emph{tempo
+move} is a cell in $\Board_6$ that makes exactly one threat, such that
+the threat cell is not the hidden corner and after the block the second
+player still has no threat.
+\end{definition}
+
+\begin{definition}[line, key]\label{def:line}
+A \emph{line} from a position consists of some tempo moves, each
+followed by its block, and then the arms the first player does not yet
+hold of one plus in the region whose centre the first player holds, in
+some order, such that each arm before the last makes exactly one threat
+whose block is not the hidden corner, the last arm makes at least two
+threats, and the second player never has a threat. The \emph{key} of a
+line is the triple
+\[
+  (\text{number of tempo moves},\ \text{number of arms to play},\
+  \text{side of the plus}).
+\]
+The rule prefers the smallest key in lexicographic order, then the
+smaller centre in cell order (row, then column), then the line its
+search generates first.
+\end{definition}
+
+The rule searches for lines with at most three tempo moves. Whether a
+line exists, and which is preferred, depends only on the abstraction of
+the position.
+
+\section{The plus rule}\label{sec:rule}
 
 Algorithm~\ref{alg:move} is the move function and
-Algorithm~\ref{alg:line} the search it calls once, after the second
-reply, to choose the line; both are stated as in the formal
-development. The second move against a first reply $o_1$ is $(3,2)$
-unless $o_1$ is one of seven cells, for which Figure~\ref{fig:second}
-gives the move.
+Algorithm~\ref{alg:line} the line search it calls once, after the
+second reply. Both are stated as in the formal development. The second
+move $x_2(o_1)$ against a first reply $o_1$ is $(3,2)$ unless $o_1$ is
+one of seven cells, for which Figure~\ref{fig:second} gives the move.
 
 \begin{algorithm}[ht]
 \caption{The move function.}\label{alg:move}
 \begin{algorithmic}[1]
-\If{some cell completes one of our squares}
+\If{some empty cell completes a square of the first player}
   \State play the least such cell
-\ElsIf{some cell completes an opponent square}
+\ElsIf{some empty cell completes a square of the second player}
   \State play the least such cell
-\ElsIf{we have not yet moved}
+\ElsIf{the first player has no stone}
   \State play $(2,2)$
-\ElsIf{we do not yet hold the second move for the first reply $o_1$}
-  \State play it
+\ElsIf{the first player does not hold $x_2(o_1)$}
+  \State play $x_2(o_1)$
 \Else
-  \State let $L$ be the line of Algorithm~\ref{alg:line} for the
-    abstraction of the position after the second reply
-  \State play the first cell of $L$ that we do not hold
+  \State $L \gets$ the line of Algorithm~\ref{alg:line} from the
+    abstraction after the second reply
+  \State play the first cell of $L$ the first player does not hold
 \EndIf
 \end{algorithmic}
 \end{algorithm}
 
-Lines 1 to 4 scan the squares of the abstraction: ours, which all lie
-in $\Board_6$, and the opponent's with all corners inside $\Board_{17}$.
-An opponent square with a corner beyond $\Board_{17}$ would go through
-the hidden corner, which the rule never surrenders, and the checker of
-Section~\ref{sec:verify} confirms at every node that the opponent has
-no threat at all.
+Lines 1 to 4 scan the squares of the abstraction: the first player's,
+which lie in $\Board_6$, and the second player's with all corners
+inside $\Board_{17}$. A second-player square with a corner beyond
+$\Board_{17}$ would go through the hidden corner, where the rule never
+lets a block land, and the checker of Section~\ref{sec:verify}
+confirms at every node that the second player has no threat at all. If
+Algorithm~\ref{alg:line} returns no line the rule is undefined; the
+checker certifies that this never happens at a position the rule
+reaches.
 
 \begin{algorithm}[ht]
 \caption{The line search, from an abstract position $A$.}\label{alg:line}
 \begin{algorithmic}[1]
-\State $F \gets \{(A, \text{empty prefix})\}$
+\State $F \gets [(A, \varepsilon)]$
+  \Comment{positions reached, with the tempo moves that reached them}
 \For{$d = 0, 1, 2, 3$}
-  \ForAll{$(B, p) \in F$ in order, if the opponent has no threat in $B$}
-    \ForAll{pluses in the region whose centre we hold in $B$, side $1$ then $2$}
-      \State the arms to play are those we do not hold; skip the plus if the opponent holds one
-      \State try the orders of these arms; keep the first that wins by force (Definition~\ref{def:line})
+  \State $R \gets \varnothing$
+  \ForAll{$(B, p) \in F$ in order, such that the second player has no threat in $B$}
+    \ForAll{pluses $P$ in the region whose centre the first player holds in $B$}
+      \State $T \gets$ the arms of $P$ the first player does not hold in $B$
+      \If{$T \ne \varnothing$ and the second player holds no cell of $T$}
+        \State $\pi \gets$ the first ordering of $T$ such that $p\,\pi$ is a line from $A$
+        \If{$\pi$ exists} record $p\,\pi$ in $R$ with the key $(|T|, \text{side of } P, \text{centre of } P)$ \EndIf
+      \EndIf
     \EndFor
-    \State record the best plus found from $B$, by (arms to play, side, centre), behind $p$
   \EndFor
-  \If{some plus was recorded} \Return the recorded line with the smallest key \EndIf
-  \State $F \gets \{(B', p\,m) : (B, p) \in F,\ m \text{ a tempo move in } B,\ B' = B \text{ after } m \text{ and its block}\}$
+  \If{$R \ne \varnothing$} \Return the first line recorded in $R$ among those with the smallest key \EndIf
+  \State $F \gets$ the successors of the members of $F$, in order
 \EndFor
 \State \Return no line
 \end{algorithmic}
 \end{algorithm}
 
-The loop over $d$ examines all lines with $d$ tempo moves before any
-with $d+1$; within one $d$ the key compares arms to play, then side,
-then centre. Tempo moves are tried in cell order and arm orders in a
-fixed enumeration, so that two implementations choose the same line;
-the Lean definition and the Python twin are compared on this.
+The successors of $(B, p)$ in line 11 are the pairs $(B', p\,m)$ for
+the tempo moves $m$ in $B$, taken in cell order, where $B'$ is $B$
+after $m$ and its block. Line 8 tries the arm orders in a fixed
+enumeration, so that two implementations choose the same line.
 
 \begin{figure}[ht]
 \centering
 \input{fig-second}
 \caption{The second move. The black stone is the opening. Against a
-first reply on a cell marked $a$ the second move is $(2,1)$; on $b$ it
-is $(2,3)$; on $c$ it is $(1,2)$. Against every other first reply, on
-this board or beyond it, it is $(3,2)$. When the reply takes one of the
-natural second moves, $(2,3)$ or $(2,1)$, the rule takes the other.}
+first reply on a cell marked $1$ the second move is $(2,1)$; on $2$ it
+is $(2,3)$; on $3$ it is $(1,2)$. Against every other first reply, on
+this board or beyond it, it is $(3,2)$.}
 \label{fig:second}
 \end{figure}
 
@@ -493,27 +426,22 @@ The exceptions are exactly the first replies from which $(3,2)$ fails.
 They were found by search: for each first reply on $\Board_6$ the
 second move is the first cell in the order $(3,2)$, $(2,3)$, $(2,1)$,
 $(1,2)$ against which the rest of the rule beats every second reply.
-All seven lie within one king's move of the opening or of $(3,2)$; the
-farthest, $(4,3)$, is a diagonal of the side-$1$ plus at $(3,2)$, the
-cell on which the default line would need the opponent to block.
 
-\subsection{Two games}
-
-Table~\ref{tab:games} lists two complete games against an opponent who
-always blocks. In the first the replies $(0,0)$ and $(4,4)$ are far
+Table~\ref{tab:games} lists two complete games against a second player
+who always blocks. In the first the replies $(0,0)$ and $(4,4)$ are far
 from the opening pair and the basic line wins at once, key $(0,3,1)$.
-In the second the reply $(3,1)$ spoils both side-$1$ pluses and no line
-with fewer than two tempo moves exists; the line has key $(2,4,2)$, the
-side-$2$ plus at $(3,2)$ with all four arms to play behind the two
-tempo moves of Figure~\ref{fig:tempo}. It is the longest game the rule
-ever plays, on any board.
+In the second the reply $(3,1)$ is a diagonal of both side-$1$ pluses,
+no line with fewer than two tempo moves exists, and the line has key
+$(2,4,2)$: two tempo moves and then the four arms of the side-$2$ plus
+at $(3,2)$. Figure~\ref{fig:longest} shows the position before its
+last move.
 
 \begin{table}[ht]
 \centering
 \small
 \begin{tabular}{rllp{0.5\textwidth}}
 \toprule
-ply & we & opponent & what the move does \\
+ply & first player & second player & what the move does \\
 \midrule
 1, 2 & $(2,2)$ & $(0,0)$ & opening; free reply \\
 3, 4 & $(3,2)$ & $(4,4)$ & second move; free reply \\
@@ -534,36 +462,61 @@ ply & we & opponent & what the move does \\
 \bottomrule
 \end{tabular}
 \medskip
-\caption{Two games against an opponent who always blocks: the basic
-line, and the longest line. In the second game the first arm of the
-side-$2$ plus is forced through a small square with the tempo stones,
-the next two through side-$2$ squares with the centre and the arm
-$(3,4)$, and the last threatens at two diagonals.}
+\caption{Two games against a second player who always blocks: the
+basic line and the longest line.}
 \label{tab:games}
 \end{table}
 
 \begin{figure}[ht]
 \centering
 \input{fig-longest}
-\caption{The position after the fifteenth ply of the second game in
-Table~\ref{tab:games}. The side-$2$ plus at $(3,2)$ stands, with the
-opponent's blocks on its diagonals $(1,4)$ and $(5,4)$; the last arm
-$(3,0)$ threatens at the other two diagonals, dashed.}
+\caption{The second game of Table~\ref{tab:games} after ply $15$. The
+side-$2$ plus at $(3,2)$ stands with the second player's blocks on its
+diagonals $(1,4)$ and $(5,4)$, and the last arm $(3,0)$ threatens at
+the other two diagonals, dashed.}
 \label{fig:longest}
 \end{figure}
 
 The line is chosen once, after the second reply, and followed. Since
-the opponent's blocks are forced, every later position on a branch of
-the verified tree is determined by the line, and our stones at any
-point are the opening pair and a prefix of it. A rule that recomputed
-the line at every move would also be a rule of this kind; the committed
-version makes the verified tree a function of the reply pair, which the
-argument of Section~\ref{sec:uniform} needs. The compiled Lean
-definition finds the line from an abstract position in about $80$
-microseconds, the Python twin in a quarter of a millisecond. The search
-has at most three levels of tempo moves with at most $36$ candidates
-each, and at each position at most $20$ pluses with at most $24$ arm
-orders.
+the blocks are forced, every position of the forced tree below the
+second reply is determined by the line, and the first player's stones
+at any point are the opening pair and a prefix of it. Committing to the
+line makes the forced tree a function of the reply pair, which
+Section~\ref{sec:uniform} uses.
+
+The Python implementation of the rule was run over every reply pair on
+each board from $6$ to $17$, recording the line, its tempo moves, and
+the ply of the win against a second player who blocks. Every board
+plays exactly the $\distinctLines$ lines of $\Board_6$, since a pair's
+line depends only on its abstraction, and Table~\ref{tab:lines} splits
+the pairs by the number of tempo moves. Every pair won by a side-$1$
+plus needs no tempo move and every pair won by a side-$2$ plus needs at
+least one, so the first column also counts the side-$1$ lines. The
+longest line, the second game of Table~\ref{tab:games}, has
+$\longestLineMoves$ first-player moves after the opening pair, and
+against a second player who always blocks every line ends by ply
+$\latestPly$; a reply that blocks nothing leaves a threat that the rule
+completes at its next move. So the rule wins every game by the
+$\latestPly$th ply. This bound is computed from the $\distinctLines$
+lines and is not part of the formal theorem.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+tempo moves in the line & 0 & 1 & 2 & 3 \\
+\midrule
+reply pairs on $\Board_6$ & \tempoZero & \tempoOne & \tempoTwo & \tempoThree \\
+reply pairs on $\Board_{17}$ & \tempoZeroSeventeen & \tempoOneSeventeen & \tempoTwo & \tempoThree \\
+\bottomrule
+\end{tabular}
+\medskip
+\caption{The rule's lines by the number of tempo moves. The
+$\tempoTwoThree$ pairs needing two or three tempo moves have both
+replies in $\Board_6$ and are the same on every board; the other
+columns grow with the board.}
+\label{tab:lines}
+\end{table}
 
 \section{Small boards and the \texorpdfstring{$5 \times 5$}{5 x 5} board}\label{sec:small}
 
@@ -576,12 +529,10 @@ Suppose the second player had a winning strategy $\tau$. Let the first
 player open with an arbitrary move and thereafter follow $\tau$ as if
 the extra stone were absent, making a further arbitrary move whenever
 $\tau$ selects an occupied cell. The winning condition is monotone in a
-player's stone set, so surplus stones never hurt, and the first player
-wins; but $\tau$ was assumed to win against all first-player play, a
-contradiction. The formal statement is
-\texttt{second\_player\_no\_win}; the monotonicity step is the lemma
-\texttt{P1CanWin.insert\_left}, whose one subtlety is that the surplus
-stone may itself complete a square, ending the game early.
+player's stone set, so surplus stones never hurt (a surplus stone may
+itself complete a square, which ends the game in the first player's
+favour), and the first player wins; but $\tau$ was assumed to win
+against all first-player play, a contradiction.
 \end{proof}
 
 \begin{proposition}\label{prop:small}
@@ -590,52 +541,60 @@ Lemma~\ref{lem:stealing}, these games are drawn under optimal play:
 each player can secure at least a draw.
 \end{proposition}
 
+\begin{proof}
 For $n \le 2$ the board has at most four cells, so neither player ever
-holds four. For $n = 3, 4$ the claim is a
-statement about a finite game tree, verified by an exhaustive search
-that is part of the formal development: the search shows that the
-player to move cannot force a win by exhibiting, for every first-player
-move, a reply after which the first player still cannot force one. Two
-standard reductions keep the tree small: a player able to complete a
-square wins immediately, and a player facing two distinct completion
-threats has lost. The $4 \times 4$ search runs in about ninety seconds
-compiled. This confirms the report of \cite{jenrich}. The step from
-``neither player can force a win'' to ``each player can secure a draw''
-is determinacy of the finite game, formalized as
-\texttt{P1CanWin.or\_p2CanDraw} by induction on the number of empty
-cells; the drawing strategies of both players on each board are the
-theorem \texttt{small\_board\_drawn}.
+holds four. For $n = 3, 4$ the claim is a statement about a finite game
+tree, verified by an exhaustive search that is part of the formal
+development: for every first-player move the search exhibits a reply
+after which the first player still cannot force a win. The result
+agrees with \cite{jenrich}.
+The step from ``neither player can force a win'' to ``each player can
+secure a draw'' is determinacy of the finite game, proved by induction
+on the number of empty cells.
+\end{proof}
 
 \begin{proposition}\label{prop:five}
 The first player has a winning strategy on $\Board_5$.
 \end{proposition}
 
-The $5 \times 5$ board is won, but not by any purely forcing strategy
-from the opening $(2,2)$: for $\fiveNoForcing$ of the reply pairs that
-arise, no continuation in which every first-player move makes a threat
-wins, a fact established by exhaustive analysis. The strategy for this
-board is therefore a table with \emph{branch points}: a quiet,
-non-threatening move followed by a sub-table indexed by the reply to
-it. It was
-extracted from a full solution of the $5 \times 5$ game,
-$\fiveTablePositions$ positions solved with draws scored against the
-first player, has $\fiveTableBranches$ branches, and is verified by a
-checker that walks the complete game tree, every reply at every node.
-It plays the same two reflexes as the rule, complete a square when
-possible and otherwise block one, before consulting the table. Its
-verification and soundness theorem are in Section~\ref{sec:verify}; the
-table itself is data in the formal development and is not otherwise
-described here.
+\begin{proof}
+The strategy is a table, extracted from a full solution of the
+$5 \times 5$ game ($\fiveTablePositions$ positions solved, with draws
+scored against the first player) and verified by a checker that walks
+the complete game tree, every reply at every node. Like the rule, it
+completes a square when it can and otherwise blocks one before
+consulting the table. It opens at $(2,2)$, gives a second move for each
+of the $\fiveTableBranches$ first replies, and after the second reply
+follows a forcing plan where one exists. For $\fiveNoForcing$ of the
+reply pairs, with the table's second move, no continuation in which
+every first-player move makes a threat wins, so the table plays a
+\emph{quiet} move there, one making no threat, and continues with a
+sub-table indexed by the reply (Figure~\ref{fig:five}). That no
+forcing continuation exists for these $\fiveNoForcing$ pairs is a
+computation of the solver and is not formalized; the win of the table
+is.
+\end{proof}
+
+\begin{figure}[ht]
+\centering
+\input{fig-five}
+\caption{A branch point of the $5 \times 5$ table. The first player
+(black) opened at $(2,2)$ and answered the reply $(4,4)$ with the
+table's second move $(3,2)$. After the second reply $(2,3)$, one of the
+$\fiveNoForcing$ pairs with no forcing continuation, the table plays
+the quiet move $(0,2)$, marked by the square, and then consults a
+sub-table indexed by the reply to it.}
+\label{fig:five}
+\end{figure}
 
 \section{Verification}\label{sec:verify}
 
-Fix a strategy $\sigma$ and a board size $n$. The \emph{verification
-tree} of $\sigma$ on $\Board_n$ is the game tree in which the first
-player's moves are given by $\sigma$ and the second player's moves
-range over all empty cells; $\sigma$ \emph{verifies} on $\Board_n$ if
-every branch ends in a first-player square. If $\sigma$ verifies then
-the first player wins, and the $5 \times 5$ table is checked this way,
-its checker walking the tree in full.
+Fix a strategy $\sigma$ and a board size $n$. The \emph{full tree} of
+$\sigma$ on $\Board_n$ is the game tree in which the first player's
+moves are given by $\sigma$ and the second player's moves range over
+all empty cells; $\sigma$ \emph{verifies} on $\Board_n$ if every branch
+ends in a first-player square, and then the first player wins. The
+$5 \times 5$ table is checked on its full tree.
 
 The rule is checked on a smaller tree. The \emph{forced tree} of
 $\sigma$ on $\Board_n$ has the first player playing $\sigma$'s move,
@@ -658,59 +617,33 @@ strategy completes at its next move, so every omitted reply loses in
 two plies.
 
 \begin{proposition}\label{prop:forced}
-Let $\sigma$ be a strategy that, whenever our stones lie in $\Board_6$
-and some cell completes one of our squares, plays such a cell. If the
-forced tree of $\sigma$ on $\Board_n$ passes the guards and every
-branch ends in a first-player square, then
-$\texttt{WinsWith}\ \sigma\ n\ [\,]$: the tree of $\sigma$'s own moves
-against every reply is winning.
+Let $\sigma$ be a strategy that, whenever the first player's stones lie
+in $\Board_6$ and some cell completes one of the first player's
+squares, plays such a cell. If the forced tree of $\sigma$ on
+$\Board_n$ passes the guards and every branch ends in a first-player
+square, then the tree in which the first player plays $\sigma$'s move
+at every node is winning; in particular the first player wins on
+$\Board_n$.
 \end{proposition}
 
-The hypothesis is what the two-ply argument needs: if the winning tree
-is to be $\sigma$'s own, $\sigma$ must be the one to complete the
-standing threat. The rule satisfies it by its first clause, once the
-executable scan it uses is known to agree with the checker's, which is
-proved. Section~\ref{sec:lean} defines \texttt{WinsWith} and names the
-theorems.
+\begin{proof}
+This is the soundness theorem of the forced checker, an induction over
+the checker's recursion (Section~\ref{sec:lean}). The hypothesis makes
+$\sigma$ the player who completes the standing threat against a reply
+that blocks nothing, so that the winning tree is $\sigma$'s own. The
+rule satisfies it by its first clause, whose threat scan agrees with
+the checker's whenever the first player's stones lie in $\Board_6$;
+this is proved as a lemma.
+\end{proof}
 
-The rule passes the forced tree on every board from $6$ to $17$;
-Table~\ref{tab:runs} gives the number of reply pairs at the root and
-the time of the compiled checker, together with the full-tree check of
-the $5 \times 5$ table. The rule exists three times and the checkers
-twice: a Python twin used while finding the rule and the table, the
-Lean definitions, and a TypeScript copy of the rule that drives the
-interactive page accompanying the paper. The Python and TypeScript copies are compared with the Lean rule
-on the line it commits to for every reply pair of the $6 \times 6$
-board and for the anchored positions of Section~\ref{sec:uniform}, and
-the Python verifier, which walks the full tree rather than the forced
-skeleton, confirms the win on $\Board_6$ with the same longest game.
-Only the Lean runs enter the proof.
-
-\begin{table}[ht]
-\centering
-\begin{tabular}{rrrcrrr}
-\toprule
-$n$ & pairs & time (s) & & $n$ & pairs & time (s) \\
-\midrule
-5 & full tree & \timeFive & & 12 & \pairsTwelve & \timeTwelve \\
-6 & \pairsSix & \timeSix & & 13 & \pairsThirteen & \timeThirteen \\
-7 & \pairsSeven & \timeSeven & & 14 & \pairsFourteen & \timeFourteen \\
-8 & \pairsEight & \timeEight & & 15 & \pairsFifteen & \timeFifteen \\
-9 & \pairsNine & \timeNine & & 16 & \pairsSixteen & \timeSixteen \\
-10 & \pairsTen & \timeTen & & 17 & \pairsSeventeen & \timeSeventeen \\
-11 & \pairsEleven & \timeEleven & & 23 & \pairsAnchor & \timeAnchor \\
-\bottomrule
-\end{tabular}
-\medskip
-\caption{Verification runs and their wall-clock times on a laptop. At
-$5$ the enumerating checker walks the full tree of the table; from $6$
-up the forced checker runs the rule, with the number of reply pairs
-$(o_1, o_2)$ at the root. The run at $23$ is the base run of
-Section~\ref{sec:uniform}; the three anchored families there take
-$\timeAnchored$ seconds together. Each run is discharged by native
-evaluation inside the build of the development.}
-\label{tab:runs}
-\end{table}
+The rule passes the forced tree on every board from $6$ to $17$, one
+run of the checker per board with $(n^2-1)(n^2-3)$ reply pairs at the
+root (Table~\ref{tab:runs} in Section~\ref{sec:lean}). A Python
+implementation of the rule and a full-tree verifier, used while the
+rule was being found, agree with the Lean definition on the line
+committed to for every reply pair of $\Board_6$ and for the anchored
+positions of Section~\ref{sec:uniform}, and the full-tree verifier
+confirms the win on $\Board_6$. Only the Lean runs enter the proof.
 
 \section{Boards of size at least 17}\label{sec:uniform}
 
@@ -911,12 +844,14 @@ Theorem~\ref{thm:rule} with the moves forgotten.
 \section{Formalization}\label{sec:lean}
 
 The Lean development defines cells, boards, and squares as in
-Section~\ref{sec:defs}, and the winning predicate \texttt{P1CanWin} as
-an inductive family whose derivations are exactly strategy trees: one
-first-player move per node, every reply covered, draws failures by
-construction. The second player's win and each player's ability to
-secure a draw are defined from it by swapping roles after a move, and
-strategy stealing and determinacy are proved against these definitions
+Section~2, and the winning predicate \texttt{P1CanWin} as an inductive
+family whose derivations are exactly strategy trees: one first-player
+move per node, every reply covered, draws failures by construction.
+The second player's win and each player's ability to secure a draw are
+defined from it by swapping roles after a move, and strategy stealing
+(\texttt{second\_player\_no\_win}, with the monotonicity step
+\texttt{P1CanWin.insert\_left}) and determinacy
+(\texttt{P1CanWin.or\_p2CanDraw}) are proved against these definitions
 with no computation. These definitions, a few dozen lines, are the
 whole specification; everything else is proved against them.
 
@@ -929,30 +864,69 @@ which \texttt{WinsWith} holds again. It has the constructors of
 \texttt{P1CanWin} with one extra premise on each, that the move is the
 one $\sigma$ returns, and implies \texttt{P1CanWin} by forgetting that
 premise. A checker that plays $\sigma$ at every node proves
-\texttt{WinsWith} only if its soundness proof never invents a move; the
-one place the forced checker's proof did, the two-ply win against a
-reply that blocks nothing, is where Proposition~\ref{prop:forced} needs
-its hypothesis.
+\texttt{WinsWith} only if its soundness proof never invents a move,
+which is why Proposition~\ref{prop:forced} needs its hypothesis,
+\texttt{TakesWinsOn}.
 
 Three executable checkers are proved sound: \texttt{check}, which
 replays a table against all reply sequences (\texttt{check\_sound});
 the forced checker, generic over strategies
 (\texttt{checkForcedS\_winsWith}, Proposition~\ref{prop:forced}); and
-\texttt{refute} (\texttt{refute\_sound}). Each proof is an induction
-over the checker's recursion, whose guards supply the premises of the
-constructors, so soundness never inspects the strategy; the recursion
-descends on the bound $n^2 + 1$ on the length of a game, and
-exhausting it returns failure, which can cost completeness but never
-soundness. The rule is the definition \texttt{plusMove},
-$\ruleLeanLines$ lines; its threat scan agrees with the checker's
-(\texttt{plusMove\_takesWins}), the agreement lemma is
-\texttt{plusMove\_agree}, the simulation theorem is \texttt{simulate},
-and Theorem~\ref{thm:uniform} is
-\texttt{plus\_wins\_with\_of\_seventeen\_le}, in about $\plusLeanLines$
-further lines. Theorem~\ref{thm:rule} is \texttt{plus\_wins\_with} and
-Theorem~\ref{thm:main} is \texttt{outcome}, whose first half is
-\texttt{p1\_wins\_iff}. No table appears in the statement or the proof
-of Theorem~\ref{thm:rule}.
+\texttt{refute} (\texttt{refute\_sound}, Proposition~\ref{prop:small}).
+Each proof is an induction over the checker's recursion, whose guards
+supply the premises of the constructors, so soundness never inspects
+the strategy. The $5 \times 5$ table is
+\texttt{fiveTable} and Proposition~\ref{prop:five} is
+\texttt{p1\_wins\_five}.
+
+The rule is the definition \texttt{plusMove}, $\ruleLeanLines$ lines.
+Hypothesis (i) of Theorem~\ref{thm:simulate} for the rule is
+\texttt{plusMove\_takesWins} and hypothesis (ii) is
+\texttt{plusMove\_agree}; both are proved by unfolding the definition,
+and neither is an evaluation. The simulation theorem is \texttt{simulate}, and
+Theorem~\ref{thm:uniform} is
+\texttt{plus\_wins\_with\_of\_seventeen\_le}, which dispatches the
+cases (a) to (e) to \texttt{simulate} with the run on the anchor board
+(\texttt{plus\_forced\_anchor}) and the three families
+\texttt{farAnchorsSafe}, \texttt{exactAnchorsSafe}, and
+\texttt{farNearAnchorsSafe}. The containment of Lemma~\ref{lem:span}
+is \texttt{corners\_span\_bounded} and Lemma~\ref{lem:dichotomy} is
+\texttt{escape\_farm}, with the hidden corner of a pair computed by
+\texttt{farmKey}; the Lean sources call the hidden corner a
+\emph{farm}. Lemma~\ref{lem:arms} is not used by the formal proof,
+which checks the lines directly. Theorem~\ref{thm:rule} is
+\texttt{plus\_wins\_with} and Theorem~\ref{thm:main} is
+\texttt{outcome}, whose first half is \texttt{p1\_wins\_iff}. In sum, Theorem~\ref{thm:main} rests on Propositions~\ref{prop:small}
+and~\ref{prop:five} and Theorem~\ref{thm:rule};
+Theorem~\ref{thm:rule} on the runs at $6$ to $17$ with
+Proposition~\ref{prop:forced} and on Theorem~\ref{thm:uniform}; and
+Theorem~\ref{thm:uniform} on Lemma~\ref{lem:dichotomy},
+Theorem~\ref{thm:simulate}, the two lemmas about the rule, and the
+four runs on $\Board_{23}$.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrcrrr}
+\toprule
+$n$ & pairs & time (s) & & $n$ & pairs & time (s) \\
+\midrule
+5 & full tree & \timeFive & & 12 & \pairsTwelve & \timeTwelve \\
+6 & \pairsSix & \timeSix & & 13 & \pairsThirteen & \timeThirteen \\
+7 & \pairsSeven & \timeSeven & & 14 & \pairsFourteen & \timeFourteen \\
+8 & \pairsEight & \timeEight & & 15 & \pairsFifteen & \timeFifteen \\
+9 & \pairsNine & \timeNine & & 16 & \pairsSixteen & \timeSixteen \\
+10 & \pairsTen & \timeTen & & 17 & \pairsSeventeen & \timeSeventeen \\
+11 & \pairsEleven & \timeEleven & & 23 & \pairsAnchor & \timeAnchor \\
+\bottomrule
+\end{tabular}
+\medskip
+\caption{The checker runs of the proof. At $5$ the enumerating checker
+walks the full tree of the table; from $6$ up the forced checker runs
+the rule, with the number of reply pairs at the root. The run at $23$
+is the run on the anchor board; the $\anchoredPositions$ anchored runs
+take $\timeAnchored$ seconds together.}
+\label{tab:runs}
+\end{table}
 
 Concrete boards are discharged by native evaluation
 (\texttt{native\_decide}): the refutations at $1$ to $4$, the
@@ -963,107 +937,22 @@ therefore \texttt{propext}, \texttt{Classical.choice},
 \texttt{Quot.sound}, and one instance of Lean's evaluation axiom per
 certificate: the kernel checks the soundness theorems but not the
 evaluations, which the Lean compiler and runtime perform, the standard
-trust base of large computer-assisted proofs in Lean. The development
-builds in about $\buildMinutes$ minutes on a laptop, almost all of it
-the evaluations, and accompanies the paper as supplementary material
-with the Python code: the $5 \times 5$ solver and its table, the twin of
-the rule, and the scripts that produce Table~\ref{tab:lines}, the
-numbers in this paper, and the board diagrams. The checker executable
-reproduces the runs of Table~\ref{tab:runs}, and the interactive page
-plays the rule and shows at each move the line it is following.
+trust base of large computer-assisted proofs in Lean.
+Table~\ref{tab:runs} lists the runs with their wall-clock times on a
+MacBook Pro (16-inch, 2024) with an Apple M4 Max chip and 36 GB of
+memory; the whole development builds in about $\buildMinutes$ minutes,
+almost all of it the evaluations.
 
-\section{How the rule was found}\label{sec:how}
 
-An earlier version of this work proved Theorem~\ref{thm:main} with a
-lookup table for the boards from $6 \times 6$ up: several thousand
-forcing plans, one per pair of opponent replies, found by search on the
-$15 \times 15$ board and confined to the $6 \times 6$ corner. Reading
-the plans rather than counting them, almost all began with an arm of
-the side-$1$ plus at $(2,2)$ or $(3,2)$, the shortest ones were that
-plus, and the long ones, replayed in the positions where they were
-used, either forced a block so as to place a stone that a later square
-needed or played the arms of the side-$2$ plus at $(3,2)$ one at a
-time. A first attempt at a rule scored moves by the number of threats
-they made available and failed on a few dozen reply pairs, all with
-both replies near the opening, where the right move is a preparation
-whose value a one-move lookahead does not see. Asking instead which
-plus can be completed by force, after a few tempo moves, gave a rule
-that wins them all; the order of preference, fewer tempo moves and then
-a smaller plus, keeps the lines short and makes the choice unambiguous,
-which the formal development needs. Three tempo moves are necessary and
-sufficient, and the base board of the abstraction was set at $17$ after
-$12$ failed the forced-tree check.
+The Lean development and the Python code, with the $5 \times 5$
+solver, the implementation of the rule, and the scripts that produce
+the numbers and board diagrams of this paper, accompany the paper as
+ancillary material and are at
+\url{https://github.com/sean-reid/square-achievement}, tag
+\texttt{v1.0.0}. The development builds with Lean~4.33.1 and mathlib at
+its tag \texttt{v4.33.1}.
 
-\section{Measurements}\label{sec:measure}
-
-For each board from $6$ to $17$ we ran the Python twin over every
-reply pair and recorded the line, its tempo moves, and the ply of the
-win against an opponent who blocks. Table~\ref{tab:lines} summarizes
-the result. The set of lines does not depend on the board: every board
-plays exactly the $\distinctLines$ lines of $\Board_6$, since a pair's
-line depends only on its abstraction. Most pairs need no preparation:
-on $\Board_{17}$, $\sideOneSeventeen$ of $\pairsSeventeen$ pairs are won
-by a side-$1$ plus with no tempo move, the other $\sideTwoSeventeen$ by
-a side-$2$ plus behind one to three tempo moves, and only
-$\tempoTwoThree$ pairs on any board, all with both replies in
-$\Board_6$, need two or three. The rule wins by ply $\latestPly$, the
-ply of the winning move against an opponent who always blocks.
-
-\begin{table}[ht]
-\centering
-\begin{tabular}{lr}
-\toprule
-distinct lines & \distinctLines \\
-pairs on $\Board_6$ whose line has $0$, $1$, $2$, $3$ tempo moves
-  & \tempoZero, \tempoOne, \tempoTwo, \tempoThree \\
-pairs using a plus of side $1$, side $2$ (on $\Board_6$) & \sideOne, \sideTwo \\
-longest line, in first-player moves after the opening pair & \longestLineMoves \\
-latest winning ply & \latestPly \\
-\bottomrule
-\end{tabular}
-\medskip
-\caption{The rule's lines. The distinct lines, the longest line, and
-the latest winning ply are the same on every board from $6$ to $17$,
-as are the $\tempoTwo$ and $\tempoThree$ pairs using two or three tempo
-moves, since those pairs have both replies in $\Board_6$; the other
-counts grow with the board.}
-\label{tab:lines}
-\end{table}
-
-\section{Status of the claims}\label{sec:status}
-
-Table~\ref{tab:status} records, for each statement, whether it is
-proved in Lean, proved on paper only, computed, or measured, and what
-it depends on. The numbers in this paper are written into its source by
-the accompanying code, and the board diagrams are generated from the
-positions the rule computes.
-
-\begin{table}[ht]
-\centering\small
-\begin{tabular}{p{0.34\textwidth}p{0.20\textwidth}p{0.38\textwidth}}
-\toprule
-Statement & Status & Depends on \\
-\midrule
-Theorem~\ref{thm:main} (outcome) & proved in Lean & the certificates below, \texttt{native\_decide} \\
-Theorem~\ref{thm:rule} (the rule wins, \texttt{WinsWith}) & proved in Lean & runs at $6$ to $17$ and $23$, three anchored families \\
-Theorem~\ref{thm:uniform} (every board from $17$) & proved in Lean & Lemma~\ref{lem:dichotomy}, \texttt{simulate}, \texttt{plusMove\_agree} \\
-Lemma~\ref{lem:arms} (arms force) & proved on paper & elementary; not needed by the formal proof, which checks the lines \\
-Lemma~\ref{lem:span}, Lemma~\ref{lem:dichotomy} & proved in Lean & \texttt{corners\_span\_bounded} in \texttt{General/Invariance.lean}, \texttt{escape\_farm} in \texttt{General/Coverage.lean} \\
-Lemma~\ref{lem:stealing} (strategy stealing) & proved in Lean & \texttt{P1CanWin.insert\_left} \\
-Proposition~\ref{prop:small} (draws) & proved in Lean & refutations at $1$ to $4$, determinacy \\
-Proposition~\ref{prop:five} ($5 \times 5$) & proved in Lean & the $5 \times 5$ table, one full-tree run \\
-Proposition~\ref{prop:forced} (checker soundness) & proved in Lean & \texttt{checkForcedS\_winsWith} \\
-no forcing strategy on $5 \times 5$ from $(2,2)$ & computed, not formalized & the Python solver \\
-Table~\ref{tab:runs} (times) & measured & one laptop \\
-Table~\ref{tab:lines} (lines) & computed, reproducible & the Python twin, compared with the Lean rule \\
-\bottomrule
-\end{tabular}
-\medskip
-\caption{What is proved and what is not.}
-\label{tab:status}
-\end{table}
-
-\section{Open questions}\label{sec:open}
+\section{Open questions}
 
 The rule wins by ply $\latestPly$. What is the least ply by which the
 first player can force a win on $\Board_n$, and is there a rule of
@@ -1073,18 +962,18 @@ the cost of a longer statement.
 
 The second move has seven exceptions. Is there an opening, or an
 opening with a fixed second move, from which a rule of this kind wins
-with none? The search that fixed the second move tried the four
-neighbours of the opening in one order and did not vary the opening.
+with none? The search of Section~\ref{sec:rule} did not vary the
+opening.
 
-The rule does not apply to $\Board_5$, where no purely forcing strategy
-from $(2,2)$ exists and the table needs quiet moves at branch points. A short rule for $\Board_5$ is open.
+The rule does not apply to $\Board_5$, where the table needs quiet
+moves at branch points. A short rule for $\Board_5$ is open.
 
-Finally, the constants. The region $6$ cannot shrink for a purely
-forcing strategy from $(2,2)$ with the second moves searched here, and
-the base $17$ is least for Lemma~\ref{lem:dichotomy}; whether a rule
-can read less than the opponent's stones inside $\Board_{17}$, for
-instance only those inside $\Board_6$ with a summary of the rest, is
-open.
+The region $6$ cannot shrink for a purely forcing strategy from
+$(2,2)$ with the second moves searched here, and the base $17$ is least
+for Lemma~\ref{lem:dichotomy} (Remark~\ref{rem:base}). Whether a rule
+can read less than the second player's stones inside $\Board_{17}$,
+for instance only those inside $\Board_6$ with a summary of the rest,
+is open.
 
 \section*{Acknowledgements}
 
