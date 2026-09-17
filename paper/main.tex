@@ -637,16 +637,25 @@ every branch ends in a first-player square. If $\sigma$ verifies then
 the first player wins, and the $5 \times 5$ table is checked this way,
 its checker walking the tree in full.
 
-The rule is verified on a smaller tree. The \emph{forced tree} of
-$\sigma$ on $\Board_n$ is the game tree in which we play $\sigma$'s
-move, the opponent's replies range over all empty cells at the first
+The rule is checked on a smaller tree. The \emph{forced tree} of
+$\sigma$ on $\Board_n$ has the first player playing $\sigma$'s move,
+the second player's replies ranging over all empty cells at the first
 two levels, and below every later node only over the cells that block
 a threat of the move just played. The checker walks this tree under
-guards: past the second reply, every move of $\sigma$ wins outright or
-leaves a threat, every non-winning move and every threat cell lies in
-$\Board_6$, and the opponent never has a threat. A reply that blocks
-nothing leaves a threat standing, which the strategy completes next
-move, so every omitted reply loses in two plies.
+guards:
+\begin{enumerate}
+\item[(G1)] after the second reply, every move of $\sigma$ wins
+  outright or makes a threat;
+\item[(G2)] every non-winning move and every threat cell lies in
+  $\Board_6$;
+\item[(G3)] after every move of $\sigma$ the second player has no
+  threat;
+\item[(G4)] optionally, for a given cell $g$, no move of $\sigma$ has
+  $g$ as its only threat cell.
+\end{enumerate}
+A reply that blocks nothing leaves a threat standing, which the
+strategy completes at its next move, so every omitted reply loses in
+two plies.
 
 \begin{proposition}\label{prop:forced}
 Let $\sigma$ be a strategy that, whenever our stones lie in $\Board_6$
@@ -703,100 +712,201 @@ evaluation inside the build of the development.}
 \label{tab:runs}
 \end{table}
 
-\section{Every larger board}\label{sec:uniform}
+\section{Boards of size at least 17}\label{sec:uniform}
 
 \begin{theorem}\label{thm:uniform}
 For every $n \ge 17$ the first player following the rule wins on
 $\Board_n$.
 \end{theorem}
 
-Checking boards one at a time can never finish, and the difficulty a
-large board adds is room: stones placed far from the corner region
-belong to squares that exist only out there, and if one of those
-squares reached three corners, the rule would have to answer far from
-its lines. Lemma~\ref{lem:dichotomy} says this can happen only through
-a hidden corner, and the rule never surrenders one. The proof is a
-simulation. Figure~\ref{fig:zones} shows the regions it lives in.
+By Lemma~\ref{lem:dichotomy}, a stone beyond $\Board_{17}$ can affect
+the rule's play only through a hidden corner, and the rule never lets
+a block land on one. The proof replays a checked run on $\Board_{23}$
+as a run on $\Board_n$. Replies inside $\Board_{17}$ are read
+verbatim. A reply beyond $\Board_{17}$ is
+replaced, for the base run, by a \emph{stand-in}: a fixed cell beyond
+$\Board_{17}$ when the pair has no hidden corner, and an
+\emph{anchor}, a cell beyond $\Board_{17}$ that forms with the other
+reply the same hidden corner, when it has one. The \emph{anchor board}
+$\Board_{23}$ is the least board holding every anchor
+(Remark~\ref{rem:anchors}).
+
+A \emph{history} is the sequence of moves played so far, and for a
+history $h$ and a sequence $t$ of further moves $h\,t$ is their
+concatenation. A strategy $\sigma$ is given the board, and
+$\sigma_n(h)$ is its move after $h$ on $\Board_n$. The guards are those
+of Section~\ref{sec:verify}.
+
+\begin{theorem}[simulation]\label{thm:simulate}
+Let $\sigma$ be a strategy, let $B, n \ge 17$, and let
+$x_1, x_2 \in \Board_6$. Let $h = (x_1, o_1, x_2, o_2)$ be a history
+on $\Board_n$ and $h' = (x_1, o_1', x_2, o_2')$ a history on
+$\Board_B$ such that for each $i$ either $o_i' = o_i \in \Board_{17}$,
+or $o_i \in \Board_n \setminus \Board_{17}$ and
+$o_i' \in \Board_B \setminus \Board_{12}$. Let $g$ be either no cell or
+a cell of $\Board_6$. Suppose that
+\begin{enumerate}
+\item[(i)] on every history extending $h$ in which the first player's
+  stones lie in $\Board_6$, $\sigma$ plays a cell completing one of the
+  first player's squares whenever one exists;
+\item[(ii)] $\sigma_n(h\,t) = \sigma_B(h'\,t)$ for every sequence $t$
+  of further moves;
+\item[(iii)] the forced tree of $\sigma$ on $\Board_B$ below $h'$
+  passes the guards, with $g$ as the cell of (G4) if $g$ is a cell, and
+  every branch ends in a first-player square;
+\item[(iv)] if $o_1$ or $o_2$ lies beyond $\Board_{17}$, then either
+  $g$ is no cell and $\{o_1, o_2\}$ has no hidden corner
+  (Definition~\ref{def:latent}), or $g$ is the hidden corner of
+  $\{o_1, o_2\}$.
+\end{enumerate}
+Then the tree in which the first player plays $\sigma$'s move at every
+node below $h$ on $\Board_n$ is winning.
+\end{theorem}
+
+\begin{proof}
+By induction along the forced tree of (iii). Consider a node of that
+tree together with the corresponding real position on $\Board_n$; the
+two differ only at the two reply slots, and the blocks played so far,
+all in $\Board_6$ by (G2), are shared. By (ii) $\sigma$ plays the same
+cell $m$ in both. If $m$ completes a square in the base position, the
+square has three corners among the first player's stones, which lie in
+$\Board_6$, so it is a square on $\Board_n$ too and $m$ wins there.
+Otherwise $m \in \Board_6$ by (G2), the threat cells of $m$ are the
+same on both boards, since each threat square has three corners in
+$\Board_6$, and by (G3) the second player has no threat in the base
+position.
+
+No reply $r$ completes a second-player square on $\Board_n$. Suppose
+$\Sq$ were such a square. If $\Sq \subseteq \Board_{17}$, its corners
+other than $r$ are stones shared with the base position, since a
+substituted reply lies beyond $\Board_{17}$; then either $r$ is a
+stand-in cell and the base position already contains $\Sq$, or $r$
+completes $\Sq$ in the base position, and both contradict (G3) along
+the base run. If $\Sq \not\subseteq \Board_{17}$, two blocks among its
+corners would confine it to $\Board_{12}$ by Lemma~\ref{lem:span}, so
+its corners are $r$, one block $d \in \Board_6$, and both replies, and
+a reply lies beyond $\Board_{17}$, since three corners in $\Board_{17}$
+would confine $\Sq$ there. By Lemma~\ref{lem:dichotomy} $d$ is the
+hidden corner of $\{o_1, o_2\}$, which contradicts (iv): either the
+pair has none, or its hidden corner is $g$, and $g$ is never a block,
+because a block at $g$ arises only when $g$ is the only threat cell,
+which (G4) excludes, or when the second player chooses $g$ among two
+threat cells, in which case $\sigma$ completes the other by (i) and
+the branch ends.
+
+A reply that blocks nothing leaves a threat, which $\sigma$ completes
+by (i). A block $r \ne g$ is a block in the base run as well, and the
+induction continues along the base branch, whose invariants are
+preserved: the new block lies in $\Board_6$ and is not $g$.
+\end{proof}
+
+The formal theorem is stated for any node of the base run reached by
+forced play, with the blocks so far in $\Board_6$ and $g$ not among
+the second player's stones, and is proved by induction on the checker's
+fuel.
+
+For the rule, hypotheses (i) and (ii) are lemmas about its definition.
+For (i), the first clause of Algorithm~\ref{alg:move} plays a
+completion found by the rule's threat scan, and that scan agrees with
+the checker's whenever the first player's stones lie in $\Board_6$. For
+(ii), the rule's move depends on a history only through its
+abstraction and through the second move of the first reply. A reply
+beyond $\Board_{17}$ and its stand-in both drop out of the abstraction,
+a reply inside $\Board_{17}$ is its own stand-in, and the stand-in pair
+is chosen with the same hidden corner as the real pair, so the two
+abstractions agree at every node; the second moves agree because every
+first reply beyond $\Board_6$, and every stand-in, has the default
+second move $(3,2)$. Figure~\ref{fig:agreement} shows a real history
+and its base history.
 
 \begin{figure}[ht]
 \centering
-\input{fig-zones}
-\caption{The regions of the argument, drawn on $\Board_{17}$. The rule
-plays in $\Board_6$; by Lemma~\ref{lem:span} every square through two
-stones of $\Board_6$ lies in $\Board_{12}$; a stone beyond $\Board_{17}$
-shares no square with two blocks and matters only through the hidden
-corner.}
-\label{fig:zones}
+\input{fig-agreement}
+\caption{Left: a real history on $\Board_{25}$, with $\Board_{17}$
+outlined and $\Board_6$ shaded. The first player (black) holds $(2,2)$
+and $(3,2)$; the replies $o_1 = (20,23)$ and $o_2 = (20,4)$, both
+beyond $\Board_{17}$, are two corners of the dashed square
+$\Sq(1,4,19)$ with hidden corner $b = (1,4)$. Right: the base history
+on the anchor board $\Board_{23}$; the anchors $o_1' = (18,21)$ and
+$o_2' = (18,4)$ are two corners of $\Sq(1,4,17)$ with the same hidden
+corner. The two histories have the same abstraction, so the rule plays
+the same line from each.}
+\label{fig:agreement}
 \end{figure}
 
-In a position the forced run can reach, the opponent's lasting stones
-are the two free replies and forced blocks in $\Board_6$. Replies
-inside $\Board_{17}$ are read verbatim; a reply beyond it is replaced,
-for the base run, by a stand-in, a fixed cell beyond $\Board_{17}$ when
-the pair has no hidden corner and an anchor cell with the same hidden
-corner when it has one. The base run is on $\Board_{23}$, the least
-board holding every anchor. Safety at every node reduces to
-Lemma~\ref{lem:dichotomy}: an opponent square is either inside
-$\Board_{17}$, and excluded by the base run, or goes through the hidden
-corner. Pairs with a hidden corner are covered by three families of
-anchored runs, one per placement of the pair on the corners of its
-square, over all coordinates: $\anchoredPositions$ positions, each a
-run of the checker with the hidden corner as an additional guard.
+Pairs with a hidden corner $b = (b_1, b_2)$ are covered by three
+families of \emph{anchored runs}, each a forced run of the rule on
+$\Board_{23}$ from the history $((2,2), o_1', x_2(o_1'), o_2')$ with
+$b$ as the cell of (G4), preceded by a check that $b$ is the hidden
+corner of the anchor pair.
+\begin{itemize}
+\item The \emph{far} family, for both replies beyond $\Board_{17}$:
+  $o_1' = (b_1 + 17, b_2 + 17)$ and $o_2' = (b_1 + 17, b_2)$, two
+  corners of $\Sq(b_1, b_2, 17)$; one run per $b \in \Board_6$, $36$
+  runs.
+\item The \emph{exact} family, for $o_1 \in \Board_{17}$ and $o_2$
+  beyond it. By Lemma~\ref{lem:dichotomy}, $o_1$ lies in the row or
+  the column of $b$ at distance $s \ge 12$, and $o_1 \in \Board_{17}$
+  puts that coordinate of $o_1$ below $17$; say $o_1 = (a, w)$ and
+  $b = (a, h)$ with $a, h < 6$, $12 \le w < 17$, and $s = w - h$. Then
+  $o_1' = o_1$ and $o_2' = (a + s, w)$, the corner of $\Sq(a, h, s)$
+  opposite $b$, which lies beyond $\Board_{17}$ exactly when the square
+  does; one run per $(a, w, h)$ with $a + w - h \ge 17$ and one per
+  transposed triple, $70$ runs.
+\item The \emph{far-near} family, for $o_1$ beyond $\Board_{17}$ and
+  $o_2 \in \Board_{17}$: the exact family with the two replies
+  exchanged, $70$ runs.
+\end{itemize}
+This gives $\anchoredPositions$ anchored runs in all.
 
-The formal simulation theorem is stated for any strategy $\sigma$ and
-concludes that $\sigma$'s own play wins from the real history. Beyond
-the runs it has two hypotheses about $\sigma$: that $\sigma$ takes its
-completions, as in Proposition~\ref{prop:forced}, and agreement,
-\[
-  \sigma\,(\text{real history}) \;=\; \sigma\,(\text{base history})
-\]
-at every node, the base history being the real one with the two replies
-replaced by their stand-ins. For the rule this follows from what it
-reads. Stand-ins and anchors lie beyond $\Board_{17}$, as do the stones
-they replace, so both drop out of the abstraction; a reply inside
-$\Board_{17}$ is its own stand-in; and the stand-ins have the same
-hidden corner as the real pair, which for the anchors is part of what
-the anchored run checks and for the keyless stand-ins is a short
-computation. So the abstractions agree, and the rule's move is a
-function of the abstraction and of the first reply's second move, which
-agrees too because every reply beyond $\Board_6$ has the default second
-move. A case analysis over the reply pairs assembles Theorem~\ref{thm:uniform}
-from this agreement and the simulation theorem.
+\begin{proof}[Proof of Theorem~\ref{thm:uniform}]
+Let $n \ge 17$. The rule opens at $(2,2)$ and answers the first reply
+$o_1$ with $x_2 = x_2(o_1) \in \Board_6$; both moves are legal and
+complete nothing, so it remains to show that the rule's tree below
+$h = ((2,2), o_1, x_2, o_2)$ is winning for every reply pair. Apply
+Theorem~\ref{thm:simulate} with $B = 23$, $\sigma$ the rule, and $h'$,
+$g$ as follows, calling a reply \emph{far} if it lies beyond
+$\Board_{17}$.
+\begin{enumerate}
+\item[(a)] Neither reply far: $h' = h$, $g$ no cell, and (iii) is the
+  branch at $h$ of the forced run of the rule on $\Board_{23}$; (iv) is
+  vacuous.
+\item[(b)] A far reply and no hidden corner: a far $o_1$ is replaced by
+  $(22,22)$ and a far $o_2$ by $(22,21)$, $g$ is no cell, and (iii) is
+  again a branch of the run on $\Board_{23}$. A stand-in forms no hidden
+  corner with a cell of $\Board_{17}$, and the two stand-ins form none
+  with each other, so the stand-in pair has no hidden corner either.
+\item[(c)] Both replies far with hidden corner $b$: the far family,
+  $g = b$.
+\item[(d)] $o_1 \in \Board_{17}$, $o_2$ far, hidden corner $b$: the
+  exact family, $g = b$.
+\item[(e)] $o_1$ far, $o_2 \in \Board_{17}$, hidden corner $b$: the
+  far-near family, $g = b$.
+\end{enumerate}
+In (c) to (e), (iii) is the anchored run, and (iv) holds by the case
+hypothesis. Hypothesis (i) is the lemma above; (ii) holds because the
+real and base pairs have the same hidden corner, checked at the head of
+each anchored run and shown for the stand-ins in (b), and the same
+second move, so that the abstractions of $h\,t$ and $h'\,t$ agree for
+every $t$.
+\end{proof}
 
 \begin{remark}\label{rem:anchors}
-The anchor board $23$, the stand-ins $(22,22)$ and $(22,21)$, and the
-anchor cells at coordinates $17$ and above are choices of the proof,
-not of the rule (Figure~\ref{fig:anchors}). An anchor for the hidden
-corner $(h_1,h_2)$ of a far pair sits at $(h_1+17, h_2+17)$ and
-$(h_1+17, h_2)$, so it reaches coordinate $22$ at most; the anchors of
-the two other families reach $a + w - h \le 21$; and the stand-ins are
-placed at $22$, beyond every anchor. So $23$ is the least board that
-holds them all, and any larger board would serve as the base. The rule
-itself has two board constants, the region $6$ and the base $17$, with
-$12 = 2 \cdot 6$ marking the stones that can have a hidden corner, and
-one search constant, the three tempo moves.
+The anchors of the far family reach coordinate $5 + 17 = 22$, those of
+the other two families $a + s \le 5 + 16 = 21$, and the stand-ins sit
+at $22$, so $\Board_{23}$ is the least board holding them all; any
+larger board would serve. The anchor board, the stand-ins, and the
+anchors are choices made in the proof, and the rule does not depend on
+them.
 \end{remark}
 
-\begin{figure}[ht]
-\centering
-\input{fig-anchors}
-\caption{The anchor board $\Board_{23}$. The region $\Board_6$ is
-shaded and the base board $\Board_{17}$ outlined. The far pair with
-hidden corner $b = (2,3)$ is replaced in the base run by its anchors
-$o_1' = (19,20)$ and $o_2' = (19,3)$, two corners of the dashed square
-through $b$, both beyond $\Board_{17}$; a pair with no hidden corner is
-replaced by the two grey stand-ins at $(22,22)$ and $(22,21)$, which
-lie on no square through the region. Every anchor has coordinates at most
-$22$, which is why the anchor board is $23$.}
-\label{fig:anchors}
-\end{figure}
-
+\begin{proof}[Proof of Theorems~\ref{thm:main} and~\ref{thm:rule}]
 Theorem~\ref{thm:rule} follows from the checked runs at $6$ to $17$
-with Proposition~\ref{prop:forced} and from Theorem~\ref{thm:uniform}
-for $n \ge 17$, and
-Theorem~\ref{thm:main} from Propositions~\ref{prop:small}
-and~\ref{prop:five} and Theorem~\ref{thm:rule} with the moves
-forgotten.
+with Proposition~\ref{prop:forced}, and from Theorem~\ref{thm:uniform}
+for $n \ge 17$. Theorem~\ref{thm:main} follows from
+Propositions~\ref{prop:small} and~\ref{prop:five} and from
+Theorem~\ref{thm:rule} with the moves forgotten.
+\end{proof}
 
 \section{Formalization}\label{sec:lean}
 
