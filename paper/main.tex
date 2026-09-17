@@ -23,10 +23,12 @@
 
 \input{macros}
 \input{claims}
+\raggedbottom
 
 \title{The square achievement game on \texorpdfstring{$n \times n$}{n x n} boards}
 \author{Sean Reid}
-\address{San Jose State University}
+\address{Department of Mathematics and Statistics, San Jose State
+  University, San Jose, CA 95192}
 \email{sean.reid@sjsu.edu}
 \subjclass[2020]{91A46, 05D10, 68V20}
 \keywords{Positional game, achievement game, strategy stealing, Lean}
@@ -40,12 +42,15 @@ board without one is a draw. The first player has a winning strategy
 if and only if $n \ge 5$, which answers a question of Erickson. For
 $n \ge 6$ the strategy is a rule with no lookup table, built around the
 \emph{plus}, a held stone with the four cells at a common distance from
-it along the axes: open at $(2,2)$, take a completion or a block
-whenever one exists, and otherwise play at most three single forcing
-moves and then the arms of a plus. The rule reads only its own stones,
-the second player's stones inside a $17 \times 17$ region, and one
-derived cell, and a simulation theorem carries a checked run on the
-$23 \times 23$ board to every larger board. The proofs are formalized
+it along the axes: open at $(2,2)$, answer the first reply with a
+fixed second move, take a completion or a block whenever one exists,
+and otherwise play at most three single forcing moves and then the
+arms of a plus. The rule reads only its own stones, the second player's
+stones inside a $17 \times 17$ board, and one derived cell, the corner
+at which a forced block would give the second player a threat the rule
+does not read; it never forces a block there, and a simulation theorem
+carries a checked run on the $23 \times 23$ board to every board of
+size at least $17$. The proofs are formalized
 in Lean~4, and the theorem for the rule states that the tree of its
 own moves is winning.
 \end{abstract}
@@ -85,9 +90,9 @@ and Eliahou also exhibit square-free two-colorings of the $14 \times 14$
 board. Concurrently with the present work, Adler \cite{adler} announced
 computer searches settling these nine sizes as first-player wins, with
 full strategy trees certified for $n = 6$ and $7$ and search verdicts
-for the rest, one search per size; the author notes that the results
-are unrefereed and names a conceptual proof with an explicit strategy
-as the open direction.
+for the rest, one search per size; Adler notes that the results are
+unrefereed and names a conceptual proof with an explicit strategy as
+the open direction.
 
 \begin{theorem}\label{thm:main}
 In the square achievement game on the $n \times n$ board, the first
@@ -112,7 +117,7 @@ $n \times n$ board.
 Theorem~\ref{thm:rule} is proved by checking the rule's forced tree on
 every board from $6$ to $17$ (Section~\ref{sec:verify}) and by a
 simulation theorem, stated for any strategy, that carries a checked run
-on the $23 \times 23$ board to every larger board
+on the $23 \times 23$ board to every board of size at least $17$
 (Section~\ref{sec:uniform}). Theorem~\ref{thm:main} follows with an exhaustive
 refutation for $n \le 4$ and a strategy table for $n = 5$, whose play
 from the opening $(2,2)$ is not purely forcing
@@ -123,16 +128,15 @@ moves is winning, not only that a winning tree exists; the runs of the
 checkers are discharged by evaluation, and the two properties of the
 rule that the simulation theorem needs are proved as lemmas about its
 definition. The rule was extracted from an earlier lookup-table
-strategy, almost all of whose forcing plans were arms of a side-$1$
+strategy, almost all of whose forcing sequences were arms of a side-$1$
 plus at $(2,2)$ or $(3,2)$, the rest preparing the side-$2$ plus at
 $(3,2)$.
 
-Searches are only as trustworthy as the programs running them, and the
-first version of the search in \cite{jenrich} contained an error that
-was corrected later. The formalization makes every search discharge a
-statement about the game rather than about a program.
+The first version of the search in \cite{jenrich} contained an error
+that was corrected later. The formalization makes every search here
+discharge a statement about the game rather than about a program.
 
-\section{Definitions}
+\section{Definitions}\label{sec:defs}
 
 Cells are pairs $(r,c)$ of non-negative integers, row then column,
 with row $0$ at the top and column $0$ at the left in the figures, and
@@ -174,9 +178,10 @@ is, $s \le r, k$ and $r+s, k+s \le 5$.
 \centering
 \input{fig-anatomy}
 \caption{Left: the plus of side $1$ at $c = (2,2)$, with its arms $a$
-and diagonals $d$. Right: the plus of side $2$ at $c = (3,2)$; the
-dashed outline is one of its four squares, whose corners are the
-centre, two perpendicular arms, and the diagonal between them.}
+and diagonals $d$. Right: the plus of side $2$ at $c = (3,2)$. In each,
+the dashed outline is one of the four squares of the plus, whose
+corners are the centre, two perpendicular arms, and the diagonal
+between them.}
 \label{fig:anatomy}
 \end{figure}
 
@@ -369,7 +374,7 @@ second reply. Both are stated as in the formal development. The second
 move $x_2(o_1)$ against a first reply $o_1$ is $(3,2)$ unless $o_1$ is
 one of seven cells, for which Figure~\ref{fig:second} gives the move.
 
-\begin{algorithm}[ht]
+\begin{algorithm}[H]
 \caption{The move function.}\label{alg:move}
 \begin{algorithmic}[1]
 \If{some empty cell completes a square of the first player}
@@ -398,7 +403,7 @@ Algorithm~\ref{alg:line} returns no line the rule is undefined; the
 checker certifies that this never happens at a position the rule
 reaches.
 
-\begin{algorithm}[ht]
+\begin{algorithm}[H]
 \caption{The line search, from an abstract position $A$.}\label{alg:line}
 \begin{algorithmic}[1]
 \State $F \gets [(A, \varepsilon)]$
@@ -439,15 +444,16 @@ this board or beyond it, it is $(3,2)$.}
 \label{fig:second}
 \end{figure}
 
-The exceptions are exactly the first replies from which $(3,2)$ fails.
-They were found by search: for each first reply on $\Board_6$ the
+The exceptions are exactly the first replies against which $(3,2)$ is
+occupied or fails. They were found by search: for each first reply on $\Board_6$ the
 second move is the first cell in the order $(3,2)$, $(2,3)$, $(2,1)$,
 $(1,2)$ against which the rest of the rule beats every second reply.
 
-Table~\ref{tab:games} lists two complete games against a second player
-who always blocks. In the first the replies $(0,0)$ and $(4,4)$ are far
+Table~\ref{tab:games} lists two complete games in which the second
+player always blocks. In the first the replies $(0,0)$ and $(4,4)$ are far
 from the opening pair and the basic line wins at once, key $(0,3,1)$.
-In the second the reply $(3,1)$ is a diagonal of both side-$1$ pluses,
+In the second the reply $(3,1)$ is a diagonal of the side-$1$ plus at
+$(2,2)$ and an arm of the side-$1$ plus at $(3,2)$,
 no line with fewer than two tempo moves exists, and the line has key
 $(2,4,2)$: two tempo moves and then the four arms of the side-$2$ plus
 at $(3,2)$. Figure~\ref{fig:longest} shows the position before its
@@ -536,8 +542,8 @@ reply pairs on $\Board_{17}$ & \tempoZeroSeventeen & \tempoOneSeventeen & \tempo
 \end{tabular}
 \medskip
 \caption{The rule's lines by the number of tempo moves. The
-$\tempoTwoThree$ pairs needing two or three tempo moves have both
-replies in $\Board_6$ and are the same on every board; the other
+$\tempoTwo + \tempoThree$ pairs needing two or three tempo moves have
+both replies in $\Board_6$ and are the same on every board; the other
 columns grow with the board.}
 \label{tab:lines}
 \end{table}
@@ -577,18 +583,7 @@ secure a draw'' is determinacy of the finite game, proved by induction
 on the number of empty cells.
 \end{proof}
 
-\begin{figure}[t]
-\centering
-\input{fig-five}
-\caption{A branch point of the $5 \times 5$ table. The first player
-(black) opened at $(2,2)$ and answered the reply $(4,4)$ with the
-table's second move $(3,2)$. After the second reply $(2,3)$, one of the
-$\fiveNoForcing$ pairs with no forcing continuation, the table plays
-the quiet move $(0,2)$, marked by the square, and then consults a
-sub-table indexed by the reply to it.}
-\label{fig:five}
-\end{figure}
-
+\Needspace*{6\baselineskip}
 \begin{proposition}\label{prop:five}
 The first player has a winning strategy on $\Board_5$.
 \end{proposition}
@@ -601,7 +596,8 @@ the complete game tree, every reply at every node. Like the rule, it
 completes a square when it can and otherwise blocks one before
 consulting the table. It opens at $(2,2)$, gives a second move for each
 of the $\fiveTableBranches$ first replies, and after the second reply
-follows a forcing plan where one exists. For $\fiveNoForcing$ of the
+plays a sequence of forcing moves ending in a double threat where one
+exists. For $\fiveNoForcing$ of the
 reply pairs, with the table's second move, no continuation in which
 every first-player move makes a threat wins, so the table plays a
 \emph{quiet} move there, one making no threat, and continues with a
@@ -610,6 +606,18 @@ forcing continuation exists for these $\fiveNoForcing$ pairs is a
 computation of the solver and is not formalized; the win of the table
 is.
 \end{proof}
+
+\begin{figure}[ht]
+\centering
+\input{fig-five}
+\caption{A quiet move of the $5 \times 5$ table. The first player
+(black) opened at $(2,2)$ and answered the reply $(4,4)$ with the
+table's second move $(3,2)$. After the second reply $(2,3)$, one of the
+$\fiveNoForcing$ pairs with no forcing continuation, the table plays
+$(0,2)$, marked by the square, which makes no threat, and then consults
+a sub-table indexed by the reply to it.}
+\label{fig:five}
+\end{figure}
 
 \section{Verification}\label{sec:verify}
 
@@ -664,10 +672,11 @@ this is proved as a lemma.
 The rule passes the forced tree on every board from $6$ to $17$, one
 run of the checker per board with $(n^2-1)(n^2-3)$ reply pairs at the
 root (Table~\ref{tab:runs} in Section~\ref{sec:lean}). A Python
-implementation of the rule and a full-tree verifier, used while the
-rule was being found, agree with the Lean definition on the line
-committed to for every reply pair of $\Board_6$ and for the anchored
-positions of Section~\ref{sec:uniform}, and the full-tree verifier
+implementation of the rule and a full-tree verifier were used while the
+rule was being found. The checker executable prints the line the Lean
+rule commits to for every reply pair of $\Board_6$ and for every
+anchored position of Section~\ref{sec:uniform}, and a test of the
+Python implementation reproduces every one; the full-tree verifier
 confirms the win on $\Board_6$. Only the Lean runs enter the proof.
 
 \section{Boards of size at least 17}\label{sec:uniform}
@@ -678,8 +687,8 @@ $\Board_n$.
 \end{theorem}
 
 By Lemma~\ref{lem:dichotomy}, a stone beyond $\Board_{17}$ can affect
-the rule's play only through a hidden corner, and the rule never lets
-a block land on one. The proof replays a checked run on $\Board_{23}$
+the rule's play only through a hidden corner, and the rule never
+forces a block there. The proof replays a checked run on $\Board_{23}$
 as a run on $\Board_n$. Replies inside $\Board_{17}$ are read
 verbatim. A reply beyond $\Board_{17}$ is
 replaced, for the base run, by a \emph{stand-in}: a fixed cell beyond
@@ -880,9 +889,10 @@ Theorem~\ref{thm:rule} with the moves forgotten.
 \section{Formalization}\label{sec:lean}
 
 The Lean development defines cells, boards, and squares as in
-Section~2, and the winning predicate \texttt{P1CanWin} as an inductive
-family whose derivations are exactly strategy trees: one first-player
-move per node, every reply covered, draws failures by construction.
+Section~\ref{sec:defs}, and the winning predicate \texttt{P1CanWin} as
+an inductive family whose derivations are exactly strategy trees: one
+first-player move per node, every reply covered, and no derivation for
+a game that ends in a draw.
 The second player's win and each player's ability to secure a draw are
 defined from it by swapping roles after a move, and strategy stealing
 (\texttt{second\_player\_no\_win}, with the monotonicity step
@@ -915,7 +925,9 @@ the strategy. The $5 \times 5$ table is
 \texttt{fiveTable} and Proposition~\ref{prop:five} is
 \texttt{p1\_wins\_five}.
 
-The rule is the definition \texttt{plusMove}, $\ruleLeanLines$ lines.
+The rule is the definition \texttt{plusMove}; the file
+\texttt{Plus/Rule.lean}, which defines it with the abstraction and the
+line search, is about $\ruleLeanLines$ lines.
 Hypothesis (i) of Theorem~\ref{thm:simulate} for the rule is
 \texttt{plusMove\_takesWins} and hypothesis (ii) is
 \texttt{plusMove\_agree}; both are proved by unfolding the definition,
@@ -926,10 +938,15 @@ cases (a) to (e) to \texttt{simulate} with the run on the anchor board
 (\texttt{plus\_forced\_anchor}) and the three families
 \texttt{farAnchorsSafe}, \texttt{exactAnchorsSafe}, and
 \texttt{farNearAnchorsSafe}. The containment of Lemma~\ref{lem:span}
-is \texttt{corners\_span\_bounded} and Lemma~\ref{lem:dichotomy} is
-\texttt{escape\_farm}, with the hidden corner of a pair computed by
-\texttt{farmKey}; the Lean sources call the hidden corner a
-\emph{farm}. Lemma~\ref{lem:arms} is not used by the formal proof,
+is \texttt{corners\_span\_bounded}. The hidden corner of a pair is
+computed by \texttt{farmKey}, which the abstraction and the anchored
+runs use; the Lean sources call the hidden corner a \emph{farm}. A cell
+it returns is a hidden corner of the pair in the sense of
+Definition~\ref{def:latent} (\texttt{farmKey\_spec}), and the second
+claim of Lemma~\ref{lem:dichotomy} is \texttt{escape\_farm}: for a
+square as in the lemma, \texttt{farmKey} returns $b$. The uniqueness
+claim is not needed by the formal proof, which reads the one value
+\texttt{farmKey} returns. Lemma~\ref{lem:arms} is not used by the formal proof,
 which checks the lines directly. Theorem~\ref{thm:rule} is
 \texttt{plus\_wins\_with} and Theorem~\ref{thm:main} is
 \texttt{outcome}, whose first half is \texttt{p1\_wins\_iff}. In sum, Theorem~\ref{thm:main} rests on Propositions~\ref{prop:small}
@@ -956,7 +973,8 @@ $n$ & pairs & time (s) & & $n$ & pairs & time (s) \\
 \bottomrule
 \end{tabular}
 \medskip
-\caption{The checker runs of the proof. At $5$ the enumerating checker
+\caption{The runs of the checkers, timed with the checker executable.
+At $5$ the enumerating checker
 walks the full tree of the table; from $6$ up the forced checker runs
 the rule, with the number of reply pairs at the root. The run at $23$
 is the run on the anchor board; the $\anchoredPositions$ anchored runs
@@ -974,7 +992,8 @@ therefore \texttt{propext}, \texttt{Classical.choice},
 certificate: the kernel checks the soundness theorems but not the
 evaluations, which the Lean compiler and runtime perform, the standard
 trust base of large computer-assisted proofs in Lean.
-Table~\ref{tab:runs} lists the runs with their wall-clock times on a
+Table~\ref{tab:runs} lists the runs with the wall-clock times of the
+checker executable, one run per board, on a
 MacBook Pro (16-inch, 2024) with an Apple M4 Max chip and 36 GB of
 memory; the whole development builds in about $\buildMinutes$ minutes,
 almost all of it the evaluations.
@@ -1002,14 +1021,13 @@ with none? The search of Section~\ref{sec:rule} did not vary the
 opening.
 
 The rule does not apply to $\Board_5$, where the table needs quiet
-moves at branch points. A short rule for $\Board_5$ is open.
+moves. A short rule for $\Board_5$ is open.
 
-The region $6$ cannot shrink for a purely forcing strategy from
-$(2,2)$ with the second moves searched here, and the base $17$ is least
-for Lemma~\ref{lem:dichotomy} (Remark~\ref{rem:base}). Whether a rule
-can read less than the second player's stones inside $\Board_{17}$,
-for instance only those inside $\Board_6$ with a summary of the rest,
-is open.
+The base $17$ is least for Lemma~\ref{lem:dichotomy}
+(Remark~\ref{rem:base}). Whether a rule of this kind can play inside a
+region smaller than $\Board_6$, or read less than the second player's
+stones inside $\Board_{17}$, for instance only those inside $\Board_6$
+with a summary of the rest, is open.
 
 \section*{Acknowledgements}
 
