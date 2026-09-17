@@ -1,6 +1,5 @@
 import SquareAchievement.Compute.ForcedSound
 import SquareAchievement.Compute.WinsWith
-import SquareAchievement.General.Invariance
 import SquareAchievement.General.Coverage
 
 /-!

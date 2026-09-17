@@ -77,13 +77,6 @@ theorem not_hasSquare_pair {a b : Cell} :
     ¬ HasSquare (([a, b] : List Cell).toFinset) :=
   not_hasSquare_of_card_lt (lt_of_le_of_lt (List.toFinset_card_le _) (by simp))
 
-/-- The finset of a two-stone list. -/
-theorem pair_toFinset (a b : Cell) :
-    ([a, b] : List Cell).toFinset = insert b (insert a ∅) := by
-  ext w
-  simp
-  tauto
-
 /-- Three stones or fewer, as a union of the two sides. -/
 theorem card_union_three (a b c : Cell) :
     ((insert a (insert b ∅) : Finset Cell) ∪ insert c ∅).card ≤ 3 := by

@@ -15,8 +15,7 @@ Two supporting notions. `TakesWinsOn σ box n root` says that on every
 history extending `root`, with the first player's stones inside the
 box, `σ` takes a completion whenever the board offers one; the forced
 checker needs this to cover the replies it does not visit, where a
-standing threat wins at once. `WinsWith.congr` transfers a derivation
-between strategies that agree on every extension of the root.
+standing threat wins at once.
 -/
 
 namespace SquareAchievement
@@ -67,24 +66,6 @@ theorem WinsWith.p1CanWin {σ : Strategy} {n : ℕ} : ∀ {hist : List Cell},
     have := ih r hr hlen''
     rwa [hs1, hs2, hp1, hp2] at this
 
-/-- Strategies agreeing on every extension of `root` win together. -/
-theorem WinsWith.congr {σ σ' : Strategy} {n : ℕ} {root : List Cell}
-    (hagree : ∀ tail : List Cell, σ (squaresList n) (root ++ tail) =
-      σ' (squaresList n) (root ++ tail)) :
-    ∀ {tail : List Cell}, WinsWith σ n (root ++ tail) → WinsWith σ' n (root ++ tail) := by
-  intro tail h
-  generalize hh : root ++ tail = hist at h
-  induction h generalizing tail with
-  | now m hσ hm hwin =>
-    subst hh
-    exact WinsWith.now m ((hagree tail).symm.trans hσ) hm hwin
-  | @step hist m hσ hm hne hsafe _ ih =>
-    subst hh
-    refine WinsWith.step m ((hagree tail).symm.trans hσ) hm hne hsafe ?_
-    intro r hr
-    have := ih r hr (tail := (tail ++ [m]) ++ [r]) (by simp)
-    simpa using this
-
 /-- On every history extending `root`, with the first player's stones
 in the box, `σ` takes a completion whenever there is one. -/
 def TakesWinsOn (σ : Strategy) (box n : ℕ) (root : List Cell) : Prop :=
@@ -102,23 +83,5 @@ theorem TakesWinsOn.extend {σ : Strategy} {box n : ℕ} {root : List Cell}
   intro tail
   rw [List.append_assoc]
   exact h (more ++ tail)
-
-/-- Strategies agreeing on every history extending `root` give the same
-forced check from any such history. -/
-theorem goForcedS_congr {σ σ' : Strategy} {box : ℕ} {sq : List (List Cell)} {n : ℕ}
-    {hot : Option Cell} {root : List Cell}
-    (hagree : ∀ h : List Cell, root <+: h → σ sq h = σ' sq h) :
-    ∀ (fuel : ℕ) (h : List Cell), root <+: h →
-      goForcedS σ box sq n hot fuel h = goForcedS σ' box sq n hot fuel h := by
-  intro fuel
-  induction fuel with
-  | zero => intro h _; rfl
-  | succ fuel ih =>
-    intro h hpre
-    have hrec : ∀ m r : Cell,
-        goForcedS σ box sq n hot fuel ((h ++ [m]) ++ [r]) =
-          goForcedS σ' box sq n hot fuel ((h ++ [m]) ++ [r]) :=
-      fun m r => ih _ (hpre.trans ((List.prefix_append h [m]).trans (List.prefix_append _ [r])))
-    simp only [goForcedS, hagree h hpre, hrec]
 
 end SquareAchievement

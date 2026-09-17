@@ -145,6 +145,50 @@ theorem farmKey_spec {box : ℕ} {o1 o2 h : Cell}
       exact Or.inl hcase
     · exact Or.inr hk
 
+private theorem mem_corners_of {r c s : ℕ} {x : Cell}
+    (h : (x.1 = r ∧ x.2 = c) ∨ (x.1 = r ∧ x.2 = c + s) ∨ (x.1 = r + s ∧ x.2 = c) ∨
+      (x.1 = r + s ∧ x.2 = c + s)) : x ∈ corners r c s := by
+  rw [mem_corners]
+  rcases h with ⟨h1, h2⟩ | ⟨h1, h2⟩ | ⟨h1, h2⟩ | ⟨h1, h2⟩ <;>
+    [exact Or.inl (Prod.ext h1 h2); exact Or.inr (Or.inl (Prod.ext h1 h2));
+     exact Or.inr (Or.inr (Or.inl (Prod.ext h1 h2)));
+     exact Or.inr (Or.inr (Or.inr (Prod.ext h1 h2)))]
+
+/-- The hidden corner lies in the box and is a corner of a square whose
+corners include both replies. -/
+theorem farmKey_corners {box : ℕ} {o1 o2 h : Cell}
+    (hk : farmKey box o1 o2 = some (.farm h)) :
+    h ∈ board box ∧ ∃ r c s, 0 < s ∧ h ∈ corners r c s ∧
+      o1 ∈ corners r c s ∧ o2 ∈ corners r c s := by
+  obtain ⟨-, -, hcase | hcase⟩ := farmKey_spec hk <;>
+    rcases farmCase_spec hcase with
+      ⟨c1, c2, c3, c4, c5, e1, e2⟩ | ⟨c1, c2, c3, c4, c5, e1, e2⟩ |
+      ⟨c1, c2, c3, c4, e1, e2⟩
+  · exact ⟨by rw [mem_board]; omega, o1.1, o1.2 - (o2.1 - o1.1), o2.1 - o1.1, by omega,
+      mem_corners_of (Or.inl ⟨by omega, by omega⟩),
+      mem_corners_of (Or.inr (Or.inl ⟨by omega, by omega⟩)),
+      mem_corners_of (Or.inr (Or.inr (Or.inr ⟨by omega, by omega⟩)))⟩
+  · exact ⟨by rw [mem_board]; omega, o1.1 - (o2.2 - o1.2), o1.2, o2.2 - o1.2, by omega,
+      mem_corners_of (Or.inl ⟨by omega, by omega⟩),
+      mem_corners_of (Or.inr (Or.inr (Or.inl ⟨by omega, by omega⟩))),
+      mem_corners_of (Or.inr (Or.inr (Or.inr ⟨by omega, by omega⟩)))⟩
+  · exact ⟨by rw [mem_board]; omega, o1.1, o2.2, o1.2 - o2.2, by omega,
+      mem_corners_of (Or.inl ⟨by omega, by omega⟩),
+      mem_corners_of (Or.inr (Or.inl ⟨by omega, by omega⟩)),
+      mem_corners_of (Or.inr (Or.inr (Or.inl ⟨by omega, by omega⟩)))⟩
+  · exact ⟨by rw [mem_board]; omega, o2.1, o2.2 - (o1.1 - o2.1), o1.1 - o2.1, by omega,
+      mem_corners_of (Or.inl ⟨by omega, by omega⟩),
+      mem_corners_of (Or.inr (Or.inr (Or.inr ⟨by omega, by omega⟩))),
+      mem_corners_of (Or.inr (Or.inl ⟨by omega, by omega⟩))⟩
+  · exact ⟨by rw [mem_board]; omega, o2.1 - (o1.2 - o2.2), o2.2, o1.2 - o2.2, by omega,
+      mem_corners_of (Or.inl ⟨by omega, by omega⟩),
+      mem_corners_of (Or.inr (Or.inr (Or.inr ⟨by omega, by omega⟩))),
+      mem_corners_of (Or.inr (Or.inr (Or.inl ⟨by omega, by omega⟩)))⟩
+  · exact ⟨by rw [mem_board]; omega, o2.1, o1.2, o2.2 - o1.2, by omega,
+      mem_corners_of (Or.inl ⟨by omega, by omega⟩),
+      mem_corners_of (Or.inr (Or.inr (Or.inl ⟨by omega, by omega⟩))),
+      mem_corners_of (Or.inr (Or.inl ⟨by omega, by omega⟩))⟩
+
 /-- The near member of a farm pair reaching beyond the base board is
 box-aligned with one far coordinate, the farm cell shares its
 box-aligned coordinate, and the pair's square escapes the base. -/
