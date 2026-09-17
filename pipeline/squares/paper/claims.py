@@ -59,11 +59,17 @@ def build_claims():
         if n == 17:
             out["sideOneSeventeen"] = group(m["sides"][1])
             out["sideTwoSeventeen"] = group(m["sides"][2])
+            out["tempoZeroSeventeen"] = group(m["tempo"][0])
+            out["tempoOneSeventeen"] = group(m["tempo"][1])
         assert m["lines"] == six["lines"] and m["max_plies"] == six["max_plies"]
+        assert m["tempo"][2] == six["tempo"][2] and m["tempo"][3] == six["tempo"][3]
+        # the paper says side-1 lines are exactly the lines with no tempo move
+        assert m["sides"][1] == m["tempo"][0]
     out["pairsAnchor"] = group((23 * 23 - 1) * (23 * 23 - 3))
     out["distinctLines"] = str(six["lines"])
     for d in range(4):
         out[f"tempo{['Zero', 'One', 'Two', 'Three'][d]}"] = group(six["tempo"][d])
+    out["tempoTwoThree"] = group(six["tempo"][2] + six["tempo"][3])
     out["sideOne"] = group(six["sides"][1])
     out["sideTwo"] = group(six["sides"][2])
     out["longestLineMoves"] = str(len(six["longest"][2]))
