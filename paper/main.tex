@@ -159,7 +159,7 @@ $\Board_{17}$.
 
 \subsection{Pluses}
 
-\begin{definition}[plus]\label{def:plus}
+\begin{definition}\label{def:plus}
 The \emph{plus} of side $s$ at the \emph{centre} $c = (r,k)$ has four
 \emph{arms}, the cells $(r-s,k)$, $(r+s,k)$, $(r,k-s)$, $(r,k+s)$, and
 four \emph{diagonals}, the cells $(r \pm s, k \pm s)$
@@ -250,7 +250,7 @@ other corners (Figure~\ref{fig:latent}). The block in that situation
 is the one cell through which stones beyond $\Board_{17}$ can affect
 the game.
 
-\begin{definition}[hidden corner, abstraction]\label{def:latent}
+\begin{definition}\label{def:latent}
 Let $x$ and $y$ be two cells each having a coordinate at least $12$.
 Their \emph{hidden corner} is a cell $b \in \Board_6$ such that
 $b$, $x$, $y$ are three corners of one square. The \emph{abstraction}
@@ -325,14 +325,14 @@ When no plus can be completed directly, because the second player holds
 an arm or a diagonal or because the arms would not force, the rule
 first plays moves that each force a block and so add a stone.
 
-\begin{definition}[tempo move]\label{def:tempo}
+\begin{definition}\label{def:tempo}
 In a position where the second player has no threat, a \emph{tempo
 move} is a cell in $\Board_6$ that makes exactly one threat, such that
 the threat cell is not the hidden corner and after the block the second
 player still has no threat.
 \end{definition}
 
-\begin{definition}[line, key]\label{def:line}
+\begin{definition}\label{def:line}
 A \emph{line} from a position consists of some tempo moves, each
 followed by its block, and then the arms the first player does not yet
 hold of one plus in the region whose centre the first player holds, in
@@ -526,7 +526,7 @@ columns grow with the board.}
 
 \section{Small boards and the \texorpdfstring{$5 \times 5$}{5 x 5} board}\label{sec:small}
 
-\begin{lemma}[strategy stealing]\label{lem:stealing}
+\begin{lemma}\label{lem:stealing}
 The second player has no winning strategy.
 \end{lemma}
 
@@ -677,7 +677,7 @@ concatenation. A strategy $\sigma$ is given the board, and
 $\sigma_n(h)$ is its move after $h$ on $\Board_n$. The guards are those
 of Section~\ref{sec:verify}.
 
-\begin{theorem}[simulation]\label{thm:simulate}
+\begin{theorem}\label{thm:simulate}
 Let $\sigma$ be a strategy, let $B, n \ge 17$, and let
 $x_1, x_2 \in \Board_6$. Let $h = (x_1, o_1, x_2, o_2)$ be a history
 on $\Board_n$ and $h' = (x_1, o_1', x_2, o_2')$ a history on
