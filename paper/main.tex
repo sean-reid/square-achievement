@@ -559,6 +559,18 @@ secure a draw'' is determinacy of the finite game, proved by induction
 on the number of empty cells.
 \end{proof}
 
+\begin{figure}[t]
+\centering
+\input{fig-five}
+\caption{A branch point of the $5 \times 5$ table. The first player
+(black) opened at $(2,2)$ and answered the reply $(4,4)$ with the
+table's second move $(3,2)$. After the second reply $(2,3)$, one of the
+$\fiveNoForcing$ pairs with no forcing continuation, the table plays
+the quiet move $(0,2)$, marked by the square, and then consults a
+sub-table indexed by the reply to it.}
+\label{fig:five}
+\end{figure}
+
 \begin{proposition}\label{prop:five}
 The first player has a winning strategy on $\Board_5$.
 \end{proposition}
@@ -580,18 +592,6 @@ forcing continuation exists for these $\fiveNoForcing$ pairs is a
 computation of the solver and is not formalized; the win of the table
 is.
 \end{proof}
-
-\begin{figure}[b]
-\centering
-\input{fig-five}
-\caption{A branch point of the $5 \times 5$ table. The first player
-(black) opened at $(2,2)$ and answered the reply $(4,4)$ with the
-table's second move $(3,2)$. After the second reply $(2,3)$, one of the
-$\fiveNoForcing$ pairs with no forcing continuation, the table plays
-the quiet move $(0,2)$, marked by the square, and then consults a
-sub-table indexed by the reply to it.}
-\label{fig:five}
-\end{figure}
 
 \section{Verification}\label{sec:verify}
 
