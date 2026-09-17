@@ -34,8 +34,7 @@ theorem squaresList_on_board {n : ℕ} {sq : List Cell}
   obtain ⟨r, c, s, hs, hr, hc, rfl⟩ := mem_squaresList.mp hsq
   intro x hx
   rw [mem_board]
-  simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil,
-    or_false] at hx
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
   rcases hx with rfl | rfl | rfl | rfl <;> constructor <;> omega
 
 /-- What a `threatsL` entry certifies: a listed square one unoccupied
@@ -167,8 +166,7 @@ theorem goForcedS_winsWith (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
       split at h
       · exact absurd h (by simp)
       · rename_i hguard
-        simp only [Bool.or_eq_true, not_or, Bool.not_eq_true', Bool.not_eq_true,
-          List.contains_iff_mem] at hguard
+        simp only [Bool.or_eq_true, not_or, Bool.not_eq_true', List.contains_iff_mem] at hguard
         obtain ⟨⟨hmb, hm1'⟩, hm2'⟩ := hguard
         have hmbT : onBoard n m = true := by
           revert hmb; cases onBoard n m <;> simp
@@ -206,7 +204,7 @@ theorem goForcedS_winsWith (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                 stonesOf_snoc_even_false hEven
               have hp1'F : (p1L ++ [m]).toFinset = insert m p1L.toFinset := by
                 ext x
-                simp [List.toFinset_append, or_comm]
+                simp [List.toFinset_append]
               have hh : ∀ x : Cell, x ∈ hist ++ [m] ↔ x ∈ p1L ++ [m] ∨ x ∈ p2L := by
                 intro x
                 rw [mem_stonesOf (hist ++ [m]) true, hstone1]
@@ -236,7 +234,7 @@ theorem goForcedS_winsWith (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                 intro r hrb hrmem hgo
                 have hrE : r ∈ empties n (insert m p1L.toFinset) p2L.toFinset := by
                   rw [hh] at hrmem
-                  push_neg at hrmem
+                  push Not at hrmem
                   refine mem_empties.mpr ⟨hrb, ?_, ?_⟩
                   · intro hx
                     apply hrmem.1
@@ -260,7 +258,7 @@ theorem goForcedS_winsWith (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                   rw [stonesOf_snoc_odd_false hlen', hstone2]
                 have hins : (p2L ++ [r]).toFinset = insert r p2L.toFinset := by
                   ext x
-                  simp [List.toFinset_append, or_comm]
+                  simp [List.toFinset_append]
                 have hnosq'' : ¬ HasSquare (stonesOf false ((hist ++ [m]) ++ [r])).toFinset := by
                   rw [hs2, hins]
                   exact hsafe r hrE
@@ -286,9 +284,9 @@ theorem goForcedS_winsWith (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                   · rintro ⟨hall, hnc⟩
                     have hnmem : r ∉ hist ++ [m] := by
                       intro hx
-                      simp [List.contains_iff_mem, hx] at hnc
+                      simp [hx] at hnc
                     rw [hh] at hnmem
-                    push_neg at hnmem
+                    push Not at hnmem
                     refine ⟨mem_allCells.mp hall, ?_, ?_⟩
                     · intro hx
                       apply hnmem.1
@@ -301,7 +299,7 @@ theorem goForcedS_winsWith (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                     refine ⟨mem_allCells.mpr hb, ?_⟩
                     have hnmem : r ∉ hist ++ [m] := by
                       rw [hh]
-                      push_neg
+                      push Not
                       refine ⟨?_, fun hx => h2 (List.mem_toFinset.mpr hx)⟩
                       intro hx
                       apply h1
@@ -310,7 +308,7 @@ theorem goForcedS_winsWith (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                       · rw [List.mem_singleton] at h'
                         rw [h']
                         exact Finset.mem_insert_self m _
-                    simp [List.contains_iff_mem, hnmem]
+                    simp [hnmem]
                 split at h
                 · exact absurd h (by simp)
                 · rename_i hrep
@@ -330,7 +328,7 @@ theorem goForcedS_winsWith (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                   have hrmem : r ∉ hist ++ [m] := by
                     have := (List.mem_filter.mp hr').2
                     intro hx
-                    simp [List.contains_iff_mem, hx] at this
+                    simp [hx] at this
                   exact hrec r hrb hrmem (h r hr')
               · -- forced level: threats stand, only blocks recurse
                 rename_i hlv

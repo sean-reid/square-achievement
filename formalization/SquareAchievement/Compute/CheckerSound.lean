@@ -52,7 +52,7 @@ theorem stonesOf_snoc (b : Bool) (l : List Cell) (x : Cell) :
     cases b <;>
       simp only [List.cons_append, stonesOf, ih true, ih false] <;>
       by_cases hr : rest.length % 2 = 0 <;>
-      simp [hr, hpar.mpr, hpar] <;>
+      simp [hr] <;>
       simp_all
 
 theorem stonesOf_snoc_even_true {l : List Cell} {x : Cell}
@@ -175,7 +175,7 @@ theorem not_hasSquare_insert {n : ℕ} {p2 : List Cell} {r : Cell}
         exact hx
       rcases Finset.mem_insert.mp (hsub hxc) with h | h
       · simp [h]
-      · simp [List.mem_toFinset.mp h, List.contains_iff_mem]
+      · simp [List.mem_toFinset.mp h]
     rw [hc] at this
     exact absurd this (by simp)
   · -- the square avoids r, so it already sat inside p2
@@ -220,8 +220,7 @@ theorem go_sound (t : Table) (n : ℕ) :
       split at h
       · exact absurd h (by simp)
       · rename_i hguard
-        simp only [Bool.or_eq_true, not_or, Bool.not_eq_true', Bool.not_eq_true,
-          List.contains_iff_mem] at hguard
+        simp only [Bool.or_eq_true, not_or, Bool.not_eq_true', List.contains_iff_mem] at hguard
         obtain ⟨⟨hmb, hm1'⟩, hm2'⟩ := hguard
         have hmbT : onBoard n m = true := by
           revert hmb; cases onBoard n m <;> simp
@@ -250,7 +249,7 @@ theorem go_sound (t : Table) (n : ℕ) :
               stonesOf_snoc_even_false hEven
             have hp1'F : (p1L ++ [m]).toFinset = insert m p1L.toFinset := by
               ext x
-              simp [List.toFinset_append, or_comm]
+              simp [List.toFinset_append]
             -- history membership splits into the two stone lists
             have hh : ∀ x : Cell, x ∈ hist ++ [m] ↔ x ∈ p1L ++ [m] ∨ x ∈ p2L := by
               intro x
@@ -267,9 +266,9 @@ theorem go_sound (t : Table) (n : ℕ) :
               · rintro ⟨hall, hnc⟩
                 have hnmem : r ∉ hist ++ [m] := by
                   intro hx
-                  simp [List.contains_iff_mem, hx] at hnc
+                  simp [hx] at hnc
                 rw [hh] at hnmem
-                push_neg at hnmem
+                push Not at hnmem
                 refine ⟨mem_allCells.mp hall, ?_, ?_⟩
                 · intro hx
                   apply hnmem.1
@@ -282,7 +281,7 @@ theorem go_sound (t : Table) (n : ℕ) :
                 refine ⟨mem_allCells.mpr hb, ?_⟩
                 have hnmem : r ∉ hist ++ [m] := by
                   rw [hh]
-                  push_neg
+                  push Not
                   refine ⟨?_, fun hx => h2 (List.mem_toFinset.mpr hx)⟩
                   intro hx
                   apply h1
@@ -291,7 +290,7 @@ theorem go_sound (t : Table) (n : ℕ) :
                   · rw [List.mem_singleton] at h'
                     rw [h']
                     exact Finset.mem_insert_self m _
-                simp [List.contains_iff_mem, hnmem]
+                simp [hnmem]
             -- assemble the `step` constructor
             have hne : (empties n (insert m p1L.toFinset) p2L.toFinset).Nonempty := by
               have : ((allCells n).filter
@@ -341,13 +340,13 @@ theorem go_sound (t : Table) (n : ℕ) :
               apply hnosq'
               have : (p2L ++ [r]).toFinset = insert r p2L.toFinset := by
                 ext x
-                simp [List.toFinset_append, or_comm]
+                simp [List.toFinset_append]
               rwa [this] at hcon
             have := ih ((hist ++ [m]) ++ [r]) hlen'' hboard'' hnosq'' hgo
             rw [hs1, hs2] at this
             have hins : (p2L ++ [r]).toFinset = insert r p2L.toFinset := by
               ext x
-              simp [List.toFinset_append, or_comm]
+              simp [List.toFinset_append]
             rwa [hp1'F, hins] at this
 
 theorem check_sound {t : Table} {n : ℕ} (h : check t n = true) :

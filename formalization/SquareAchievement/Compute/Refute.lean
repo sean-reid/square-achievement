@@ -98,10 +98,10 @@ theorem refuteP1_sound (n : ℕ) :
         refine ⟨mem_allCells.mpr hm.1, ?_⟩
         have : m ∉ hist := by
           rw [hist_split]
-          push_neg
+          push Not
           exact ⟨fun hx => hm.2.1 (List.mem_toFinset.mpr hx),
             fun hx => hm.2.2 (List.mem_toFinset.mpr hx)⟩
-        simp [List.contains_iff_mem, this]
+        simp [this]
       have hfree' : ∀ m : Cell,
           m ∈ ((allCells n).filter fun c => !hist.contains c) →
           m ∈ empties n p1L.toFinset p2L.toFinset := by
@@ -109,9 +109,9 @@ theorem refuteP1_sound (n : ℕ) :
         rw [List.mem_filter] at hm
         have hnmem : m ∉ hist := by
           intro hx
-          simp [List.contains_iff_mem, hx] at hm
+          simp [hx] at hm
         rw [hist_split] at hnmem
-        push_neg at hnmem
+        push Not at hnmem
         rw [mem_empties]
         exact ⟨mem_allCells.mp hm.1,
           fun hx => hnmem.1 (List.mem_toFinset.mp hx),
@@ -179,7 +179,7 @@ theorem refuteP1_sound (n : ℕ) :
             stonesOf_snoc_even_false hEven
           have hp1'F : (p1L ++ [m]).toFinset = insert m p1L.toFinset := by
             ext x
-            simp [List.toFinset_append, or_comm]
+            simp [List.toFinset_append]
           have hh : ∀ x : Cell, x ∈ hist ++ [m] ↔ x ∈ p1L ++ [m] ∨ x ∈ p2L := by
             intro x
             rw [mem_stonesOf (hist ++ [m]) true, hstone1]
@@ -194,7 +194,7 @@ theorem refuteP1_sound (n : ℕ) :
             refine ⟨mem_allCells.mpr hr.1, ?_⟩
             have : r ∉ hist ++ [m] := by
               rw [hh]
-              push_neg
+              push Not
               constructor
               · intro hx
                 apply hr.2.1
@@ -202,7 +202,7 @@ theorem refuteP1_sound (n : ℕ) :
                 exact List.mem_toFinset.mpr hx
               · intro hx
                 exact hr.2.2 (List.mem_toFinset.mpr hx)
-            simp [List.contains_iff_mem, this]
+            simp [this]
           have hreplies' : ∀ r : Cell,
               r ∈ ((allCells n).filter fun c => !((hist ++ [m]).contains c)) →
               r ∈ empties n (insert m p1L.toFinset) p2L.toFinset := by
@@ -210,9 +210,9 @@ theorem refuteP1_sound (n : ℕ) :
             rw [List.mem_filter] at hr
             have hnmem : r ∉ hist ++ [m] := by
               intro hx
-              simp [List.contains_iff_mem, hx] at hr
+              simp [hx] at hr
             rw [hh] at hnmem
-            push_neg at hnmem
+            push Not at hnmem
             rw [mem_empties]
             refine ⟨mem_allCells.mp hr.1, ?_, ?_⟩
             · intro hx
@@ -267,7 +267,7 @@ theorem refuteP1_sound (n : ℕ) :
             rw [hs1, hs2, hp1'F] at hres
             have hins : (p2L ++ [r]).toFinset = insert r p2L.toFinset := by
               ext x
-              simp [List.toFinset_append, or_comm]
+              simp [List.toFinset_append]
             rw [hins] at hres
             exact hres (hwins r hrE)
 
