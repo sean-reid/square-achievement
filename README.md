@@ -29,9 +29,9 @@ when n >= 5, by a machine-checked strategy.
 The components are independent; none is needed to build the others.
 Commands assume a POSIX shell; on Windows, work inside WSL.
 
-While the repository is private, the checks below run on the author's
-machine before a change merges; the `ci` and `lean` workflows repeat
-them weekly and on demand rather than on every pull request.
+The `ci` workflow runs the checks below on every pull request and
+weekly; the `lean` workflow builds the formalization weekly and on
+demand.
 
 ### Site
 
@@ -70,8 +70,8 @@ lake build
 
 A successful build verifies every theorem, all board sizes included.
 [formalization/README.md](formalization/README.md) covers the
-expected build time, the Linux environment note, and the commands
-reproducing the paper's Table 1.
+expected build time, the Linux environment note, and the runs behind
+the paper's timings table.
 
 ### Pipeline
 

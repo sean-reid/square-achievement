@@ -1,9 +1,8 @@
 name: lean
 
-# The Lean build is the proof, and it runs locally before a
-# formalization change merges: `lake build` in formalization/. Actions
-# builds it on a weekly schedule and on demand, never per pull request,
-# because a full build costs most of an hour of runner time.
+# The Lean build is the proof: `lake build` in formalization/. It runs
+# weekly and on demand rather than per pull request, because a full
+# build costs most of an hour of runner time.
 on:
   schedule:
     - cron: "41 6 * * 1"

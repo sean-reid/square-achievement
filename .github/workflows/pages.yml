@@ -4,8 +4,6 @@ on:
   push:
     branches: [main]
 
-# Dormant until the repo goes public: set the repository variable
-# DEPLOY_PAGES to "true" to activate.
 jobs:
   deploy:
     if: ${{ vars.DEPLOY_PAGES == 'true' }}
