@@ -117,23 +117,33 @@ Section~\ref{sec:rule} wins the square achievement game on the
 $n \times n$ board.
 \end{theorem}
 
-Theorem~\ref{thm:rule} is proved by checking the rule's forced tree on
-every board from $6$ to $17$ (Section~\ref{sec:verify}) and by a
-simulation theorem, stated for any strategy, that carries a checked run
-on the $23 \times 23$ board to every board of size at least $17$
-(Section~\ref{sec:uniform}). Theorem~\ref{thm:main} follows with an exhaustive
-refutation for $n \le 4$ and a strategy table for $n = 5$, whose play
-from the opening $(2,2)$ is not purely forcing
-(Section~\ref{sec:small}). Everything is formalized in Lean~4
-\cite{lean4} on mathlib \cite{mathlib} (Section~\ref{sec:lean}). The
-formal theorem for the rule states that the tree of the rule's own
-moves is winning, not only that a winning tree exists; the runs of the
-checkers are discharged by evaluation, and the two properties of the
-rule that the simulation theorem needs are proved as lemmas about its
-definition. The rule was extracted from an earlier lookup-table
-strategy, almost all of whose forcing sequences were arms of a side-$1$
-plus at $(2,2)$ or $(3,2)$, the rest preparing the side-$2$ plus at
-$(3,2)$.
+Two facts make Theorem~\ref{thm:rule} a finite computation. After the
+second reply the rule makes only forcing moves, so the second player's
+replies are forced blocks and the game tree branches freely at two
+levels only; checking that tree on one board is an enumeration of the
+second player's first two replies followed by a chain of forced moves,
+and the check is run on every board from $6$ to $17$
+(Section~\ref{sec:verify}). The rule reads only a $17 \times 17$ corner
+of the board and one cell computed from the second player's first two
+replies; a stone outside that corner can affect the game only through
+that cell, and the rule never forces a block there, so a game on a
+larger board is mirrored move for move by a game on the $23 \times 23$
+board. A simulation theorem, stated for any strategy, turns one checked
+run on that board into a proof for every board of size at least $17$
+(Section~\ref{sec:uniform}). Theorem~\ref{thm:main} then follows with an
+exhaustive refutation for $n \le 4$ and a strategy table for $n = 5$,
+whose play from the opening $(2,2)$ is not purely forcing
+(Section~\ref{sec:small}).
+
+Everything is formalized in Lean~4 \cite{lean4} on mathlib
+\cite{mathlib} (Section~\ref{sec:lean}). The formal theorem for the
+rule states that the tree of the rule's own moves is winning, not only
+that a winning tree exists; the runs of the checkers are discharged by
+evaluation, and the two properties of the rule that the simulation
+theorem needs are proved as lemmas about its definition. The rule was
+extracted from an earlier lookup-table strategy, almost all of whose
+forcing sequences were arms of a side-$1$ plus at $(2,2)$ or $(3,2)$,
+the rest preparing the side-$2$ plus at $(3,2)$.
 
 The first version of the search in \cite{jenrich} contained an error
 that was corrected later. The formalization makes every search here
