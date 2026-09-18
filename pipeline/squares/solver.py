@@ -15,7 +15,7 @@ class Solver:
         """box confines P1's plan: his candidate moves and the squares
         his threats run through must fit the box x box corner region, so
         generated scripts only rely on geometry every n >= box has.
-        Opponent threats always use the whole board."""
+        The second player's threats always use the whole board."""
         self.n = n
         self.full = (1 << n * n) - 1
         self.squares = [sum(1 << (r * n + c) for r, c in sq) for sq in all_squares(n)]
@@ -115,7 +115,7 @@ def forcing_bits(solver, p1, p2, budget):
     """A winning all-forcing plan as a tuple of cells, or None.
 
     P1's threats and candidate moves go through the solver's plan
-    region; the opponent's threats always use the whole board, so a
+    region; the second player's threats always use the whole board, so a
     boxed solver only accepts lines that survive its own board size.
     """
     if solver.plan_threat_bits(p1, p2):

@@ -2,7 +2,7 @@
 
 Each figure is drawn from positions the rule computes, so the diagrams
 cannot drift from the code: the basic line and the longest line are
-replayed against an opponent who blocks, the second-move diagram reads
+replayed against a second player who blocks, the second-move diagram reads
 the rule's second move, and the hidden-corner figure asserts its pair's
 corner.
 
@@ -77,8 +77,8 @@ def quiet_mark(cell):
 
 
 def board(black, white, threats, n=6, label=None, extra=()):
-    """An n x n board with our stones black, the opponent's white, and
-    threat cells dashed."""
+    """An n x n board with the first player's stones black, the second
+    player's white, and threat cells dashed."""
     out = open_board(n, SMALL)
     out += stones(black, "black", STONE)
     out += stones(white, "white", STONE)
@@ -101,9 +101,10 @@ def large_board(n, base=17, region=6, options=""):
 
 
 def play(o1, o2):
-    """The positions along the rule's line against o1, o2 with an opponent
-    who blocks: a list of (our stones, their stones, our threats) after
-    each of our moves, and the line's tempo count."""
+    """The positions along the rule's line against o1, o2 with a second
+    player who blocks: a list of (first player's stones, second player's
+    stones, first player's threats) after each first-player move, and
+    the line's tempo count."""
     x2 = second_move(o1)
     a = abstract_of([OPENING, x2], [o1, o2], o1, o2)
     line, tempo, _ = line_with_key(a)
@@ -121,7 +122,8 @@ def play(o1, o2):
 
 def ply_labels(states):
     """Panel labels by ply, as in the paper's game table: the first
-    panel shows our move, each later one the block and our next move."""
+    panel shows the first player's move, each later one the block and
+    the first player's next move."""
     out = []
     for i, (p1, _, _) in enumerate(states):
         ply = 2 * len(p1) - 1

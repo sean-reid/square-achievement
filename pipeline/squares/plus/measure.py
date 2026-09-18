@@ -1,7 +1,7 @@
 """Measure the plus rule's lines on each board.
 
 For every reply pair on the n board the rule commits to a line: some
-tempo moves, then the arms of a plus. Against an opponent who blocks,
+tempo moves, then the arms of a plus. Against a second player who blocks,
 each move is answered by its block until a move makes two threats; one
 more block and the completion follow. If the double threat comes at the
 j-th move of the line, the win is the (2j + 5)-th ply of the game. This
@@ -53,7 +53,7 @@ def line_with_key(a):
 
 
 def played(a, line):
-    """The prefix of the line actually played against an opponent who
+    """The prefix of the line actually played against a second player who
     blocks: the moves up to and including the one making two threats."""
     p1, p2 = list(a.p1), list(a.p2)
     for j, m in enumerate(line, start=1):
