@@ -938,14 +938,21 @@ Theorem~\ref{thm:uniform} is
 cases (a) to (e) to \texttt{simulate} with the run on the anchor board
 (\texttt{plus\_forced\_anchor}) and the three families
 \texttt{farAnchorsSafe}, \texttt{exactAnchorsSafe}, and
-\texttt{farNearAnchorsSafe}. The containment of Lemma~\ref{lem:span}
-is \texttt{corners\_span\_bounded}. The hidden corner of a pair is
-computed by \texttt{farmKey}, which the abstraction and the anchored
-runs use; the Lean sources call the hidden corner a \emph{farm}. A cell
-it returns is a hidden corner of the pair in the sense of
-Definition~\ref{def:latent} (\texttt{farmKey\_spec}), and the second
+\texttt{farNearAnchorsSafe}. Lemma~\ref{lem:span} is not a separate
+Lean theorem; the containments it gives are proved where they are
+used, in \texttt{three\_corners\_confine} and
+\texttt{square\_filter\_confine} for squares with corners in the
+region and inside \texttt{escape\_farm}. The hidden corner of a pair
+is computed by \texttt{farmKey}, which the abstraction and the anchored
+runs use; the Lean identifiers call the hidden corner a \emph{farm}
+(\texttt{farmKey}, \texttt{Key.farm}) and the cell of (G4) \texttt{hot}.
+A cell \texttt{farmKey} returns lies in $\Board_6$ and is a corner of a
+square through the pair (\texttt{farmKey\_corners}), and the second
 claim of Lemma~\ref{lem:dichotomy} is \texttt{escape\_farm}: for a
-square as in the lemma, \texttt{farmKey} returns $b$. The uniqueness
+square as in the lemma, \texttt{farmKey} returns $b$. Hypothesis (iv)
+of Theorem~\ref{thm:simulate} is stated through \texttt{farmKey}: $g$
+is no cell and \texttt{farmKey} returns none, or \texttt{farmKey}
+returns $g$. The uniqueness
 claim is not needed by the formal proof, which reads the one value
 \texttt{farmKey} returns. Lemma~\ref{lem:arms} is not used by the formal proof,
 which checks the lines directly. Theorem~\ref{thm:rule} is
