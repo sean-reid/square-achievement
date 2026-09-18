@@ -9,10 +9,11 @@ import SquareAchievement.Plus.Threats
 The wrapper for the rule. It walks the two free reply levels of the
 rule's forced run on the anchor board and dispatches every real reply
 pair to `simulate`: both replies inside the base board `17` replay the
-base branch verbatim; a pair farming nothing replays the branch of the
-stand-ins `(22, 22)` and `(22, 21)`; a farm pair replays its anchored
-run. The rule reads only the abstraction of the position, so the
-stand-in branch is the rule's own play against the real pair.
+base branch verbatim; a pair with no hidden corner replays the branch
+of the stand-ins `(22, 22)` and `(22, 21)`; a pair with a hidden
+corner replays its anchored run. The rule reads only the abstraction
+of the position, so the stand-in branch is the rule's own play against
+the real pair.
 -/
 
 namespace SquareAchievement.Plus
@@ -310,7 +311,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                   goForcedS plusMove box (squaresList anchorBoard) anchorBoard none fuel1
                     (opening :: o1b :: x2 :: o2b :: []) = true :=
                 fun o2b hb hop ho1 hx2 => hlvl2 o2b hb hop ho1 hx2
-              -- shared facts about a farm pair
+              -- shared facts about a pair with a hidden corner
               have hfarm : ∀ hc : Cell, farmKey 6 o1r o2r = some (.farm hc) →
                   hc ∈ board 17 ∧ hc ∉ ([o1r, o2r] : List Cell) ∧
                   (o1r ∉ board 17 ∨ o2r ∉ board 17 →
@@ -374,7 +375,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                       fuel1 [] (by simp) (by simp)
                       (hbranch (22, 21) (by rw [mem_board, hab]; omega) (by decide) hro1 hrx2)
                       not_hasSquare_pair not_hasSquare_pair (fun _ => hfk)
-                  · -- a farm pair with the near member first: its exact anchor
+                  · -- a hidden corner with the near member first: its exact anchor
                     obtain ⟨hc, rfl⟩ := farmKey_farm hfk
                     have hhotbox := farmKey_hot_box hfk
                     obtain ⟨hhc17, hcne, hmode⟩ := hfarm hc hfk
@@ -455,7 +456,7 @@ theorem plus_uniform_aux {n : ℕ} (hn : 17 ≤ n)
                       fuel1 [] (by simp) (by simp)
                       (hbranch (22, 21) (by rw [mem_board, hab]; omega) (by decide) hro1 hrx2)
                       not_hasSquare_pair not_hasSquare_pair (fun _ => hfk)
-                · -- a farm pair with a far first member
+                · -- a hidden corner with a far first member
                   obtain ⟨hc, rfl⟩ := farmKey_farm hfk
                   have hhotbox := farmKey_hot_box hfk
                   obtain ⟨hhc17, hcne, hmode⟩ := hfarm hc hfk

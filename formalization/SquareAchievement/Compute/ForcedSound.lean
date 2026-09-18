@@ -5,12 +5,12 @@ import SquareAchievement.Compute.WinsWith
 /-!
 # Soundness of the forced-tree checker
 
-`goForced` recurses only on block replies; soundness covers the rest.
+`goForcedS` recurses only on block replies; soundness covers the rest.
 At each forced node the strategy threatens, so a reply that blocks no
 threat leaves one standing, and the threat cell wins on the next
 move. The per-node scan `threatsL squares p2 = []` replaces the
 per-reply completion checks of `go`: it says no empty cell finishes a
-square for the opponent, which is the safety obligation of
+square for the second player, which is the safety obligation of
 `P1CanWin.step`.
 -/
 
@@ -36,6 +36,12 @@ theorem squaresList_on_board {n : ℕ} {sq : List Cell}
   rw [mem_board]
   simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
   rcases hx with rfl | rfl | rfl | rfl <;> constructor <;> omega
+
+/-- A square of a board is a square of every larger board. -/
+theorem squaresList_mono {m n : ℕ} (h : m ≤ n) {sq : List Cell}
+    (hsq : sq ∈ squaresList m) : sq ∈ squaresList n := by
+  obtain ⟨r, c, s, hs, hr, hc, rfl⟩ := mem_squaresList.mp hsq
+  exact mem_squaresList.mpr ⟨r, c, s, hs, by omega, by omega, rfl⟩
 
 /-- What a `threatsL` entry certifies: a listed square one unoccupied
 cell away from `mine`. -/
@@ -96,7 +102,7 @@ theorem threat_wins {n : ℕ} {mine occ : List Cell} {z : Cell}
     rw [this]
     exact Finset.mem_insert_self z _
 
-/-- With the opponent's scan empty, no empty cell completes for them. -/
+/-- With the second player's scan empty, no empty cell completes for them. -/
 theorem completesL_eq_false_of_threats_nil {n : ℕ} {mine occ : List Cell}
     {r : Cell} (hnil : threatsL (squaresList n) mine occ = [])
     (hro : occ.contains r = false) (hrm : r ∉ mine) :
@@ -476,29 +482,11 @@ theorem goForcedS_winsWith (σ : Strategy) (box n : ℕ) (hot : Option Cell) :
                             · exact Or.inr (List.mem_singleton.mpr hx)
                         · rw [hs1]; exact hwz
 
-/-- The existential form, for any strategy that takes its wins. -/
-theorem goForcedS_sound (σ : Strategy) (box n : ℕ) (hot : Option Cell)
-    (fuel : ℕ) (hist : List Cell)
-    (hEven : hist.length % 2 = 0)
-    (hBoard : ∀ x ∈ hist, x ∈ board n)
-    (hP1box : ∀ x ∈ stonesOf true hist, inBox box x = true)
-    (htake : TakesWinsOn σ box n hist)
-    (hNoSq2 : ¬ HasSquare (stonesOf false hist).toFinset)
-    (h : goForcedS σ box (squaresList n) n hot fuel hist = true) :
-    P1CanWin n (stonesOf true hist).toFinset (stonesOf false hist).toFinset :=
-  (goForcedS_winsWith σ box n hot fuel hist hEven hBoard hP1box htake hNoSq2 h).p1CanWin hEven
-
 /-- A checked run from the empty board: following the strategy wins. -/
 theorem checkForcedS_winsWith {σ : Strategy} {box n : ℕ}
     (htake : TakesWinsOn σ box n []) (h : checkForcedS σ box n = true) :
     WinsWith σ n [] :=
   goForcedS_winsWith σ box n none (n * n + 1) [] (by simp) (by simp) (by simp [stonesOf])
     htake (by simpa [stonesOf] using not_hasSquare_empty) (by simpa [checkForcedS] using h)
-
-theorem checkForcedS_sound {σ : Strategy} {box n : ℕ}
-    (htake : TakesWinsOn σ box n []) (h : checkForcedS σ box n = true) :
-    P1CanWin n ∅ ∅ := by
-  have := (checkForcedS_winsWith htake h).p1CanWin (by simp)
-  simpa [stonesOf] using this
 
 end SquareAchievement

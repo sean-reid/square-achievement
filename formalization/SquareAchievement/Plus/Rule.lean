@@ -1,4 +1,5 @@
 import SquareAchievement.Compute.Checker
+import SquareAchievement.General.FarmKey
 
 /-!
 # The plus rule
@@ -6,28 +7,28 @@ import SquareAchievement.Compute.Checker
 A strategy stated without a lookup table. A *plus* is a stone the
 first player holds together with the four cells at distance `s` from
 it along the axes; playing an arm makes three corners of a side-`s`
-square with the centre and a neighbouring arm, so the opponent must
-block the diagonal cell, and the last arm makes three corners of two
-squares at once. A *tempo move* is a single forcing move: once it is
-played the second player has no threat and the first player threatens
-exactly one square. The block may leave the second player with a
+square with the centre and a neighbouring arm, so the second player
+must block the diagonal cell, and the last arm makes three corners of
+two squares at once. A *tempo move* is a single forcing move: once it
+is played the second player has no threat and the first player has
+exactly one threat cell. The block may leave the second player with a
 threat, which the next move of the line takes.
 
 The rule. Open at `(2, 2)`. Reply below it at `(3, 2)`, except against
 seven first replies touching the opening pair, where a fixed diagram
 gives the second move. Take a win or a block by reflex whenever one
-exists. Otherwise follow the line chosen at the second reply: the
-shortest sequence of at most three tempo moves followed by a plus of
-side `1` or `2`, preferring fewer tempo moves, then the smaller plus,
-then cell order, and never making a threat whose only block is the
-latent corner of the opponent's two free stones.
+exists. Otherwise follow the line chosen at the second reply: at most
+three tempo moves followed by a plus of side `1` or `2`, preferring
+fewer tempo moves, then fewer arms not held, then the smaller side,
+then the smaller centre, and never making a threat whose only block
+is the hidden corner of the second player's two free stones.
 
 The rule reads only an abstraction of the position: the first player's
-stones (always in the `6 × 6` corner), the opponent's stones inside the
-`17 × 17` base board, and the latent corner of the free pair if any.
-A stone beyond the base board shares no square with two corner stones,
-so it can matter only through a latent square, and that is exactly
-what the latent corner records.
+stones (always in the `6 × 6` corner), the second player's stones
+inside the `17 × 17` base board, and the hidden corner of the free
+pair if any. A stone beyond the base board shares no square with two
+corner stones, so it matters only through a square with the hidden
+corner, and that is what the abstraction records.
 -/
 
 namespace SquareAchievement.Plus
@@ -91,8 +92,8 @@ def threatsIn (k : ℕ) (mine occ : List Cell) : List Cell :=
 /-- The first player's threats: squares inside the corner. -/
 def myThreats (p1 occ : List Cell) : List Cell := threatsIn box p1 occ
 
-/-- The opponent's threats among its near stones: squares inside the
-base board. -/
+/-- The second player's threats among the near stones: squares inside
+the base board. -/
 def theirThreats (p2 occ : List Cell) : List Cell := threatsIn base p2 occ
 
 def boxCells : List Cell := allCells box
@@ -104,9 +105,9 @@ structure Abs where
   hot : Option Cell
 
 /-- Play `moves` under forcing semantics, as the checker judges them:
-after each move the opponent must have no threat, the move must make at
-least one, a double threat wins, and a single threat is blocked, never
-on the latent corner. -/
+after each move the second player has no threat, the move makes at
+least one, two threats win, and one threat is blocked, never on the
+hidden corner. -/
 def forceLine (a : Abs) : List Cell → Bool
   | [] => false
   | m :: rest =>
@@ -128,8 +129,8 @@ def arms (c : Cell) (s : ℕ) : List Cell :=
 def armsOk (c : Cell) (s : ℕ) : Bool :=
   s ≤ c.1 && s ≤ c.2 && c.1 + s < box && c.2 + s < box
 
-/-- All orderings of a short list, in the order of the generating
-pipeline: by the position of the first element, then recursively. -/
+/-- All orderings of a short list: by the position of the first
+element, then recursively. -/
 def permsAux : ℕ → List Cell → List (List Cell)
   | 0, _ => [[]]
   | _ + 1, [] => [[]]
@@ -169,8 +170,8 @@ def winningPluses (a : Abs) : List (PlusKey × List Cell) :=
           | none => none
   cands.mergeSort candLe
 
-/-- Tempo moves from `a`: exactly one threat, with the block forced and
-not on the latent corner. -/
+/-- Tempo moves from `a`: exactly one threat cell, and it is not the
+hidden corner. -/
 def tempoMoves (a : Abs) : List (Cell × Abs) :=
   boxCells.filterMap fun m =>
     if a.p1.contains m || a.p2.contains m then none
@@ -187,7 +188,7 @@ def keyLt (a b : PlusKey) : Bool := keyLe a b && !(a == b)
 
 /-- The best line within `d` tempo moves: fewest tempo moves first,
 then the plus key, ties to the earliest position in search order. A
-position where the opponent already threatens offers no plus. Returns
+position where the second player already threatens offers no plus. Returns
 the whole line, tempo moves then arms. -/
 def bestLine (a : Abs) : ℕ → List (Abs × List Cell) → Option (List Cell)
   | _, [] => none
@@ -215,8 +216,8 @@ def bestLine (a : Abs) : ℕ → List (Abs × List Cell) → Option (List Cell)
 def lineOf (a : Abs) : Option (List Cell) := bestLine a 3 [(a, [])]
 
 /-- The abstraction of a history: the first player's stones, the
-opponent's stones inside the base board, and the latent corner of the
-free pair. -/
+second player's stones inside the base board, and the hidden corner of
+the free pair. -/
 def abstractOf (hist : List Cell) : Abs :=
   let p2 := (stonesOf false hist).filter (onBoard base)
   let hot := match hist[1]?, hist[3]? with

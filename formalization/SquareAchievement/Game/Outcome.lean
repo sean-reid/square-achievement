@@ -24,6 +24,8 @@ four predicates are read on square-free positions; there `P1CanWin`
 and its derivatives coincide with the usual game-theoretic notions.
 -/
 
+namespace SquareAchievement
+
 theorem empties_comm {n : ℕ} {A B : Finset Cell} :
     empties n A B = empties n B A := by
   simp [empties, Finset.union_comm]
@@ -286,3 +288,5 @@ theorem P1CanDraw.of_not_p2CanWin {n : ℕ} {A B : Finset Cell}
     exact (hd r hr).1
   · rw [empties_comm] at hr
     exact (hd r hr).2
+
+end SquareAchievement

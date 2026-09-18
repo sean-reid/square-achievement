@@ -1,9 +1,8 @@
 """Export the 5 x 5 strategy table as the site's five.json.
 
 The interactive page replays the same tables the checker verifies, so
-the export must be bit-exact: cell keys as "r,c", alignment classes as
-"row:r" and "col:c", farm keys as "farm:a,b", the default as "*", and
-branch points as {"q": move, "b": branches}.
+the export must be bit-exact: cell keys as "r,c", the default as "*",
+and branch points as {"q": move, "b": branches}.
 
 python3 -m squares.five.export_site [dir], default the site's game
 directory. The two tables are separate files so the page loads only
@@ -23,10 +22,7 @@ def key_str(k):
         return "*"
     if isinstance(k[0], int):
         return f"{k[0]},{k[1]}"
-    kind, v = k
-    if kind == "farm":
-        return f"farm:{v[0]},{v[1]}"
-    return f"{kind}:{v}"
+    raise ValueError(f"the site table carries exact and default keys only, not {k!r}")
 
 
 def entry_json(entry):

@@ -1,28 +1,28 @@
 import SquareAchievement.Compute.ForcedSound
 import SquareAchievement.Compute.WinsWith
-import SquareAchievement.General.Invariance
 import SquareAchievement.General.Coverage
 
 /-!
 # The simulation argument
 
-Support for `check_sound_uniform`. The theorem replays the forced run
-at the base board `17` on an arbitrary board `n ≥ 17`:
+`simulate` replays a forced run on a base board `B ≥ 17` on any board
+`n ≥ 17`, for a strategy that reads the same move from the real
+history and from its base view:
 
-* replies inside the base board follow the checked tree verbatim;
+* replies inside `board 17` follow the checked tree verbatim;
 * a reply that blocks no standing threat loses to the threat at once,
-  so the opponent's lasting stones are the two replies and the
+  so the second player's lasting stones are the two replies and the
   blocks, and the blocks stay in the box by the checked guards;
-* the two replies, when they use cells beyond the base board, are
-  abstracted: through class representatives when the pair farms
-  nothing, and through the anchored farm subtree when it does.
+* a reply beyond `board 17` is stood in for by a base cell, and the
+  pair mode records what `farmKey` says about the real pair.
 
-The safety obligation reduces to squares with one block corner in the
-box, the two replies, and the completing move. Such a square either
-fits inside the base board, where the run checked it, or has both
-replies at the far threshold, where `farmKey` names the block corner
-and the farm entry keeps the opponent off it; `17 = box + far - 1` is
-the least base making that dichotomy exhaustive.
+The safety obligation is that no real reply completes a second-player
+square. A square with one block corner in the box, the two replies,
+and the completing move either fits inside `board 17`, where the run
+checked it, or escapes it, where `escape_farm` shows that `farmKey`
+returns the box corner and the pair mode keeps the second player off
+it; `17 = 6 + 12 - 1` is the least base making that dichotomy
+exhaustive.
 -/
 
 namespace SquareAchievement
@@ -145,7 +145,7 @@ both outside `board 12`, the real one outside `board 17`. The pair
 mode records what `farmKey` says about the real replies: `none`
 means no square escaping the base can use them (`escape_farm`), and
 `some hot` means every such square runs through `hot`, which the
-opponent never holds in a recursed position. -/
+second player never holds in a recursed position. -/
 
 /-- One reply slot of the simulation: shared verbatim, or
 substituted. -/
@@ -161,13 +161,13 @@ def PairMode (hot : Option Cell) (r1 r2 : Cell) (p2r : List Cell) : Prop :=
   | none => farmKey 6 r1 r2 = none
   | some h => farmKey 6 r1 r2 = some (.farm h) ∧ h ∉ p2r
 
-/-- The safety core: no real reply completes an opponent square. The
-opponent's real stones are the two replies and box cells shared with
-the base run. A hypothetical square with a substituted reply among
-its corners escapes the base region, so `escape_farm` reduces it to
-the pair mode; a square without one lies among cells the base run
-shares, where the base scan and the base square-freeness kill it,
-including a reply landing on a stand-in cell. -/
+/-- The safety core: no real reply completes a second-player square.
+The second player's real stones are the two replies and box cells
+shared with the base run. A square with a substituted reply among its
+corners escapes the base region, so `escape_farm` reduces it to the
+pair mode; a square without one lies among cells the base run shares,
+where the base scan and the base square-freeness exclude it, including
+a reply landing on a stand-in cell. -/
 theorem simulate_safe {B n : ℕ} (hB : 17 ≤ B) (hot : Option Cell)
     {o1b o1r o2b o2r : Cell} {P D : List Cell}
     (hs1 : SlotOk B n o1b o1r) (hs2 : SlotOk B n o2b o2r)
