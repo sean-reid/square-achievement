@@ -59,6 +59,9 @@ jobs:
       - run: uv run python -m squares.five.export_lean
       - run: uv run python -m squares.five.export_site
       - run: uv run python -m squares.smallboard
+      - run: uv run python -m squares.plus.export_site
+      - run: uv run python -m squares.paper.figures
+      - run: uv run python -m squares.paper.claims
       - run: git diff --exit-code --stat
 
   paper:
