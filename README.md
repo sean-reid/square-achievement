@@ -85,4 +85,5 @@ uv run --with pytest python -m pytest squares
 
 ## License
 
-Code is MIT. The paper's text and figures are CC BY 4.0.
+Code is MIT, under [LICENSE](LICENSE). The paper's text and figures
+are CC BY 4.0, under [paper/LICENSE](paper/LICENSE).
