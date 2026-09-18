@@ -1,9 +1,11 @@
 name: ci
 
-# While the repository is private, every check here runs on the
-# author's machine before a change merges, and Actions repeats them
-# weekly and on demand rather than per pull request.
+# Every check runs on pull requests, on pushes to main, weekly, and on
+# demand. The Lean build has its own workflow.
 on:
+  pull_request:
+  push:
+    branches: [main]
   schedule:
     - cron: "17 6 * * 1"
   workflow_dispatch:
@@ -57,6 +59,9 @@ jobs:
       - run: uv run python -m squares.five.export_lean
       - run: uv run python -m squares.five.export_site
       - run: uv run python -m squares.smallboard
+      - run: uv run python -m squares.plus.export_site
+      - run: uv run python -m squares.paper.figures
+      - run: uv run python -m squares.paper.claims
       - run: git diff --exit-code --stat
 
   paper:

@@ -1,6 +1,6 @@
 """The far-pair farm geometry and its generation-time constraints."""
 
-from squares.latent import farm_relation
+from squares.hidden import farm_relation
 from squares.solver import Solver, forcing_bits
 
 

@@ -9,7 +9,7 @@ moves; forced blocks are the block reflex's job at replay.
 """
 
 from ..game import P1, P2
-from ..latent import farm_relation
+from ..hidden import farm_relation
 
 
 def _candidates(g):

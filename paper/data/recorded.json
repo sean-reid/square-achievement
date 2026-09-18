@@ -1,7 +1,6 @@
 {
   "five_positions_solved": "1.79 \\times 10^8",
   "five_no_forcing": 20,
-  "table_latest_ply": 27,
   "build_minutes": 17,
-  "note": "five_positions_solved is printed by squares.five.tables; five_no_forcing by its test; table_latest_ply is the earlier general table's longest game on the 6 board, from the reference verifier before the table was retired; build_minutes is lake build on a laptop."
+  "note": "five_positions_solved is printed by squares.five.tables; five_no_forcing by its test; build_minutes is lake build on a laptop."
 }

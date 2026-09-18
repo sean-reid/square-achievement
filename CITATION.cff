@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+type: software
+title: The square achievement game on n x n boards
+authors:
+  - family-names: Reid
+    given-names: Sean
+    affiliation: San Jose State University
+license: MIT
+repository-code: https://github.com/sean-reid/square-achievement
+version: 0.2.1
+date-released: "2026-09-17"
+preferred-citation:
+  type: article
+  title: The square achievement game on n x n boards
+  authors:
+    - family-names: Reid
+      given-names: Sean
+      affiliation: San Jose State University
+  notes: The arXiv identifier is added on upload.

@@ -1,10 +1,10 @@
 """The plus rule, mirroring formalization/Plus/Rule.lean move for move.
 
-A plus is a stone we hold with the four cells at distance s along the
-axes; each arm played makes three corners of a side-s square with the
-centre and a neighbouring arm, so the opponent must block the diagonal
-cell, and the last arm threatens two squares at once. A tempo move is a
-single forcing move.
+A plus is a first-player stone with the four cells at distance s along
+the axes; each arm played makes three corners of a side-s square with
+the centre and a neighbouring arm, so the second player must block the
+diagonal cell, and the last arm threatens two squares at once. A tempo
+move is a single forcing move.
 
 The rule: open at (2, 2); reply below it at (3, 2), except against seven
 first replies touching the opening pair, where a fixed diagram gives the
@@ -12,18 +12,18 @@ second move; take a win or a block by reflex; otherwise follow the line
 chosen at the second reply, the shortest sequence of at most three
 tempo moves followed by a plus of side 1 or 2, preferring fewer tempo
 moves, then the smaller plus, then cell order, and never making a
-threat whose only block is the hidden corner of the opponent's two free
-stones.
+threat whose only block is the hidden corner of the second player's two
+free stones.
 
-The rule reads an abstraction of the position: our stones (in the 6 x 6
-corner), the opponent's stones inside the 17 x 17 base board, and the
-hidden corner of the free pair.
+The rule reads an abstraction of the position: the first player's
+stones (in the 6 x 6 corner), the second player's stones inside the
+17 x 17 base board, and the hidden corner of the free pair.
 """
 
 from itertools import permutations
 
 from ..game import P1, P2
-from ..latent import farm_relation
+from ..hidden import farm_relation
 
 BOX = 6
 BASE = 17
@@ -130,7 +130,8 @@ def arms_ok(c, s):
 
 
 def winning_pluses(a):
-    """Every plus we can complete by force, as ((todo, side, centre), order),
+    """Every plus the first player completes by force, as
+    ((todo, side, centre), order),
     sorted by key then order."""
     out = []
     for c in a.p1:

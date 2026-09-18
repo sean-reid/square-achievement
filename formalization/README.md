@@ -18,7 +18,7 @@ footprint is Lean's kernel plus the compiler-evaluation trust behind
 | `p1_wins_iff` | the first half of `outcome` |
 | `Plus.plus_wins_with` | following the plus rule, a strategy stated without a lookup table, wins every board from 6 x 6 up: the winning tree is the rule's own play |
 | `Plus.plus_wins` | the same with the moves forgotten, a `P1CanWin` tree |
-| `p1_wins_five` | the first player wins on 5 x 5, by the exact-solver table with quiet forks |
+| `p1_wins_five` | the first player wins on 5 x 5, by the exact-solver table, which plays quiet moves where no forcing continuation exists |
 | `small_board_no_win` | no first-player win on boards up to 4 x 4 |
 | `small_board_drawn` | drawing strategies for both players on boards up to 4 x 4 |
 | `second_player_no_win` | strategy stealing: the second player never forces a win |
@@ -26,8 +26,8 @@ footprint is Lean's kernel plus the compiler-evaluation trust behind
 | `check_sound` | a successful run of the enumerating checker yields a `P1CanWin` tree |
 | `checkForcedS_winsWith` | a successful forced run of a strategy that takes its wins yields the strategy's own winning tree, `WinsWith` |
 | `refute_sound` | a successful refuter run refutes a first-player win |
-| `escape_farm` | a square escaping the base board through a box cell and the reply pair has that cell as the pair's hidden corner, the one `farmKey` returns |
-| `farmKey_corners` | the hidden corner lies in the box and is a corner of a square through both replies |
+| `escape_farm` | a square escaping the base board through a region cell and the reply pair has that cell as the pair's hidden corner, the one `farmKey` returns |
+| `farmKey_corners` | the hidden corner lies in the region and is a corner of a square through both replies |
 | `simulate` | a forced base run of any strategy replays on every larger board as the strategy's own play |
 
 ## Building

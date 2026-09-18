@@ -3,6 +3,10 @@ name = "square-achievement-pipeline"
 version = "0.0.0"
 description = "Strategy generation and cross-checking for the square achievement game"
 requires-python = ">=3.11"
+license = {text = "MIT"}
+
+[project.urls]
+Repository = "https://github.com/sean-reid/square-achievement"
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.6"]

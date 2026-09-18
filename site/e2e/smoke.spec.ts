@@ -63,6 +63,25 @@ test("the guide speaks of the first and second player", async ({ page }) => {
   expect(text).toContain("anchor board");
 });
 
+test("pages carry an icon and Open Graph tags", async ({ page }) => {
+  await page.goto("./proof/");
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute(
+    "href",
+    "/square-achievement/favicon.svg",
+  );
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute(
+    "content",
+    "website",
+  );
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    "content",
+    "https://sean-reid.github.io/square-achievement/proof/",
+  );
+  const icon = await page.request.get("./favicon.svg");
+  expect(icon.ok()).toBe(true);
+  expect(icon.headers()["content-type"]).toContain("image/svg+xml");
+});
+
 test("the old result pages redirect", async ({ page }) => {
   await page.goto("./threshold/");
   await expect(page.locator("h1")).toContainText("Square Achievement Game");
