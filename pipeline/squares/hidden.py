@@ -1,14 +1,14 @@
 """The hidden corner of a far reply pair: the cell of the 6 x 6 corner
 region that forms three corners of a square with the two replies, when
 both replies have a coordinate at least 12. Mirrors farmKey in
-formalization/SquareAchievement/Compute/Table.lean.
+formalization/SquareAchievement/General/FarmKey.lean.
 """
 
 
 def farm_relation(o1, o2, box=6, far=12):
-    """The hot box cell a far reply pair can farm through, or None.
+    """The region cell a far reply pair can farm through, or None.
 
-    A farm square has one box corner t, the two replies as corners,
+    A farm square has one corner t in the region, the two replies as corners,
     and a fourth corner the strategy will block. Every such square
     extends right and down from t with side at least far - box + 1, so
     one reply is aligned with t's row or column and pins t exactly.

@@ -23,7 +23,7 @@ hidden corner of the free pair.
 from itertools import permutations
 
 from ..game import P1, P2
-from ..latent import farm_relation
+from ..hidden import farm_relation
 
 BOX = 6
 BASE = 17

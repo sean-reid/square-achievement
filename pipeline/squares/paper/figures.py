@@ -12,7 +12,7 @@ python3 -m squares.paper.figures   writes paper/fig-*.tex
 from ..five import strategy5
 from ..five.forcing import forcing_script
 from ..game import P1, P2, Game
-from ..latent import farm_relation
+from ..hidden import farm_relation
 from ..paths import REPO
 from ..plus.measure import line_with_key
 from ..plus.rule import OPENING, abstract_of, my_threats, second_move

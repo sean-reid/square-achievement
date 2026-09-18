@@ -24,7 +24,7 @@ figures.
 - `squares/smallboard.py`: exact never-losing policies for the boards
   below 5, exported for the site's bot.
 - `squares/paths.py`: repository paths the exporters write to.
-- `squares/latent.py`: the latent corner of a far reply pair, the one
+- `squares/hidden.py`: the hidden corner of a far reply pair, the one
   geometric fact the rule and the 5 x 5 machinery share.
 - `squares/five/tables.py`: extraction of the 5 x 5 table from solved
   positions; generates `strategy5.py`.
