@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/sean-reid/square-achievement/compare/v0.2.0...v0.2.1) (2026-09-18)
+
+
+### Bug Fixes
+
+* **paper:** define the rule as it is proved, and close the referees' items ([#117](https://github.com/sean-reid/square-achievement/issues/117)) ([abd9191](https://github.com/sean-reid/square-achievement/commit/abd9191188a01e0387621a273d5784110755116f))
+
 ## [0.2.0](https://github.com/sean-reid/square-achievement/compare/v0.1.5...v0.2.0) (2026-09-06)
 
 
