@@ -3,8 +3,8 @@
 Counts come from the pipeline itself: the rule's lines per board from
 squares.plus.measure, the lines on the anchor board and in the anchored
 positions from the same rule, the anchored positions from squares.plus.sweep,
-the 5 x 5 table's branches from its module, and line counts of the Lean
-sources. Values that come from long runs are read from
+the 5 x 5 table's branches from its module, and the line count of the
+Lean rule. Values that come from long runs are read from
 paper/data/recorded.json and paper/data/timings.json, the latter
 written by squares.paper.timings.
 
@@ -130,8 +130,6 @@ def build_claims():
         m = six if n == 6 else measure(n)
         out[f"pairs{WORDS[n]}"] = group(m["roots"])
         if n == 17:
-            out["sideOneSeventeen"] = group(m["sides"][1])
-            out["sideTwoSeventeen"] = group(m["sides"][2])
             out["tempoZeroSeventeen"] = group(m["tempo"][0])
             out["tempoOneSeventeen"] = group(m["tempo"][1])
         assert m["lines"] == six["lines"] and m["max_plies"] == six["max_plies"]
@@ -148,29 +146,14 @@ def build_claims():
     out["distinctLines"] = str(six["lines"])
     for d in range(4):
         out[f"tempo{['Zero', 'One', 'Two', 'Three'][d]}"] = group(six["tempo"][d])
-    out["tempoTwoThree"] = group(six["tempo"][2] + six["tempo"][3])
-    out["sideOne"] = group(six["sides"][1])
-    out["sideTwo"] = group(six["sides"][2])
     out["longestLineMoves"] = str(len(six["longest"][2]))
     out["latestPly"] = str(six["max_plies"])
-    out["tableLatestPly"] = str(recorded["table_latest_ply"])
     out["anchoredPositions"] = str(len(anchors()))
     out["fiveTablePositions"] = recorded["five_positions_solved"]
     out["fiveTableBranches"] = str(len(strategy5.X2))
     out["fiveNoForcing"] = str(recorded["five_no_forcing"])
     rule_lines = len((LEAN / "Plus" / "Rule.lean").read_text().splitlines())
     out["ruleLeanLines"] = str(round(rule_lines, -1))
-    other = sum(
-        len((LEAN / "Plus" / f).read_text().splitlines())
-        for f in (
-            "Threats.lean",
-            "Agreement.lean",
-            "Anchors.lean",
-            "Uniform.lean",
-            "Results.lean",
-        )
-    )
-    out["plusLeanLines"] = group(round(other, -2))
     for key, secs in timings.items():
         if key == "anchored":
             out["timeAnchored"] = f"{secs:.2f}"
