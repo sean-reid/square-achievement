@@ -1,7 +1,7 @@
 {
   "name": "square-achievement-site",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.2.1",
   "description": "Landing page, playable strategy, and proof guide for the square achievement game",
   "license": "MIT",
   "repository": {
