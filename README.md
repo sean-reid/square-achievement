@@ -24,7 +24,7 @@ when n >= 5, by a machine-checked strategy.
   reference verifier, exporters, and analysis tools. See
   [pipeline/README.md](pipeline/README.md).
 
-## Getting started
+## Building each part
 
 The components are independent; none is needed to build the others.
 Commands assume a POSIX shell; on Windows, work inside WSL.
