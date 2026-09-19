@@ -19,13 +19,18 @@
         },
         {
           "type": "toml",
-          "path": "pipeline/pyproject.toml",
-          "jsonpath": "$.project.version"
-        },
-        {
-          "type": "toml",
           "path": "formalization/lakefile.toml",
           "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "site/package-lock.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "site/package-lock.json",
+          "jsonpath": "$.packages[\"\"].version"
         }
       ]
     }
