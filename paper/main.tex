@@ -261,9 +261,10 @@ corner of $\Sq(r,c,s)$ has its row or its column indexed below $B$.
 
 \begin{proof}
 Two distinct corners either share a coordinate and differ by $s$ in the
-other, or differ by $s$ in both; either way $s < B$. Each anchor
-coordinate is bounded by the corresponding coordinate of a corner, so
-$r, c < B$, and the containment follows. If $x$ and $y$ share a row,
+other, or differ by $s$ in both; either way $s \le B - 1$. Each
+coordinate of $(r,c)$ is bounded by the corresponding coordinate of a
+corner, so $r, c \le B - 1$, and the containment follows, indeed with
+$r + s, c + s \le 2B - 2$. If $x$ and $y$ share a row,
 the two remaining corners inherit their columns, both below $B$; a
 shared column is symmetric; and if $x$ and $y$ are diagonally opposite,
 all four corners lie in $\Board_B$.
@@ -339,11 +340,15 @@ through it stays inside $\Board_{17}$ and the restriction is not
 needed.
 
 \begin{remark}\label{rem:base}
-The base $17 = 6 + 2 \cdot 6 - 1$ is least for
-Lemma~\ref{lem:dichotomy}. With base $15$ or $16$ in place of $17$, the
-replies $(0,16)$ and $(11,5)$ span the square $\Sq(0,5,11)$ through the
-region cell $(0,5)$, which fits in neither $\Board_{15}$ nor
-$\Board_{16}$, while $(11,5)$ has no coordinate at least $12$.
+The threshold $12$ of Definition~\ref{def:latent} and the base $17$ are
+tied by $17 = 12 + 5$: a square through a region cell leaves
+$\Board_{17}$ only if its side is at least $12$. With a threshold $t$
+and the base $t + 5$ in their place, Lemma~\ref{lem:dichotomy} holds
+exactly when $t \ge 11$. At $t = 10$ uniqueness fails: $(0,10)$ and
+$(5,10)$ would have the two hidden corners $(0,5)$ and $(5,5)$. So base
+$16$ with threshold $11$ would serve the lemma as well. The development
+uses $t = 2 \cdot 6 = 12$, the bound of Lemma~\ref{lem:span}, and the
+rule has been checked only with base $17$.
 \end{remark}
 
 \subsection{Tempo moves and lines}
@@ -1055,11 +1060,12 @@ opening.
 The rule does not apply to $\Board_5$, where the table needs quiet
 moves. A short rule for $\Board_5$ is open.
 
-The base $17$ is least for Lemma~\ref{lem:dichotomy}
-(Remark~\ref{rem:base}). Whether a rule of this kind can play inside a
-region smaller than $\Board_6$, or read less than the second player's
-stones inside $\Board_{17}$, for instance only those inside $\Board_6$
-with a summary of the rest, is open.
+Base $16$ would serve Lemma~\ref{lem:dichotomy}
+(Remark~\ref{rem:base}); whether the rule still wins when it reads only
+$\Board_{16}$ was not checked. Whether a rule of this kind can play
+inside a region smaller than $\Board_6$, or read less than the second
+player's stones inside its base board, for instance only those inside
+$\Board_6$ with a summary of the rest, is open.
 
 \section*{Acknowledgements}
 
