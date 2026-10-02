@@ -135,6 +135,21 @@ def box_class(cell, box=6):
     return None
 
 
+def quiet_pairs(x2, scripts, n=5, opening=(2, 2)):
+    """The reply pairs (o1, o2) whose table entry opens with a quiet move."""
+    cells = [(r, c) for r in range(n) for c in range(n)]
+    out = []
+    for o1, second in x2.items():
+        table = scripts[o1]
+        for o2 in cells:
+            if o2 in (opening, o1, second):
+                continue
+            entry = table.get(o2, table.get(None))
+            if entry and entry[0] == "q":
+                out.append((o1, o2))
+    return out
+
+
 def table_strategy(x2, scripts, opening=(2, 2), classify=None, meter=None):
     """The lookup strategy over a generated (x2, scripts) table.
 

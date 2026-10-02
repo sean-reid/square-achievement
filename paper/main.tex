@@ -602,23 +602,27 @@ The first player has a winning strategy on $\Board_5$.
 \end{proposition}
 
 \begin{proof}
-The strategy is a table, extracted from a full solution of the
-$5 \times 5$ game ($\fiveTablePositions$ positions solved, with draws
-scored against the first player) and verified by a checker that walks
-the complete game tree, every reply at every node. Like the rule, it
-completes a square when it can and otherwise blocks one before
-consulting the table. It opens at $(2,2)$, gives a second move for each
-of the $\fiveTableBranches$ first replies, and after the second reply
-plays a sequence of forcing moves ending in a double threat where one
-exists. For $\fiveNoForcing$ of the
-reply pairs, with the table's second move, no continuation in which
-every first-player move makes a threat wins, so the table plays a
-\emph{quiet} move there, one making no threat, and continues with a
-sub-table indexed by the reply (Figure~\ref{fig:five}). That no
-forcing continuation exists for these $\fiveNoForcing$ pairs is a
+The strategy is a table, verified by a checker that walks its complete
+game tree on $\Board_5$, every reply at every node, and finds every
+branch ending in a first-player square. The checker's soundness theorem
+and the run are part of the formal development
+(Section~\ref{sec:lean}).
+\end{proof}
+
+The table was extracted from a full solution of the $5 \times 5$ game
+($\fiveTablePositions$ positions solved, with draws scored against the
+first player). Like the rule, it completes a square when it can and
+otherwise blocks one before consulting the table. It opens at $(2,2)$,
+gives a second move for each of the $\fiveTableBranches$ first replies,
+and after the second reply plays a sequence of forcing moves ending in
+a double threat where one exists. For $\fiveNoForcing$ of the reply
+pairs, with the table's second move, the solver finds no winning
+continuation of at most eight moves in which every first-player move
+makes a threat, so the table plays a \emph{quiet} move there, one
+making no threat, and continues with a sub-table indexed by the reply
+(Figure~\ref{fig:five}). That no such continuation exists is a
 computation of the solver and is not formalized; the win of the table
 is.
-\end{proof}
 
 \begin{figure}[ht]
 \centering
