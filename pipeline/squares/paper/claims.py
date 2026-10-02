@@ -3,8 +3,8 @@
 Counts come from the pipeline itself: the rule's lines per board from
 squares.plus.measure, the lines on the anchor board and in the anchored
 positions from the same rule, the anchored positions from squares.plus.sweep,
-the 5 x 5 table's branches from its module, and the line count of the
-Lean rule. Values that come from long runs are read from
+the 5 x 5 table's branches and quiet moves from its module, and the
+line count of the Lean rule. Values that come from long runs are read from
 paper/data/recorded.json and paper/data/timings.json, the latter
 written by squares.paper.timings.
 
@@ -14,6 +14,7 @@ python3 -m squares.paper.claims   writes paper/claims.tex
 import json
 
 from ..five import strategy5
+from ..five.forcing import quiet_pairs
 from ..paths import REPO
 from ..plus.measure import line_with_key, measure, played
 from ..plus.rule import OPENING, abstract_of, my_threats, second_move, their_threats
@@ -151,7 +152,7 @@ def build_claims():
     out["anchoredPositions"] = str(len(anchors()))
     out["fiveTablePositions"] = recorded["five_positions_solved"]
     out["fiveTableBranches"] = str(len(strategy5.X2))
-    out["fiveNoForcing"] = str(recorded["five_no_forcing"])
+    out["fiveNoForcing"] = str(len(quiet_pairs(strategy5.X2, strategy5.SCRIPTS)))
     rule_lines = len((LEAN / "Plus" / "Rule.lean").read_text().splitlines())
     out["ruleLeanLines"] = str(round(rule_lines, -1))
     for key, secs in timings.items():
