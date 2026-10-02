@@ -110,13 +110,14 @@ const branchPoint = board6({
     <span set:html={k("n \\times n")} /> grid; the first to hold all four
     corners of an axis-parallel square wins, and a full board without one is a
     draw. The first player has a winning strategy if and only if
-    <span set:html={k("n \\ge 5")} />. For <span set:html={k("n \\ge 6")} /> the
-    strategy is a rule with no lookup table, built around the plus, a held stone
-    with the four cells at a common distance from it along the axes. The rule is
-    checked on the boards from 6 × 6 to 17 × 17, a simulation theorem carries a
-    checked run on the 23 × 23 board to every larger board, and the proofs are
-    formalized in Lean 4. This guide follows the paper section by section, with
-    the proofs left out.
+    <span set:html={k("n \\ge 5")} />. For <span set:html={k("n \\ge 6")} /> one
+    strategy serves every board: a rule with no lookup table whose moves after
+    the second reply are all forcing, built around the plus, a stone with the
+    four cells at a common distance from it along the axes, a shape proposed for
+    this game by Sirgedas in 2010. The rule is checked on the boards from 6 × 6
+    to 17 × 17, a simulation theorem carries one checked run on the 23 × 23
+    board to every larger board, and the proofs are formalized in Lean 4. This
+    guide follows the paper section by section, with the proofs left out.
   </p>
 
   <figure class="game">
@@ -144,29 +145,38 @@ const branchPoint = board6({
   <p>
     Erickson posed the game and asked for the outcome under optimal play{" "}
     <a href="#ref-2">[2]</a>, and the question is recorded on the Open Problem
-    Garden <a href="#ref-3">[3]</a>. It is an achievement game in the sense of
-    Harary <a href="#ref-1">[1]</a>: both players pursue the same goal, and a
-    player who loses the race may still secure a draw. The convention goes back
-    to the positional games of Hales and Jewett <a href="#ref-8">[8]</a>; a
-    recent unified treatment of achievement conventions is by Galliot and
-    Sénizergues <a href="#ref-10">[10]</a>, and the general theory of positional
-    games is in Beck <a href="#ref-11">[11]</a>. Two boundary results were
-    known. Jenrich reported computer searches showing that the second player can
-    secure a draw on 3 × 3 and 4 × 4 and that the first player can force a win
-    on 5 × 5 <a href="#ref-4">[4]</a>. Bacher and Eliahou proved that every
-    two-coloring of the 15 × 15 grid contains four equal-colored cells at the
-    corners of an axis-parallel square, and that 15 is least with this property{" "}
+    Garden <a href="#ref-3">[3]</a> and on MathOverflow{" "}
+    <a href="#ref-12">[12]</a>. It is an achievement game in the sense of Harary{" "}
+    <a href="#ref-1">[1]</a>: both players pursue the same goal, and a player
+    who loses the race may still secure a draw. The convention goes back to the
+    positional games of Hales and Jewett <a href="#ref-8">[8]</a>; a recent
+    unified treatment of achievement conventions is by Galliot and Sénizergues{" "}
+    <a href="#ref-10">[10]</a>, and the general theory of positional games is in
+    Beck <a href="#ref-11">[11]</a>. Two boundary results were known. Jenrich
+    reported computer searches showing that the second player can secure a draw
+    on 3 × 3 and 4 × 4 and that the first player can force a win on 5 × 5{" "}
+    <a href="#ref-4">[4]</a>. Bacher and Eliahou proved that every two-coloring
+    of the 15 × 15 grid contains four equal-colored cells at the corners of an
+    axis-parallel square, and that 15 is least with this property{" "}
     <a href="#ref-5">[5]</a>; since no completed game on a board of size 15 or
-    more is square-free, strategy stealing gives the first player a win there,
-    though it produces no strategy. Between these results nothing was published,
-    and no coloring argument can reach the boards from 6 × 6 to 14 × 14, since
-    Bacher and Eliahou also exhibit square-free two-colorings of the 14 × 14
-    board. Concurrently with this work, Adler announced computer searches
+    more is square-free, strategy stealing and determinacy give the first player
+    a win there, though they produce no strategy. Between these results nothing
+    was published, and no coloring argument can reach the boards from 6 × 6 to
+    14 × 14, since Bacher and Eliahou also exhibit square-free two-colorings of
+    the 14 × 14 board. One idea had been sketched: answering Erickson's question
+    on MathOverflow in 2010, Sirgedas proposed that the first player open in the
+    centre and win by making a <em>cross</em>, a stone with its four neighbours
+    at a common distance along the axes, each arm forcing a reply{" "}
+    <a href="#ref-13">[13]</a>; he noted that the cross can also be built on two
+    stones in a row or column at distance two, worked out three of the nine
+    first replies on the 7 × 7 board up to symmetry, and guessed that 5 × 5 was
+    a draw. Concurrently with this work, Adler announced computer searches
     settling those nine sizes as first-player wins, with full strategy trees
-    certified for 6 × 6 and 7 × 7 and search verdicts for the rest, one search
-    per size <a href="#ref-9">[9]</a>. What is new here is a single strategy
-    that wins every board from 6 × 6 up, stated in a paragraph, and a proof
-    checked by a proof assistant. The bot in Figure 1 plays that strategy.
+    certified for 6 × 6 and 7 × 7 and search verdicts for the rest,
+    cross-checked by independent runs at the smaller sizes{" "}
+    <a href="#ref-9">[9]</a>. What is new here is a single strategy that wins
+    every board from 6 × 6 up, stated in a paragraph, and a proof checked by a
+    proof assistant. The bot in Figure 1 plays that strategy.
   </p>
 
   <div class="theorem">
@@ -180,12 +190,17 @@ const branchPoint = board6({
   </div>
 
   <p>
-    The rule is built around one shape, the plus: the arms of a plus force the
-    second player's replies one at a time, and the last arm threatens two
-    squares at once. The theorem for the rule is proved by checking the rule's
-    forced tree on every board from 6 to 17 and by a simulation theorem, stated
-    for any strategy, that carries a checked run on the 23 × 23 board to every
-    larger board. The outcome theorem follows with an exhaustive refutation for
+    The rule is built around one shape, the plus, which is Sirgedas's cross: the
+    arms of a plus force the second player's replies one at a time, and the last
+    arm threatens two squares at once. The sketch of 2010 covered one board and
+    a few replies and did not say which plus to aim for, how to prepare one when
+    the replies obstruct it, or why one board's analysis should carry to
+    another; the rule settles the first two by a search with a fixed preference
+    order, and the simulation theorem settles the third. The theorem for the
+    rule is proved by checking the rule's forced tree on every board from 6 to
+    17 and by a simulation theorem, stated for any strategy, that carries a
+    checked run on the 23 × 23 board to every larger board. The outcome theorem
+    follows with an exhaustive refutation for
     <span set:html={k("n \\le 4")} /> and a strategy table for
     <span set:html={k("n = 5")} />, whose play from the opening (2,2) is not
     purely forcing. Everything is formalized in Lean 4 <a href="#ref-6">[6]</a>{" "}
@@ -263,10 +278,10 @@ const branchPoint = board6({
     the second player must block there or lose. Once the first player also holds
     the arm opposite the held one, the remaining arm is perpendicular to both
     and threatens at two diagonals at once, which no single block answers. So
-    from a centre and one arm the first player wins in three moves against a
-    second player who has no threat and whose blocks make none. The opening
-    (2,2) and the second move (3,2) are the centre and an arm of the side-1 plus
-    at (2,2), and an arm and the centre of the side-1 plus at (3,2).
+    from a centre and one arm the first player reaches a double threat in three
+    moves against a second player who has no threat and whose blocks make none.
+    The opening (2,2) and the second move (3,2) are the centre and an arm of the
+    side-1 plus at (2,2), and an arm and the centre of the side-1 plus at (3,2).
   </p>
 
   <figure class="diagram">
@@ -301,16 +316,19 @@ const branchPoint = board6({
     each having a coordinate at least 12. Their <em>hidden corner</em> is a cell
     of the region that together with <span set:html={k("x")} /> and
     <span set:html={k("y")} /> makes three corners of one square. Two cells have
-    at most one hidden corner. The <em>abstraction</em> of a position reached
-    after the second player's second move consists of the first player's stones,
-    the second player's stones inside the base board, and the hidden corner of
-    the second player's first two stones, if they have one. A second player
-    forced to block at the hidden corner would hold three corners of that square
-    and threaten at its fourth, a cell the rule does not read. So the rule never
-    makes a threat whose only block is the hidden corner. It applies the
-    restriction whenever the pair has a hidden corner, also when the square
-    through it stays inside the base board and the restriction is not needed.
-    The base 17 = 6 + 2 · 6 − 1 is the least size for which this argument works.
+    at most one hidden corner. The <em>abstraction</em> of a position consists
+    of the first player's stones, the second player's stones inside the base
+    board, and, once the second player has two stones, the hidden corner of the
+    first two, if they have one. A second player forced to block at the hidden
+    corner would hold three corners of that square and threaten at its fourth, a
+    cell the rule does not read. So the rule never makes a threat whose only
+    block is the hidden corner. It applies the restriction whenever the pair has
+    a hidden corner, even when the square through it lies inside the base board
+    and the restriction is not needed. The threshold 12 and the base 17 are tied
+    by 17 = 12 + 5: a square through a region cell leaves the base board only if
+    its side is at least 12. With a threshold of 11 and base 16 the argument
+    would still work, and 11 is the least threshold for which a pair has at most
+    one hidden corner; the rule has been checked only with base 17.
   </p>
 
   <h3>Tempo moves and lines</h3>
@@ -326,12 +344,12 @@ const branchPoint = board6({
     in the region whose centre the first player holds, in some order, such that
     each arm before the last makes exactly one threat whose block is not the
     hidden corner, the last arm makes at least two threats, and the second
-    player never has a threat. The <em>key</em> of a line is the triple (number
-    of tempo moves, number of arms to play, side of the plus). The rule prefers
-    the smallest key in lexicographic order, then the smaller centre in cell
-    order, then the line its search generates first. It searches for lines with
-    at most three tempo moves. Whether a line exists, and which is preferred,
-    depends only on the abstraction of the position.
+    player never has a threat. The <em>key</em> of a line is (number of tempo
+    moves, number of arms to play, side of the plus, centre of the plus). The
+    rule prefers the smallest key in lexicographic order, cells ordered by row
+    and then by column, then the line its search generates first. It searches
+    for lines with at most three tempo moves. Whether a line exists, and which
+    is preferred, depends only on the abstraction of the position.
   </p>
 
   <h2>The plus rule</h2>
@@ -352,12 +370,12 @@ const branchPoint = board6({
   </p>
   <p>
     The paper lists two complete games against a second player who always
-    blocks. In the first the replies (0,0) and (4,4) are far from the opening
-    pair and the basic line of Figure 3 wins at once, key (0, 3, 1). In the
-    second the reply (3,1) is a diagonal of both side-1 pluses, no line with
-    fewer than two tempo moves exists, and the line has key (2, 4, 2): two tempo
-    moves and then the four arms of the side-2 plus at (3,2). Figure 4 shows the
-    position before its last move.
+    blocks. In the first the replies (0,0) and (4,4) are away from the opening
+    pair and the basic line of Figure 3 wins at once, key (0, 3, 1, (2,2)). In
+    the second the reply (3,1) is a diagonal of both side-1 pluses, no line with
+    fewer than two tempo moves exists, and the line has key (2, 4, 2, (3,2)):
+    two tempo moves and then the four arms of the side-2 plus at (3,2). Figure 4
+    shows the position before its last move.
   </p>
 
   <figure class="diagram">
@@ -393,8 +411,8 @@ const branchPoint = board6({
     region and are the same on every board, while the other two counts grow with
     the board. Every pair won by a side-1 plus needs no tempo move and every
     pair won by a side-2 plus needs at least one. The longest line, the second
-    game above, has six first-player moves after the opening pair, and against a
-    second player who always blocks every line ends by ply 17; a reply that
+    game above, has six first-player moves after the opening pair, and every
+    game in which the second player always blocks ends by ply 17; a reply that
     blocks nothing leaves a threat that the rule completes at its next move. So
     the rule wins every game by the seventeenth ply. This bound is computed from
     the 79 lines and is not part of the formal theorem.
@@ -426,13 +444,13 @@ const branchPoint = board6({
     completes a square when it can and otherwise blocks one before consulting
     the table. It opens at (2,2), gives a second move for each of the 24 first
     replies, and after the second reply follows a forcing plan where one exists.
-    For 20 of the reply pairs, with the table's second move, no continuation in
-    which every first-player move makes a threat wins, so the table plays a
-    <em>quiet</em> move there, one making no threat, and continues with a
-    sub-table indexed by the reply. Such a position is a <em>branch point</em>
-    (Figure 5). That no forcing continuation exists for these 20 pairs is a
-    computation of the solver and is not formalized; the win of the table is.
-    The table plays in Figure 1 when n is set to 5.
+    For 104 of the reply pairs, with the table's second move, the solver finds
+    no winning continuation of at most eight moves in which every first-player
+    move makes a threat, so the table plays a <em>quiet</em> move there, one
+    making no threat, and continues with a sub-table indexed by the reply. Such
+    a position is a <em>branch point</em> (Figure 5). That no such continuation
+    exists is a computation of the solver and is not formalized; the win of the
+    table is. The table plays in Figure 1 when n is set to 5.
   </p>
 
   <figure class="diagram">
@@ -446,7 +464,7 @@ const branchPoint = board6({
     <figcaption>
       Figure 5. A branch point of the 5 × 5 table. The first player (black)
       opened at (2,2) and answered the reply (4,4) with the table's second move
-      (3,2). After the second reply (2,3), one of the 20 pairs with no forcing
+      (3,2). After the second reply (2,3), one of the 104 pairs with no forcing
       continuation, the table plays the quiet move (0,2), marked by the square,
       and then consults a sub-table indexed by the reply to it.
     </figcaption>
@@ -564,18 +582,21 @@ const branchPoint = board6({
     winning predicate <code>P1CanWin</code> as an inductive family whose
     derivations are exactly strategy trees: one first-player move per node,
     every reply covered, draws failures by construction. The second player's win
-    and each player's ability to secure a draw are defined from it by swapping
-    roles after a move, and strategy stealing and determinacy are proved against
-    these definitions with no computation. These definitions, a few dozen lines,
-    are the whole specification; everything else is proved against them.
+    is defined from it by swapping roles after a move; the first player's
+    ability to secure a draw is a second inductive family, whose branches may
+    also end on a full board, and the second player's is defined from that by
+    the same swap. Strategy stealing and determinacy are proved against these
+    definitions with no computation. These definitions, a few dozen lines, are
+    the whole specification; everything else is proved against them.
   </p>
   <p>
     The predicate behind the theorem for the rule is <code>WinsWith</code>. For
     a strategy <code>σ</code>, a board size <code>n</code>, and a history
     <code>h</code> with the first player to move, <code>WinsWith σ n h</code>
-    holds if the move of <code>σ</code> at <code>h</code> is legal and completes
-    a square, or is legal, admits a reply, and every reply completes nothing and
-    leads to a history at which <code>WinsWith</code> holds again. It implies
+    holds if the move of <code>σ</code> at <code>h</code> is legal and either
+    completes a square or admits at least one reply, no reply completes a
+    second-player square, and <code>WinsWith</code> holds again after every
+    reply. It implies
     <code>P1CanWin</code> by forgetting that the move is the one
     <code>σ</code> returns. The theorem for the rule is
   </p>
@@ -613,13 +634,12 @@ const branchPoint = board6({
     <span set:html={k("n \\times n")} /> board, and is there a rule of
     comparable length that attains it on every board? The second move has seven
     exceptions; is there an opening, or an opening with a fixed second move,
-    from which a rule of this kind wins with none? The rule does not apply to 5
-    × 5, where the table needs quiet moves at branch points, and a short rule
-    for that board is open. The region 6 cannot shrink for a purely forcing
-    strategy from (2,2) with the second moves searched here, and the base 17 is
-    least for the hidden corner argument; whether a rule can read less than the
-    second player's stones inside the base board, for instance only those inside
-    the region with a summary of the rest, is open.
+    from which a rule of this kind wins with none? Whether a short rule exists
+    for 5 × 5, where the table needs quiet moves at branch points, is open. Base
+    16 would serve the hidden-corner argument, but whether the rule still wins
+    when it reads only the 16 × 16 board was not checked; whether a rule can
+    read less than the second player's stones inside its base board, for
+    instance only those inside the region with a summary of the rest, is open.
   </p>
 
   <h2>References</h2>
@@ -634,13 +654,13 @@ const branchPoint = board6({
     <li id="ref-3">
       M. Erickson, Square achievement game on an n × n grid, Open Problem
       Garden.
-      <a href="http://www.openproblemgarden.org/op/a_game_on_an_n_x_n_grid">
+      <a href="https://www.openproblemgarden.org/op/a_game_on_an_n_x_n_grid">
         openproblemgarden.org
       </a>
     </li>
     <li id="ref-4">
       T. Jenrich, Guaranteed successful strategies for a square achievement game
-      on an n × n grid, 2012.
+      on an n by n grid, 2012.
       <a href="https://arxiv.org/abs/1109.2341">arXiv:1109.2341</a>
     </li>
     <li id="ref-5">
@@ -675,6 +695,16 @@ const branchPoint = board6({
     <li id="ref-11">
       J. Beck, Combinatorial Games: Tic-Tac-Toe Theory, Encyclopedia of
       Mathematics and its Applications 114, Cambridge University Press, 2008.
+    </li>
+    <li id="ref-12">
+      M. Erickson, Square achievement game on a grid, MathOverflow question
+      29608, June 2010.
+      <a href="https://mathoverflow.net/q/29608">mathoverflow.net</a>
+    </li>
+    <li id="ref-13">
+      T. Sirgedas, answer to Square achievement game on a grid, MathOverflow,
+      July 2010.
+      <a href="https://mathoverflow.net/a/33619">mathoverflow.net</a>
     </li>
   </ol>
 </Base>

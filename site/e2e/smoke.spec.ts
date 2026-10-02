@@ -49,7 +49,7 @@ test("the proof guide has its figures and references", async ({ page }) => {
   await expect(page.locator("figure.diagram svg rect[width='12']")).toHaveCount(
     1,
   );
-  await expect(page.locator("ol.refs li")).toHaveCount(11);
+  await expect(page.locator("ol.refs li")).toHaveCount(13);
   await expect(page.locator("sag-board .sag-x")).toHaveCount(1);
   await expect(page.locator("pre.lean")).toContainText("plus_wins_with");
 });
