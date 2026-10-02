@@ -552,7 +552,9 @@ $\pairsAnchor$ pairs have $\anchorAbstractions$ distinct abstractions,
 and every anchored position play the same $\distinctLines$ lines. Every
 abstraction that occurs on a board beyond $17$ occurs on the anchor
 board or in an anchored position (Section~\ref{sec:uniform}), so the
-same holds on every board. Table~\ref{tab:lines} splits the pairs by
+same holds on every board. These counts come from the Python
+implementation and the lines the checker prints; they are not part of
+the formal theorem. Table~\ref{tab:lines} splits the pairs by
 the number of tempo moves. Every pair won by a side-$1$ plus needs no
 tempo move and every pair won by a side-$2$ plus needs at least one, so
 the first column also counts the side-$1$ pairs. In
@@ -942,17 +944,35 @@ Theorem~\ref{thm:rule} with the moves forgotten.
 \section{Formalization}\label{sec:lean}
 
 The Lean development defines cells, boards, and squares as in
-Section~\ref{sec:defs}, and the winning predicate \texttt{P1CanWin} as
-an inductive family whose derivations are exactly strategy trees: one
-first-player move per node, every reply covered, and no derivation for
-a game that ends in a draw.
-The second player's win and each player's ability to secure a draw are
-defined from it by swapping roles after a move, and strategy stealing
+Section~\ref{sec:defs} (\texttt{Core/Square.lean}), and the winning
+predicate \texttt{P1CanWin} (\texttt{Game/Rules.lean}) as an inductive
+family whose derivations are exactly strategy trees: one first-player
+move per node, every reply covered, and no derivation for a game that
+ends in a draw. The second player's win is defined from it by swapping
+roles after a move; the first player's ability to secure a draw is a
+second inductive family, whose branches may also end on a full board,
+and the second player's is defined from that by the same swap
+(\texttt{Game/Outcome.lean}). Strategy stealing
 (\texttt{second\_player\_no\_win}, with the monotonicity step
 \texttt{P1CanWin.insert\_left}) and determinacy
 (\texttt{P1CanWin.or\_p2CanDraw}) are proved against these definitions
 with no computation. These definitions, a few dozen lines, are the
-whole specification; everything else is proved against them.
+whole specification; everything else is proved against them, and the
+development has no \texttt{sorry} and no unproved declaration. The two
+main statements are
+\begin{center}\small
+\texttt{outcome (n : $\mathbb{N}$) : (P1CanWin n $\varnothing$
+$\varnothing$ $\leftrightarrow$ 5 $\le$ n) $\wedge$ ((P1CanDraw n
+$\varnothing$ $\varnothing$ $\wedge$ P2CanDraw n $\varnothing$
+$\varnothing$) $\leftrightarrow$ n $\le$ 4)}\\[2pt]
+\texttt{plus\_wins\_with \{n : $\mathbb{N}$\} (h : 6 $\le$ n) :
+WinsWith plusMove n []}
+\end{center}
+where \texttt{P1CanWin n A B} says that the player to move, holding
+$A$ against $B$ on $\Board_n$, can force a win. Running
+\texttt{lake build} checks everything, \texttt{lake exe checker n}
+replays the certificate for $\Board_n$, and \texttt{\#print axioms}
+lists the axioms of a theorem.
 
 The predicate behind Theorem~\ref{thm:rule} is \texttt{WinsWith}. For a
 strategy $\sigma$, a board size $n$, and a history $h$ with the first
@@ -986,15 +1006,17 @@ Hypothesis (i) of Theorem~\ref{thm:simulate} for the rule is
 \texttt{plusMove\_agree}; both are proved by unfolding the definition,
 and neither is an evaluation. The simulation theorem is \texttt{simulate}, and
 Theorem~\ref{thm:uniform} is
-\texttt{plus\_wins\_with\_of\_seventeen\_le}, which dispatches the
-cases (a) to (e) to \texttt{simulate} with the run on the anchor board
+\texttt{plus\_wins\_with\_of\_seventeen\_le}, whose body
+\texttt{plus\_uniform\_aux} dispatches the cases (a) to (e) to
+\texttt{simulate} with the run on the anchor board
 (\texttt{plus\_forced\_anchor}) and the three families
 \texttt{farAnchorsSafe}, \texttt{exactAnchorsSafe}, and
 \texttt{farNearAnchorsSafe}. Lemma~\ref{lem:span} is not a separate
 Lean theorem; the containments it gives are proved where they are
-used, in \texttt{three\_corners\_confine} and
-\texttt{square\_filter\_confine} for squares with corners in the
-region and inside \texttt{escape\_farm}. The hidden corner of a pair
+used: \texttt{three\_corners\_confine} and
+\texttt{square\_filter\_confine} confine a threat square to the
+region, and \texttt{escape\_pick} and \texttt{escape\_farm} confine a
+square with two region corners. The hidden corner of a pair
 is computed by \texttt{farmKey}, which the abstraction and the anchored
 runs use; the Lean identifiers call the hidden corner a \emph{farm}
 (\texttt{farmKey}, \texttt{Key.farm}) and the cell of (G4) \texttt{hot}.
@@ -1009,13 +1031,7 @@ claim is not needed by the formal proof, which reads the one value
 \texttt{farmKey} returns. Lemma~\ref{lem:arms} is not used by the formal proof,
 which checks the lines directly. Theorem~\ref{thm:rule} is
 \texttt{plus\_wins\_with} and Theorem~\ref{thm:main} is
-\texttt{outcome}, whose first half is \texttt{p1\_wins\_iff}. In sum, Theorem~\ref{thm:main} rests on Propositions~\ref{prop:small}
-and~\ref{prop:five} and Theorem~\ref{thm:rule};
-Theorem~\ref{thm:rule} on the runs at $6$ to $17$ with
-Proposition~\ref{prop:forced} and on Theorem~\ref{thm:uniform}; and
-Theorem~\ref{thm:uniform} on Lemma~\ref{lem:dichotomy},
-Theorem~\ref{thm:simulate}, the two lemmas about the rule, and the
-four runs on $\Board_{23}$.
+\texttt{outcome}, whose first half is \texttt{p1\_wins\_iff}.
 
 \begin{table}[ht]
 \centering
