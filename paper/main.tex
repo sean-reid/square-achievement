@@ -172,11 +172,11 @@ the stones of the two players. The game is finite with perfect
 information, so exactly one of three holds: the first player can force
 a win, the second can, or both can force at least a draw.
 
-The first player \emph{threatens} at a cell $z$ if $z$ is empty and $z$
-together with three of the first player's stones is a square; the
-second player \emph{blocks} by playing $z$. A move that makes exactly
-one threat is \emph{forcing}; a move that makes two threats wins, since
-one block leaves the other. A \emph{ply} is one move of either player,
+A player \emph{threatens} at a cell $z$ if $z$ is empty and $z$
+together with three of that player's stones is a square; the opponent
+\emph{blocks} by playing $z$. A move that makes exactly one threat is
+\emph{forcing}; a move that makes two threats wins if the opponent has
+no threat of their own, since one block leaves the other. A \emph{ply} is one move of either player,
 so the first player moves at the odd plies. The rule of
 Section~\ref{sec:rule} plays inside the \emph{region} $\Board_6$ and
 reads the second player's stones inside the \emph{base board}
@@ -212,8 +212,8 @@ side $3$ does not fit.
 
 \begin{lemma}\label{lem:arms}
 Suppose the first player holds the centre $c$ and one arm $a$ of a plus
-of side $s$, that its four diagonals are empty, and that the second
-player holds none of its arms. Playing an empty arm $b$ perpendicular
+of side $s$ whose four diagonals are empty. Playing an empty arm $b$
+perpendicular
 to $a$ threatens at the
 diagonal between $a$ and $b$. If the first player also holds the arm
 $a'$ opposite to $a$, playing $b$ threatens at two cells, the diagonals
@@ -229,8 +229,9 @@ corners of $\Sq(r,k-s,s)$, and $(r+s,k-s) \ne d$. The other placements
 are symmetric.
 \end{proof}
 
-So from a centre and one arm the first player wins in three moves
-against a second player who has no threat and whose blocks make none.
+So from a centre and one arm the first player reaches a double threat
+in three moves against a second player who has no threat and whose
+blocks make none.
 The two arms perpendicular to the held arm each force a block on a
 diagonal, and the opposite arm threatens at two diagonals at once
 (Figure~\ref{fig:basic}). The opening $(2,2)$ and the second move
@@ -282,10 +283,9 @@ $\Board_{17}$ can affect the game.
 Let $x$ and $y$ be two cells each having a coordinate at least $12$.
 Their \emph{hidden corner} is a cell $b \in \Board_6$ such that
 $b$, $x$, $y$ are three corners of one square. The \emph{abstraction}
-of a position reached after the second player's second move consists
-of the first player's stones, the second player's stones inside
-$\Board_{17}$, and the hidden corner of the second player's first two
-stones, if they have one.
+of a position consists of the first player's stones, the second
+player's stones inside $\Board_{17}$, and, once the second player has
+two stones, the hidden corner of the first two, if they have one.
 \end{definition}
 
 \begin{lemma}\label{lem:dichotomy}
@@ -303,8 +303,9 @@ $6$, at distance $s$ to its left or right. Only one member can have row
 below $6$: if both did, then $s < 6$ and the shared column, being the
 coordinate at least $12$ of either, would put both candidates for $b$
 at column $7$ or more. For that member the cell to the right is
-excluded too, since it lies in $\Board_6$ only if the member's column
-is below $6$. A shared row is symmetric. If $x$ and $y$ are diagonally
+excluded too: it lies in $\Board_6$ only if the member's column is
+below $6$, and that column is the member's coordinate at least $12$,
+its row being below $6$. A shared row is symmetric. If $x$ and $y$ are diagonally
 opposite, the two remaining corners are $(x_1, y_2)$ and $(y_1, x_2)$,
 of which at most one lies in $\Board_6$, since otherwise all four
 coordinates of $x$ and $y$ would be below $6$.
@@ -355,12 +356,16 @@ rule has been checked only with base $17$.
 
 When no plus can be completed directly, because the second player holds
 an arm or a diagonal or because the arms would not force, the rule
-first plays moves that each force a block and so add a stone.
+first plays moves that each force a block and so add a stone. Threats
+in this subsection are those of the abstraction: squares of the first
+player inside $\Board_6$ and squares of the second player inside
+$\Board_{17}$.
 
 \begin{definition}\label{def:tempo}
 A \emph{tempo move} in a position is a cell of $\Board_6$ such that,
 after it is played, the second player has no threat and the first
-player has exactly one, at a cell other than the hidden corner.
+player has exactly one, at a cell other than the hidden corner, if the
+pair has one.
 \end{definition}
 
 In a position where the second player has a threat, a tempo move must
@@ -375,14 +380,13 @@ none of whose arms the second player holds, in some order, played until
 an arm makes at least two threats: after each move of the line the
 second player has no threat, and each arm before that one makes exactly
 one threat, at a cell other than the hidden corner. The \emph{key} of a
-line is the triple
+line is
 \[
   (\text{number of tempo moves},\ \text{number of arms not held},\
-  \text{side of the plus}).
+  \text{side of the plus},\ \text{centre of the plus}).
 \]
-The rule prefers the smallest key in lexicographic order, then the
-smaller centre in cell order (row, then column), then the line its
-search generates first.
+The rule prefers the smallest key in lexicographic order, cells ordered
+by row and then by column, then the line its search generates first.
 \end{definition}
 
 The arms after the one that makes two threats are part of the line and
@@ -441,7 +445,7 @@ reaches.
       \State $T \gets$ the arms of $P$ the first player does not hold in $B$
       \If{$T \ne \varnothing$ and the second player holds no cell of $T$}
         \State $\pi \gets$ the first ordering of $T$ such that $p\,\pi$ is a line from $A$
-        \If{$\pi$ exists} record $p\,\pi$ in $R$ with the key $(|T|, \text{side of } P, \text{centre of } P)$ \EndIf
+        \If{$\pi$ exists} record $p\,\pi$ in $R$ with the key $(d, |T|, \text{side of } P, \text{centre of } P)$ \EndIf
       \EndIf
     \EndFor
   \EndFor
@@ -457,8 +461,9 @@ the tempo moves $m$ in $B$, taken in cell order, where $B'$ is $B$
 after $m$ and its block. They are taken from every member of $F$,
 including positions in which the second player has a threat; such a
 position offers no plus (line 4), but its tempo moves, which must
-remove the threat, are explored. Line 8 tries the arm orders in a fixed
-enumeration, so that two implementations choose the same line.
+remove the threat, are explored. Line 8 tries the orderings of $T$ in
+lexicographic order, the arms listed above, below, left of, and right
+of the centre, so that two implementations choose the same line.
 
 \begin{figure}[ht]
 \centering
@@ -477,13 +482,18 @@ $(1,2)$ against which the rest of the rule beats every second reply.
 
 Table~\ref{tab:games} lists two complete games in which the second
 player always blocks. In the first the replies $(0,0)$ and $(4,4)$ are far
-from the opening pair and the basic line wins at once, key $(0,3,1)$.
+from the opening pair and the basic line wins at once, key
+$(0,3,1,(2,2))$.
 In the second the reply $(3,1)$ is a diagonal of the side-$1$ plus at
 $(2,2)$ and an arm of the side-$1$ plus at $(3,2)$,
 no line with fewer than two tempo moves exists, and the line has key
-$(2,4,2)$: two tempo moves and then the four arms of the side-$2$ plus
-at $(3,2)$. Figure~\ref{fig:longest} shows the position before its
-last move.
+$(2,4,2,(3,2))$: two tempo moves and then the four arms of the side-$2$
+plus at $(3,2)$. Figure~\ref{fig:longest} shows the position before its
+last move. After the forced block at ply $10$ of the first game and at
+ply $16$ of the second, the second player does hold a threat, at the
+cell the first player completes next; Definition~\ref{def:line}
+constrains the second player's threats only after the first player's
+moves.
 
 \begin{table}[ht]
 \centering
@@ -550,9 +560,9 @@ $\blocksThatThreaten$ of the $\pairsSix$ pairs on $\Board_6$, all with
 three tempo moves, a block gives the second player a threat that the
 next tempo move takes. The longest line, the second game of
 Table~\ref{tab:games}, has $\longestLineMoves$ first-player moves after
-the opening pair, and every line ends by ply $\latestPly$ when the
-second player blocks; a reply that blocks nothing leaves a threat that
-the rule completes at its next move. So the rule wins every game by the
+the opening pair, and every game in which the second player blocks
+ends by ply $\latestPly$; a reply that blocks nothing leaves a threat
+that the rule completes at its next move. So the rule wins every game by the
 $\latestPly$th ply. This bound is computed from the $\distinctLines$
 lines and is not part of the formal theorem.
 
@@ -691,13 +701,20 @@ $\Board_n$.
 
 \begin{proof}
 This is the soundness theorem of the forced checker, an induction over
-the checker's recursion (Section~\ref{sec:lean}). The hypothesis makes
-$\sigma$ the player who completes the standing threat against a reply
-that blocks nothing, so that the winning tree is $\sigma$'s own. The
-rule satisfies it by its first clause, whose threat scan agrees with
-the checker's whenever the first player's stones lie in $\Board_6$;
-this is proved as a lemma.
+the checker's recursion (Section~\ref{sec:lean}). At a node after the
+second reply, the move $m$ of $\sigma$ either completes a square or, by
+(G1), makes a threat. By (G3) no reply completes a second-player
+square. A reply that blocks a threat of $m$ is a child in the forced
+tree and is winning by induction. A reply that blocks nothing leaves a
+threat of $m$ standing, the first player's stones lie in $\Board_6$ by
+(G2), and the hypothesis makes $\sigma$ complete the threat at its next
+move, so that the winning tree is $\sigma$'s own.
 \end{proof}
+
+The rule satisfies the hypothesis: its first clause plays a completion
+found by its threat scan, and that scan agrees with the checker's
+whenever the first player's stones lie in $\Board_6$, which is proved
+as a lemma (Section~\ref{sec:lean}).
 
 The rule passes the forced tree on every board from $6$ to $17$, one
 run of the checker per board with $(n^2-1)(n^2-3)$ reply pairs at the
@@ -753,7 +770,8 @@ a cell of $\Board_6$. Suppose that
   every branch ends in a first-player square;
 \item[(iv)] if $o_1$ or $o_2$ lies beyond $\Board_{17}$, then either
   $g$ is no cell and $\{o_1, o_2\}$ has no hidden corner
-  (Definition~\ref{def:latent}), or $g$ is the hidden corner of
+  (Definition~\ref{def:latent}), in particular if one of them has no
+  coordinate at least $12$, or $g$ is the hidden corner of
   $\{o_1, o_2\}$.
 \end{enumerate}
 Then the tree in which the first player plays $\sigma$'s move at every
@@ -790,8 +808,10 @@ being too few, and the threat it completed was standing after the move
 of $\sigma$ before it. If $\Sq \not\subseteq \Board_{17}$, two blocks among its
 corners would confine it to $\Board_{12}$ by Lemma~\ref{lem:span}, so
 its corners are $r$, one block $d \in \Board_6$, and both replies, and
-a reply lies beyond $\Board_{17}$, since three corners in $\Board_{17}$
-would confine $\Sq$ there. By Lemma~\ref{lem:dichotomy} $d$ is the
+a reply lies beyond $\Board_{17}$: any three corners of a square
+include a diagonally opposite pair, and such a pair in $\Board_{17}$
+confines $\Sq$ there by Lemma~\ref{lem:span}. By
+Lemma~\ref{lem:dichotomy} $d$ is the
 hidden corner of $\{o_1, o_2\}$, which contradicts (iv): either the
 pair has none, or its hidden corner is $g$, and $g$ is never a block,
 because a block at $g$ arises only when $g$ is the only threat cell,
@@ -811,9 +831,8 @@ the second player's stones, and is proved by induction on the checker's
 fuel.
 
 For the rule, hypotheses (i) and (ii) are lemmas about its definition.
-For (i), the first clause of Algorithm~\ref{alg:move} plays a
-completion found by the rule's threat scan, and that scan agrees with
-the checker's whenever the first player's stones lie in $\Board_6$. For
+Hypothesis (i) is the hypothesis of Proposition~\ref{prop:forced},
+which the rule satisfies as noted there. For
 (ii), the rule's move depends on a history only through its
 abstraction and through the second move of the first reply. A reply
 beyond $\Board_{17}$ and its stand-in both drop out of the abstraction,
@@ -882,8 +901,12 @@ $\Board_{17}$.
 \item[(b)] A far reply and no hidden corner: a far $o_1$ is replaced by
   $(22,22)$ and a far $o_2$ by $(22,21)$, $g$ is no cell, and (iii) is
   again a branch of the run on $\Board_{23}$. A stand-in forms no hidden
-  corner with a cell of $\Board_{17}$, and the two stand-ins form none
-  with each other, so the stand-in pair has no hidden corner either.
+  corner with a cell of $\Board_{17}$: it shares no row or column with
+  such a cell, and if the two are diagonally opposite corners of a
+  square, the other two corners have a row or a column of at least
+  $21$. The two stand-ins share row $22$, so a hidden corner of theirs
+  would lie in row $21$ or $23$. So the stand-in pair has no hidden
+  corner either.
 \item[(c)] Both replies far with hidden corner $b$: the far family,
   $g = b$.
 \item[(d)] $o_1 \in \Board_{17}$, $o_2$ far, hidden corner $b$: the
@@ -894,7 +917,7 @@ $\Board_{17}$.
 In (c) to (e), (iii) is the anchored run, and (iv) holds by the case
 hypothesis. Hypothesis (i) is the lemma above; (ii) holds because the
 real and base pairs have the same hidden corner, checked at the head of
-each anchored run and shown for the stand-ins in (b), and the same
+each anchored run and shown in (b) for the stand-ins, and the same
 second move, so that the abstractions of $h\,t$ and $h'\,t$ agree for
 every $t$.
 \end{proof}
