@@ -43,19 +43,14 @@ Two players alternately claim cells of an $n \times n$ grid; the first
 to hold all four corners of an axis-parallel square wins, and a full
 board without one is a draw. The first player has a winning strategy
 if and only if $n \ge 5$, which answers a question of Erickson. For
-$n \ge 6$ the strategy is a rule with no lookup table, built around the
-\emph{plus}, a held stone with the four cells at a common distance from
-it along the axes: open at $(2,2)$, answer the first reply with a
-fixed second move, take a completion or a block whenever one exists,
-and otherwise play at most three single forcing moves and then the
-arms of a plus. The rule reads only its own stones, the second player's
-stones inside a $17 \times 17$ board, and one derived cell, the corner
-at which a forced block would give the second player a threat the rule
-does not read; it never forces a block there, and a simulation theorem
-carries a checked run on the $23 \times 23$ board to every board of
-size at least $17$. The proofs are formalized
-in Lean~4, and the theorem for the rule states that the tree of its
-own moves is winning.
+$n \ge 6$ one strategy serves every board: a rule with no lookup table
+whose moves after the second reply are all forcing, built around the
+\emph{plus}, a stone with the four cells at a common distance from it
+along the axes, a shape proposed for this game by Sirgedas in 2010. The
+rule is checked on the boards of size $6$ to $17$, and a simulation
+theorem carries one checked run on the $23 \times 23$ board to every
+larger board. The proofs are formalized in Lean~4, and the theorem for
+the rule states that the tree of its own moves is winning.
 \end{abstract}
 
 \maketitle
@@ -69,7 +64,7 @@ $(r,c)$, $(r,c+s)$, $(r+s,c)$, $(r+s,c+s)$ for some $s \ge 1$. If the
 board fills with no player holding such a square, the game is a draw.
 
 Erickson posed the game and asked for the outcome under optimal play
-\cite{erickson-pearls, opg}. It is an achievement game in the sense of
+\cite{erickson-pearls, opg, erickson-mo}. It is an achievement game in the sense of
 Harary \cite{harary}, played in the Maker--Maker convention: both
 players pursue the same goal, and a player who loses the race may still
 secure a draw. The convention goes back to the positional games of
@@ -85,17 +80,25 @@ Bacher and Eliahou \cite{bacher-eliahou} proved that every two-coloring
 of the $15 \times 15$ grid contains four equal-colored cells at the
 corners of an axis-parallel square, and that $15$ is least with this
 property. Since no completed game on a board of size $15$ or more is
-square-free, strategy stealing gives the first player a win there.
-Between these results nothing was published: for $6 \le n \le 14$
-neither a winning strategy nor a drawing strategy was known
-\cite{opg}, and no coloring argument can reach this range, since Bacher
-and Eliahou also exhibit square-free two-colorings of the $14 \times 14$
-board. Concurrently with the present work, Adler \cite{adler} announced
-computer searches settling these nine sizes as first-player wins, with
-full strategy trees certified for $n = 6$ and $7$ and search verdicts
-for the rest, one search per size; Adler notes that the results are
-unrefereed and names a conceptual proof with an explicit strategy as
-the open direction.
+square-free, strategy stealing and determinacy give the first player a
+win there. Between these results nothing was published: for
+$6 \le n \le 14$ neither a winning strategy nor a drawing strategy was
+known \cite{opg, adler}, and no coloring argument can reach this range,
+since Bacher and Eliahou also exhibit square-free two-colorings of the
+$14 \times 14$ board. One idea had been sketched. Answering Erickson's
+question on MathOverflow in 2010, Sirgedas \cite{sirgedas} proposed
+that the first player open in the centre and win by making a
+\emph{cross}, a stone with its four neighbours at a common distance
+along the axes, each arm forcing a reply; he noted that the cross can
+also be built on two stones in a row or column at distance two, worked
+out three of the nine first replies on the $7 \times 7$ board up to
+symmetry, and guessed that $n = 5$ was a draw. Concurrently with the
+present work, Adler \cite{adler, adler-code} announced computer
+searches settling the nine sizes $6 \le n \le 14$ as first-player
+wins, with full strategy trees certified for $n = 6$ and $7$ and search
+verdicts for the rest, cross-checked by independent runs at the smaller
+sizes; Adler notes that the results are unrefereed and names a
+conceptual proof with an explicit strategy as the open direction.
 
 \begin{theorem}\label{thm:main}
 In the square achievement game on the $n \times n$ board, the first
@@ -107,9 +110,15 @@ draw.
 Relative to Adler's announcement, what is new is a single strategy
 that wins every board from $6 \times 6$ up, stated in a paragraph, and
 a proof checked by a proof assistant. The strategy is a rule built
-around one shape, the plus of Definition~\ref{def:plus}: the arms of a
-plus force the second player's replies one at a time, and the last arm
-threatens two squares at once.
+around one shape, the plus of Definition~\ref{def:plus}, which is
+Sirgedas's cross: the arms of a plus force the second player's replies
+one at a time, and the last arm threatens two squares at once. The
+sketch of 2010 covered one board and a few replies and did not say
+which plus to aim for, how to prepare one when the replies obstruct
+it, or why one board's analysis should carry to another. The rule
+settles the first two by a search with a fixed preference order, and
+the simulation theorem of Section~\ref{sec:uniform} settles the
+third.
 
 \begin{theorem}\label{thm:rule}
 For every $n \ge 6$, the first player following the plus rule of
@@ -143,11 +152,10 @@ evaluation, and the two properties of the rule that the simulation
 theorem needs are proved as lemmas about its definition. The rule was
 extracted from an earlier lookup-table strategy, almost all of whose
 forcing sequences were arms of a side-$1$ plus at $(2,2)$ or $(3,2)$,
-the rest preparing the side-$2$ plus at $(3,2)$.
-
-The first version of the search in \cite{jenrich} contained an error
-that was corrected later. The formalization makes every search here
-discharge a statement about the game rather than about a program.
+the rest preparing the side-$2$ plus at $(3,2)$. The $2011$ versions of
+\cite{jenrich} contained an error in the search program, corrected in
+$2012$; the formalization makes every search here discharge a
+statement about the game rather than about a program.
 
 \section{Definitions}\label{sec:defs}
 
