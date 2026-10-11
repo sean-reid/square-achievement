@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0](https://github.com/sean-reid/square-achievement/compare/v0.2.1...v1.0.0) (2026-10-11)
+
+
+### Bug Fixes
+
+* **paper:** correct the quiet-move count and act on the referee review ([#130](https://github.com/sean-reid/square-achievement/issues/130)) ([d5f7f34](https://github.com/sean-reid/square-achievement/commit/d5f7f3445b7e0d64022af3d7c2ef550251f17700))
+
+
+### Miscellaneous Chores
+
+* release the next version as 1.0.0 ([#137](https://github.com/sean-reid/square-achievement/issues/137)) ([fb60a60](https://github.com/sean-reid/square-achievement/commit/fb60a60212a877301fc450ddd8a3d99b2985cf84))
+
 ## [0.2.1](https://github.com/sean-reid/square-achievement/compare/v0.2.0...v0.2.1) (2026-09-18)
 
 

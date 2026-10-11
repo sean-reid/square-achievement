@@ -8,7 +8,7 @@ authors:
     affiliation: San Jose State University
 license: MIT
 repository-code: https://github.com/sean-reid/square-achievement
-version: 0.2.1
+version: 1.0.0
 preferred-citation:
   type: article
   title: The square achievement game on n x n boards
