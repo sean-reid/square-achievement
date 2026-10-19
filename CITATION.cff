@@ -16,4 +16,11 @@ preferred-citation:
     - family-names: Reid
       given-names: Sean
       affiliation: San Jose State University
-  notes: The arXiv identifier is added on upload.
+  year: 2026
+  month: 10
+  doi: 10.48550/arXiv.2610.22410
+  url: https://arxiv.org/abs/2610.22410
+  identifiers:
+    - type: other
+      value: arXiv:2610.22410
+      description: The arXiv identifier of the paper
