@@ -75,7 +75,7 @@ test("pages carry an icon and Open Graph tags", async ({ page }) => {
   );
   await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
     "content",
-    "https://sean-reid.github.io/square-achievement/proof/",
+    "https://seanre.id/square-achievement/proof/",
   );
   const icon = await page.request.get("./favicon.svg");
   expect(icon.ok()).toBe(true);

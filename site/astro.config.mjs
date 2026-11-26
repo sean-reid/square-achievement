@@ -1,7 +1,7 @@
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  site: "https://sean-reid.github.io",
+  site: "https://seanre.id",
   base: "/square-achievement",
   compressHTML: false,
   // the two result pages of earlier versions, now one result
