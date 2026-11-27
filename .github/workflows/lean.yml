@@ -1,13 +1,9 @@
 name: lean
 
 # The Lean build is the proof: `lake build` in formalization/. A full
-# build costs most of an hour of runner time, so it runs only when the
-# formalization or this workflow changes, and on demand.
+# build costs most of an hour of runner time, so it runs on main when
+# the formalization or this workflow changes, and on demand.
 on:
-  pull_request:
-    paths:
-      - "formalization/**"
-      - ".github/workflows/lean.yml"
   push:
     branches: [main]
     paths:
