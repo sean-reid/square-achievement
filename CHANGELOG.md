@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/sean-reid/square-achievement/compare/v1.0.0...v1.0.1) (2026-11-27)
+
+
+### Bug Fixes
+
+* build the site for seanre.id ([c6ca8be](https://github.com/sean-reid/square-achievement/commit/c6ca8bea58aeae6bcbfec0ef76e737d652394da8))
+
 ## [1.0.0](https://github.com/sean-reid/square-achievement/compare/v0.2.1...v1.0.0) (2026-10-11)
 
 
