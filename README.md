@@ -30,8 +30,8 @@ The components are independent; none is needed to build the others.
 Commands assume a POSIX shell; on Windows, work inside WSL.
 
 The `ci` workflow runs the checks below on every pull request and
-weekly; the `lean` workflow builds the formalization weekly and on
-demand.
+weekly; the `lean` workflow builds the formalization when it changes
+and on demand.
 
 ### Site
 

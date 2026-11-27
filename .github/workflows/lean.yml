@@ -1,11 +1,18 @@
 name: lean
 
-# The Lean build is the proof: `lake build` in formalization/. It runs
-# weekly and on demand rather than per pull request, because a full
-# build costs most of an hour of runner time.
+# The Lean build is the proof: `lake build` in formalization/. A full
+# build costs most of an hour of runner time, so it runs only when the
+# formalization or this workflow changes, and on demand.
 on:
-  schedule:
-    - cron: "41 6 * * 1"
+  pull_request:
+    paths:
+      - "formalization/**"
+      - ".github/workflows/lean.yml"
+  push:
+    branches: [main]
+    paths:
+      - "formalization/**"
+      - ".github/workflows/lean.yml"
   workflow_dispatch:
 
 jobs:
